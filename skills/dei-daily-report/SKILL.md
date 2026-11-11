@@ -89,6 +89,7 @@ AI 模块已整合 AIHOT 和 Follow Builders 两个来源；执行 ai 时不再�
 
 用户要公开发布的日报、要「发出去的版本」、要图片或海报版时执行；综合日报完成后，在同一运行目录继续。读 [内容方法与标准](references/publish-standard.md) 和 [视觉呈现与数据格式](references/visual-standard.md)。
 
+0. 选定头条后，按 [头条原文存档](references/source-archive.md) 抓取头条涉及的官方原文并存为 PDF，用原文核对头条里的日期、文号和数字。
 1. 以各模块成品和 `综合日报.md` 为底稿，按 publish-standard 选头条、取舍和写作，保存为运行目录下的 `对外日报.md`。只用底稿里有依据的事实；需要补查的事实（如持续话题的最新状态）用可靠来源补上并列入资料来源。
 2. 用 `python3 publish/issue.py <output_root> <报告日>` 取期号，写 `对外日报.json`：封面一句话、本期目录、长文目录重点和速览卡片。速览图卡用来引流，按 visual-standard 覆盖每个模块的多条内容，只有头条给深度示范，内容不能照搬长文。`brand`、`community` 取 `config.json` 的 `publish_brand`、`publish_community`，`article` 指向 `对外日报.md`。
 3. 运行 `python3 publish/check_report.py 对外日报.md 对外日报.json`，有错误就改到通过；再按 publish-standard §10 逐条人工自检。
