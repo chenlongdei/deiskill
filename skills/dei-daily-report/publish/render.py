@@ -9,7 +9,7 @@ Markdown（相对 data.json 所在目录）。输出：
   速览.html  速览/01_封面.png …      3:4 图卡，2160×2880
   长文.html  长文.png  长文分块/*.png   手机阅读宽度长文，1080 宽
 渲染需要 playwright；优先用本机 Google Chrome，没有则用 playwright 自带的 Chromium。
-字体从 Google Fonts 加载，渲染时需要联网。
+字体从 Google Fonts 加载，渲染时需要联网。长图分段截图后用 Pillow 拼接；没有 Pillow 时按段保存。
 """
 import argparse, json, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
@@ -36,6 +36,33 @@ def launch(p):
 def ready(page, url):
     page.goto(url, wait_until="networkidle")
     page.wait_for_function("window.__ready === true", timeout=90000)
+
+
+def shoot_tall(page, selector, path, chunk=3000):
+    """长元素分段截图再拼接。Chrome 一次截图超过约 16000 像素会从头重复内容。"""
+    box = page.locator(selector).bounding_box()
+    scale = page.evaluate("devicePixelRatio")
+    if box["height"] * scale <= 14000:
+        page.locator(selector).screenshot(path=str(path))
+        return
+    parts, y = [], 0
+    while y < box["height"]:
+        h = min(chunk, box["height"] - y)
+        parts.append(page.screenshot(clip={"x": box["x"], "y": box["y"] + y, "width": box["width"], "height": h}, full_page=True))
+        y += h
+    try:
+        from PIL import Image
+        import io
+    except ImportError:
+        for i, png in enumerate(parts, 1):
+            path.with_name(f"{path.stem}_{i}{path.suffix}").write_bytes(png)
+        return
+    imgs = [Image.open(io.BytesIO(p)) for p in parts]
+    out = Image.new("RGB", (imgs[0].width, sum(i.height for i in imgs)))
+    top = 0
+    for im in imgs:
+        out.paste(im, (0, top)); top += im.height
+    out.save(path)
 
 
 def safe(name):
@@ -74,11 +101,11 @@ def main():
             el.screenshot(path=str(out / "速览" / f"{i+1:02d}_{safe(names[i])}.png"))
         pg = b.new_page(viewport={"width": 540, "height": 960}, device_scale_factor=2)
         ready(pg, article.as_uri() + "?export=1")
-        pg.locator("#wrap").screenshot(path=str(out / "长文.png"))
+        shoot_tall(pg, "#wrap", out / "长文.png")
         pg.locator("#hero").screenshot(path=str(out / "长文分块" / "00_报头.png"))
         for i, el in enumerate(pg.locator("section.mod").all()):
             title = el.locator("h2").inner_text().strip()
-            el.screenshot(path=str(out / "长文分块" / f"{i+1:02d}_{safe(title)}.png"))
+            shoot_tall(pg, f"section.mod >> nth={i}", out / "长文分块" / f"{i+1:02d}_{safe(title)}.png")
         b.close()
     print(out)
 
