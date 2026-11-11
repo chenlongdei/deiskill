@@ -1,15 +1,15 @@
 # deiskill
 
-一套覆盖日常「输入 → 处理 → 输出」的中文 AI Skills。安装到 Codex、Claude Code、WorkBuddy 等支持 Skills 的 Agent 后，在对话里直接使用。
+一套覆盖日常「输入 → 处理 → 输出」的中文 AI Skills。安装到 Claude Code、Codex、WorkBuddy 等支持 Skills 的 Agent 后，在对话里直接使用。
 
 ## 安装
 
 ```bash
 git clone https://github.com/chenlongdei12-dev/deiskill.git
 cd deiskill
-bash scripts/install.sh                 # 默认装到 ~/.codex/skills
+bash scripts/install.sh                 # 检测本机已有的 Agent；有多个时会问你装到哪些
 bash scripts/install.sh --list          # 查看全部 Skill
-bash scripts/install.sh --target ~/.claude/skills --target ~/.workbuddy/skills
+bash scripts/install.sh --target ~/.claude/skills --target ~/.workbuddy/skills   # 指定目录
 bash scripts/install.sh dei-daily-report   # 只装指定的 Skill
 ```
 
@@ -50,7 +50,7 @@ dbs 系列版权归 dontbesilent 所有，仅安装自用，本仓库不包含�
 
 ## 配置
 
-Skill 不预设你电脑上有哪些文件夹。第一次运行时会询问保存位置或输入文件，确认后帮你创建目录并写入该 Skill 的 `config.json`；之后不再重复问。凭证类配置见各 Skill 的 `config.example.json`。`config.json` 不进 Git。
+Skill 不预设你电脑上有哪些文件夹。第一次运行时会询问保存位置或输入文件并给出建议，确认后帮你创建目录并写入该 Skill 的 `config.json`；之后不再重复问。报告和运行数据放在你选的位置，不放在 Agent 的 skills 安装目录里。凭证类配置见各 Skill 的 `config.example.json`。`config.json` 不进 Git。
 
 ## 维护
 

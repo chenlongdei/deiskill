@@ -61,11 +61,11 @@ class DailyTests(unittest.TestCase):
                 self.assertIn('broadcast date 2026-09-13', kwargs['input'])
                 report.write_text('<!-- method-version: 3.3.0 -->\nComplete report')
                 return subprocess.CompletedProcess(args, 0)
-            with patch.object(daily, 'ROOT', root), patch('sys.argv', ['daily', '--date', '2026-09-13']), patch.object(daily.subprocess, 'run', side_effect=agent) as run:
+            with patch.object(daily, 'ROOT', root), patch.dict('os.environ', {'DEI_DAILY_DATA_DIR': str(root / 'data')}), patch('sys.argv', ['daily', '--date', '2026-09-13']), patch.object(daily.subprocess, 'run', side_effect=agent) as run:
                 self.assertEqual(daily.main(), 0)
                 self.assertEqual(daily.main(), 0)
                 self.assertEqual(run.call_count, 1)
-            with patch.object(daily, 'ROOT', root), patch('sys.argv', ['daily', '--date', '2026-09-13', '--force']), patch.object(daily.subprocess, 'run', side_effect=agent):
+            with patch.object(daily, 'ROOT', root), patch.dict('os.environ', {'DEI_DAILY_DATA_DIR': str(root / 'data')}), patch('sys.argv', ['daily', '--date', '2026-09-13', '--force']), patch.object(daily.subprocess, 'run', side_effect=agent):
                 self.assertEqual(daily.main(), 0)
                 self.assertEqual(len(list((root / 'data/revisions').glob('*/2026-09-13_分析报告.md'))), 1)
 
@@ -74,7 +74,7 @@ class DailyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             (root / 'SKILL.md').write_text('version: "3.3.0"')
-            with patch.object(daily, 'ROOT', root), patch('sys.argv', ['daily', '--date', '2026-09-13']), patch.object(daily.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1)) as run:
+            with patch.object(daily, 'ROOT', root), patch.dict('os.environ', {'DEI_DAILY_DATA_DIR': str(root / 'data')}), patch('sys.argv', ['daily', '--date', '2026-09-13']), patch.object(daily.subprocess, 'run', return_value=subprocess.CompletedProcess([], 1)) as run:
                 self.assertEqual(daily.main(), 1)
                 self.assertEqual(run.call_count, 1)
                 self.assertIn('fetch_xwlb.py', run.call_args.args[0][1])

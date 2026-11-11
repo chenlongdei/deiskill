@@ -13,6 +13,17 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _data_dir(module):
+    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+    import sys as _sys
+    env = os.environ.get('DEI_DAILY_DATA_DIR')
+    if env:
+        return Path(env).expanduser()
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
+    from dei_paths import data_dir
+    return data_dir(module)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', help='Broadcast date: YYYY-MM-DD or YYYYMMDD')
@@ -23,7 +34,7 @@ def main():
         day = datetime.strptime(args.date.replace('-', ''), '%Y%m%d').date() if args.date else now.date() - timedelta(days=1)
     except ValueError:
         parser.error('Invalid broadcast date')
-    data = ROOT / 'data'
+    data = _data_dir('policy')
     for name in ('logs', 'reports', 'transcripts', 'revisions', 'sources'):
         (data / name).mkdir(parents=True, exist_ok=True)
     with (data / 'logs/run.lock').open('w') as lock:
@@ -52,18 +63,18 @@ def main():
                 file = data / 'transcripts' / target.strftime('%Y/%m/%Y%m%d.md')
                 if file.exists() and file.stat().st_size:
                     continue
-                result = subprocess.run(['python3', str(ROOT / 'scripts/fetch_xwlb.py'), '--date', target.strftime('%Y%m%d')], stdout=log, stderr=log)
+                result = subprocess.run(['python3', str(ROOT / 'scripts/fetch_xwlb.py'), '--root', str(data), '--date', target.strftime('%Y%m%d')], stdout=log, stderr=log)
                 if n == 0 and (result.returncode or not file.exists() or not file.stat().st_size):
-                    print(f'FAIL: transcript unavailable for {day}; see data/logs/daily.log')
+                    print(f'FAIL: transcript unavailable for {day}; see {data / "logs/daily.log"}')
                     return 1
-            prompt = f'''Read SKILL.md, references/analysis-method.md and templates/daily-report.md in this directory. Generate the full policy and business-opportunity report for broadcast date {day}; morning date is {day + timedelta(days=1)}. Transcripts have been fetched; inspect actual history coverage. Follow the hypothesis-driven method, verify public sources with your network tools, preserve marginal-change tables and prose elsewhere, with no industry preference or fixed card count. Update data/topics.json and record substantive revisions. Write the finished report to {report.relative_to(ROOT)} and include the exact metadata marker {marker}. If browsing is unavailable disclose that limitation, do not claim verification. Do not install schedules or call other agents.'''
+            prompt = f'''Read SKILL.md, references/analysis-method.md and templates/daily-report.md in this directory. Generate the full policy and business-opportunity report for broadcast date {day}; morning date is {day + timedelta(days=1)}. Transcripts have been fetched; inspect actual history coverage. Follow the hypothesis-driven method, verify public sources with your network tools, preserve marginal-change tables and prose elsewhere, with no industry preference or fixed card count. Data directory is {data}: transcripts, sources and revisions live there. Update {data / 'topics.json'} and record substantive revisions under {data / 'revisions'}. Write the finished report to {report} and include the exact metadata marker {marker}. If browsing is unavailable disclose that limitation, do not claim verification. Do not install schedules or call other agents.'''
             try:
                 result = subprocess.run(['bash', str(ROOT / 'scripts/run_agent.sh')], input=prompt, text=True, stdout=log, stderr=log, timeout=int(os.environ.get('XWLB_AGENT_TIMEOUT', '1800')))
             except subprocess.TimeoutExpired:
-                print('FAIL: agent timed out; see data/logs/daily.log')
+                print(f'FAIL: agent timed out; see {data / "logs/daily.log"}')
                 return 1
             if result.returncode or not report.exists() or not report.stat().st_size:
-                print('FAIL: agent did not produce a report; see data/logs/daily.log')
+                print(f'FAIL: agent did not produce a report; see {data / "logs/daily.log"}')
                 return 1
             text = report.read_text(encoding='utf-8')
             if marker not in text:

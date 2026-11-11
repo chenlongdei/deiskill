@@ -55,7 +55,7 @@ bash scripts/run_daily.sh --date 2026-09-13 --force  # 备份后重做
 
 脚本默认取Asia/Shanghai昨日，历史按此前30个自然日逐日补齐，不用最新一期顶替昨日。目标日抓取失败返回非零并输出日志位置，历史缺失交给agent明确披露。此行为尚不包含任何邮件、消息平台发送。
 
-`run_agent.sh`依次使用本地`agent.conf`、Codex CLI、Claude Code CLI。自动探测需要CLI已安装并登录。其他CLI配置：
+`run_agent.sh`依次使用本地`agent.conf`、Claude Code CLI、Codex CLI。自动探测需要CLI已安装并登录。其他CLI配置：
 
 ```bash
 cp agent.conf.example agent.conf

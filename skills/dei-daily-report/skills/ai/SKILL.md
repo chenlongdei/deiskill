@@ -32,13 +32,13 @@ Builders 新闻内容只取采集产物；允许查仓库源码与提交历史�
 
 ## 目录与交付
 
-根目录为本Skill：原始采集 `data/sources/YYYY-MM-DD/`；按日去重线索 `data/feeds/YYYY/MM/YYYYMMDD.json`；成品 `data/reports/YYYY-MM-DD_分析报告.md`；状态 `data/topics.json`；研究与旧稿 `data/revisions/`；日志 `data/logs/`。首部含 `<!-- method-version: 4.0.0 -->`。旧稿重做先备份，保存来源与归档迁移记录，不删原始资料。
+数据目录（下文写作 `data/`）为总入口 `config.json` 中 `output_root` 下的 `AI情报/`，由总入口 `scripts/dei_paths.py` 解析；数据和报告不写进 Skill 安装目录。原始采集 `data/sources/YYYY-MM-DD/`；按日去重线索 `data/feeds/YYYY/MM/YYYYMMDD.json`；成品 `data/reports/YYYY-MM-DD_分析报告.md`；状态 `data/topics.json`；研究与旧稿 `data/revisions/`；日志 `data/logs/`。首部含 `<!-- method-version: 4.0.0 -->`。旧稿重做先备份，保存来源与归档迁移记录，不删原始资料。
 
 主阅读稿通常约1500—2200中文字符；信息量需要可适当放宽。结构见模板，详情与证据可折叠或链接后台。用户明确只要Markdown文件：在聊天仅返回文件链接和必要状态，不粘贴全文或分析摘要，不自动打开文件。资料缺口写进报告与调查记录。
 
 ## 调度
 
-由总skill统一配置Codex自动化，不在模块内注册定时或推送。实际时间与频率以用户请求及已保存任务为准，不把历史预约文字当作当前状态。
+由总入口统一配置定时，不在模块内注册定时或推送。实际时间与频率以用户请求及已保存任务为准，不把历史预约文字当作当前状态。
 
 ## 模块内部来源
 

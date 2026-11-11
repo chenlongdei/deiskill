@@ -22,7 +22,37 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CACHE = Path.home() / ".deiskill" / "cache"
 BACKUPS = Path.home() / ".deiskill" / "backups"
-DEFAULT_TARGET = Path.home() / ".codex" / "skills"
+# 常见 Agent 的用户级 skills 目录。只用于检测本机已有哪些，不默认任何一个。
+KNOWN_AGENT_DIRS = {
+    "Claude Code": Path.home() / ".claude" / "skills",
+    "Codex": Path.home() / ".codex" / "skills",
+    "WorkBuddy": Path.home() / ".workbuddy" / "skills",
+    "通用 Agents": Path.home() / ".agents" / "skills",
+}
+
+
+def resolve_targets(explicit: list[Path] | None) -> list[Path]:
+    """用户指定的目录优先；否则检测本机已有的 Agent skills 目录，多个时询问。"""
+    if explicit:
+        return explicit
+    found = [(name, path) for name, path in KNOWN_AGENT_DIRS.items() if path.parent.is_dir()]
+    if len(found) == 1:
+        say(f"检测到 {found[0][0]}，安装到 {found[0][1]}")
+        return [found[0][1]]
+    if not found:
+        sys.exit("没有检测到常见 Agent 的目录。请用 --target 指定你的 Agent 的 skills 目录。")
+    say("检测到多个 Agent：")
+    for i, (name, path) in enumerate(found, 1):
+        say(f"  {i}. {name}  {path}")
+    if not sys.stdin.isatty():
+        sys.exit("请用 --target 指定要安装到哪个（可重复指定多个）。")
+    answer = input("装到哪些？输入编号，多个用空格分隔，回车 = 全部：").split()
+    if not answer:
+        return [path for _, path in found]
+    try:
+        return [found[int(n) - 1][1] for n in answer]
+    except (ValueError, IndexError):
+        sys.exit("编号无效。")
 
 # 在任意层级出现都视为本机运行状态，覆盖安装时从旧目录恢复。
 PRESERVE_DIRS = {"data", "node_modules"}
@@ -153,7 +183,7 @@ def main() -> int:
     parser.add_argument("names", nargs="*", help="只安装这些 Skill（自有或上游）")
     parser.add_argument("--list", action="store_true", help="列出全部 Skill")
     parser.add_argument("--all", action="store_true", help="安装 default 与 optional 级别")
-    parser.add_argument("--target", action="append", type=Path, help="安装目录，可重复；默认 ~/.codex/skills")
+    parser.add_argument("--target", action="append", type=Path, help="安装到这个 skills 目录，可重复；不指定时检测本机已有的 Agent")
     parser.add_argument("--no-external", action="store_true", help="不安装上游 Skill")
     args = parser.parse_args()
 
@@ -182,7 +212,7 @@ def main() -> int:
             selected += list(upstream)
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    for target_dir in args.target or [DEFAULT_TARGET]:
+    for target_dir in resolve_targets(args.target):
         target_dir = target_dir.expanduser().resolve()
         target_dir.mkdir(parents=True, exist_ok=True)
         say(f"== 安装到 {target_dir}")

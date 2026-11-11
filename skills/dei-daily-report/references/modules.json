@@ -1,7 +1,7 @@
 {
   "version": "1.1.0",
   "timezone": "Asia/Shanghai",
-  "config": "输出目录和抖音默认工作簿在本 Skill 目录的 config.json 中配置，见 config.example.json",
+  "config": "保存位置、抖音工作簿和回补天数在本 Skill 目录的 config.json 中配置（首次运行时询问）；各模块数据目录见 scripts/dei_paths.py：政策与商机、AI情报、抖音监控、知乎热榜表达空间",
   "default_modules": [
     "policy",
     "ai",
@@ -16,7 +16,7 @@
       "default_window": "昨日播出日",
       "historical": "指定播出日，按真实源覆盖",
       "dependencies": [],
-      "output": "子skill data/reports/YYYY-MM-DD_分析报告.md"
+      "output": "<output_root>/政策与商机/reports/YYYY-MM-DD_分析报告.md"
     },
     {
       "id": "ai",
@@ -28,7 +28,7 @@
         "模块内 sources/aihot/guide.md",
         "模块内 sources/follow-builders/guide.md"
       ],
-      "output": "子skill data/reports/YYYY-MM-DD_分析报告.md"
+      "output": "<output_root>/AI情报/reports/YYYY-MM-DD_分析报告.md"
     },
     {
       "id": "zhihu",

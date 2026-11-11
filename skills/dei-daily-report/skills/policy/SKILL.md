@@ -15,7 +15,7 @@ metadata:
 
 ## 数据与日期
 
-根目录为本文件所在目录。逐字稿：`data/transcripts/YYYY/MM/YYYYMMDD.md`；成品：`data/reports/YYYY-MM-DD_分析报告.md`；主题状态：`data/topics.json`；研究与修订：`data/revisions/`；日志：`data/logs/fetch.log`。成品首部包含 `<!-- method-version: 3.3.0 -->`，用于识别旧方法报告。
+数据目录（下文写作 `data/`）为总入口 `config.json` 中 `output_root` 下的 `政策与商机/`，由总入口 `scripts/dei_paths.py` 解析；数据和报告不写进 Skill 安装目录。逐字稿：`data/transcripts/YYYY/MM/YYYYMMDD.md`；成品：`data/reports/YYYY-MM-DD_分析报告.md`；主题状态：`data/topics.json`；研究与修订：`data/revisions/`；日志：`data/logs/fetch.log`。成品首部包含 `<!-- method-version: 3.3.0 -->`，用于识别旧方法报告。
 
 每天Asia/Shanghai 05:00晨报以昨天为播出日；手动按用户指定日，未指定时以昨日为目标。区分晨报日、播出日、文件签发/公开/实施日。
 
@@ -46,6 +46,6 @@ metadata:
 
 目录可直接复制到目标agent的skills目录，或让agent读取本文件。所需能力为文件读写、Python 3.9+、curl、联网检索与网页/PDF读取；没有网络工具的agent只能生成标明限制的离线分析，不宣称完成外部核验。
 
-手动运行 `bash scripts/run_daily.sh` 默认昨日；`--date YYYY-MM-DD` 指定播出日，`--force`备份后重做。CLI适配在scripts/run_agent.sh，支持Codex/Claude自动探测和agent.conf自定义命令；调用AI可能使用该agent账户额度。
+手动运行 `bash scripts/run_daily.sh` 默认昨日；`--date YYYY-MM-DD` 指定播出日，`--force`备份后重做。CLI适配在scripts/run_agent.sh，依次使用agent.conf自定义命令、Claude Code、Codex；调用AI可能使用该agent账户额度。
 
-调度二选一：在目标agent内设Asia/Shanghai每日05:00，按本skill完整执行；或macOS显式运行 `bash install.sh --launchd`，使用本机CLI。本skill不会自行注册调度，不同时开启两套。当前作者机器使用Codex任务自动化，仓库不携带私人任务ID或配置。其他系统用现有调度器调用脚本，确保机器在线、CLI登录和检索能力可用。
+调度二选一：在目标agent内设Asia/Shanghai每日05:00，按本skill完整执行；或macOS显式运行 `bash install.sh --launchd`，使用本机CLI。本skill不会自行注册调度，不同时开启两套。仓库不携带私人任务ID或配置。其他系统用现有调度器调用脚本，确保机器在线、CLI登录和检索能力可用。

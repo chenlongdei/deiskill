@@ -158,16 +158,26 @@ def log(root, message):
         handle.write(line + "\n")
 
 
+
+def _data_dir(module):
+    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+    import sys as _sys
+    env = os.environ.get('DEI_DAILY_DATA_DIR')
+    if env:
+        return Path(env).expanduser()
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
+    from dei_paths import data_dir
+    return data_dir(module)
+
 def main():
     parser = argparse.ArgumentParser()
-    default_root = os.environ.get("XWLB_ROOT") or str(
-        Path(__file__).resolve().parent.parent / "data"
-    )
-    parser.add_argument("--root", default=default_root)
+    parser.add_argument("--root", default=os.environ.get("XWLB_ROOT"), help="数据目录；默认按 dei_paths 解析")
     parser.add_argument("--days", type=int, default=30)
     parser.add_argument("--date", help="指定日期 YYYYMMDD")
     parser.add_argument("--incremental", action="store_true")
     args = parser.parse_args()
+    if not args.root:
+        args.root = str(_data_dir("policy"))
 
     os.makedirs(args.root, exist_ok=True)
     if args.days < 1:

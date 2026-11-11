@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
-import argparse,concurrent.futures,json,subprocess,uuid
+import argparse,concurrent.futures,json,os,subprocess,uuid
 from pathlib import Path
 from datetime import datetime,timedelta,timezone
 from urllib.parse import urlencode
 ROOT=Path(__file__).resolve().parents[1]
-BASE=ROOT/'data'
+def _data_dir(module):
+    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+    import sys as _sys
+    env = os.environ.get('DEI_DAILY_DATA_DIR')
+    if env:
+        return Path(env).expanduser()
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
+    from dei_paths import data_dir
+    return data_dir(module)
+BASE=_data_dir('ai')
 CST=timezone(timedelta(hours=8))
 parser=argparse.ArgumentParser()
 parser.add_argument('--date',help='北京时间日期 YYYY-MM-DD，查询过去七天内的一天')

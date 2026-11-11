@@ -8,7 +8,23 @@ import openpyxl
 ROOT=Path(__file__).resolve().parent.parent; TK="https://api.tikhub.io"; DS="https://dashscope.aliyuncs.com/api/v1"
 UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36"
 
-ASR_JOURNAL=ROOT/"data"/"asr_tasks.json"
+def _data_dir(module):
+    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+    import sys as _sys
+    env = os.environ.get('DEI_DAILY_DATA_DIR')
+    if env:
+        return Path(env).expanduser()
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
+    from dei_paths import data_dir
+    return data_dir(module)
+
+def _journal():
+    try:
+        return _data_dir("douyin") / "asr_tasks.json"
+    except SystemExit:
+        return None  # 未配置时由 main() 报错，便于测试导入
+
+ASR_JOURNAL=_journal()
 
 class StopExternal(RuntimeError):
     """Credentials or balance prohibit further external calls."""
@@ -159,6 +175,8 @@ def write_book(path,out,records,fetched,replace_sheets=None):
     wb.save(out)
 
 def main():
+    if ASR_JOURNAL is None:
+        _data_dir("douyin")  # 未配置 output_root 时打印说明并退出
     ap=argparse.ArgumentParser(); ap.add_argument("--input",required=True); ap.add_argument("--output"); ap.add_argument("--days",type=int,default=7); ap.add_argument("--only-sheets",default=""); ap.add_argument("--replace-sheets",default=""); a=ap.parse_args()
     cfg=json.loads((ROOT/"config.json").read_text()) if (ROOT/"config.json").exists() else {}; ov=json.loads((ROOT/"account_overrides.json").read_text()); get=lambda k:os.getenv(k.upper()) or cfg.get(k, "")
     missing=[k for k in ("tikhub_api_key","dasheng_uid","dasheng_api_key","dashscope_api_key") if not get(k)]

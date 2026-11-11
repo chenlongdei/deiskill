@@ -4,8 +4,8 @@
 #
 # 解析顺序：
 # 1. 本目录 agent.conf 中自定义 AGENT_CMD 模板（最高优先级）
-# 2. 自动探测 codex CLI
-# 3. 自动探测 claude CLI
+# 2. 自动探测 claude CLI（Claude Code）
+# 3. 自动探测 codex CLI
 #
 # 协议约定：本脚本会 cd 到 skill 根目录再执行命令，提示词通过 stdin 传入。
 # 只要你的 agent CLI 支持「从 stdin 读任务 + 在当前目录读写文件」即可接入。
@@ -26,12 +26,12 @@ if [ -f agent.conf ]; then
     exit 0
 fi
 
-if command -v codex >/dev/null 2>&1; then
-    exec codex exec --sandbox workspace-write --skip-git-repo-check -
-fi
-
 if command -v claude >/dev/null 2>&1; then
     exec claude -p --permission-mode acceptEdits
+fi
+
+if command -v codex >/dev/null 2>&1; then
+    exec codex exec --sandbox workspace-write --skip-git-repo-check -
 fi
 
 cat >&2 <<'EOF'
