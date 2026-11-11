@@ -58,5 +58,18 @@ class TrafficDeckTests(unittest.TestCase):
         self.assertTrue(any("至少两张" in w for w in warns))
 
 
+class OddRuleTests(unittest.TestCase):
+    def test_even_block_items_rejected(self):
+        data = json.loads((EXAMPLE / "data.json").read_text(encoding="utf-8"))
+        data["cards"][0]["blocks"][0]["items"] = data["cards"][0]["blocks"][0]["items"][:2]
+        _, errors, _ = PublishCheckTests().run_check(data=data)
+        self.assertTrue(any("单数" in e for e in errors))
+
+    def test_even_table_rows_rejected(self):
+        md = (EXAMPLE / "report.md").read_text(encoding="utf-8").replace("| 11-10 | 前 10 个月外贸同比增长 20% |", "| 11-10 | 前 10 个月外贸同比增长 20% |\n| 11-05 | 前 9 个月服务进出口同比增长 8.5% |")
+        _, errors, _ = PublishCheckTests().run_check(md=md)
+        self.assertTrue(any("表格" in e for e in errors))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,16 @@ def check(md_path, data_path=None):
             if "持续" in text and not re.search(r"^\|[^\n]*\|[^\n]*\|[^\n]*\|[^\n]*\|\s*$", text, re.M):
                 errors.append("「本周持续在讨论的话题」应使用四列表格：话题 / 怎么开始的 / 一周进展 / 最新状态")
 
+    body = md.split("## 主要资料来源")[0]
+    for run in re.findall(r"(?:^- [^\n]*\n)+", body, re.M):
+        n_items = run.count("\n")
+        if n_items % 2 == 0:
+            errors.append(f"列表有 {n_items} 条，应为单数：{run.splitlines()[0][:24]}…")
+    for tbl in re.findall(r"(?:^\|[^\n]*\|\s*\n)+", body, re.M):
+        rows = tbl.strip().splitlines()[2:]
+        if len(rows) % 2 == 0:
+            errors.append(f"表格有 {len(rows)} 行，应为单数：{rows[0][:24]}…")
+
     for w in FORBIDDEN:
         if w in md:
             errors.append(f"出现内部用语「{w}」，执行过程和自用内容不进成品")
@@ -90,7 +100,7 @@ def check(md_path, data_path=None):
                     errors.append(f"封面「{g.get('k')}」目录要写具体条目")
                 for line in i.split("\n"):
                     width = len(re.sub(r"[\x00-\x7f]", "", line)) + len(re.sub(r"[^\x00-\x7f]", "", line)) / 2
-                    if width > 12:
+                    if width > 11:
                         warns.append(f"封面目录「{line}」一行放不下，会在词中间断开；缩短到 11 个字以内，或用 \\n 在自然停顿处换行")
         cards = d.get("cards", [])
         if len(cards) < 8:
@@ -101,6 +111,14 @@ def check(md_path, data_path=None):
                 warns.append(f"「{mod}」只有 {n_mod} 张卡片，引流图卡每个模块至少两张")
         if headline_dup := [x for x in cards if x.get("title", "").replace("\n", "") == "".join(d.get("headline", [])).replace(" ", "")]:
             errors.append("头条卡片标题和封面大标题重复")
+        for x in cards:
+            for b in x.get("blocks", []):
+                items = b.get("rows") if b.get("type") == "table" else b.get("items")
+                if isinstance(items, list) and len(items) % 2 == 0:
+                    errors.append(f"卡片「{x.get('title', '').replace(chr(10), '')}」的 {b.get('type')} 有 {len(items)} 条，每页信息应为单数")
+        for g in groups:
+            if len(g.get("items", [])) % 2 == 0:
+                errors.append(f"封面目录「{g.get('k')}」有 {len(g['items'])} 条，应为单数")
         last = cards[-1] if cards else {}
         if not any(b.get("type") == "cta" for b in last.get("blocks", [])):
             errors.append("最后一张卡片要有 cta，引导去看完整版")
