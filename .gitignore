@@ -1,0 +1,18 @@
+# 运行数据与本机配置
+**/data/
+**/config.json
+**/agent.conf
+**/.aihot-actor-id
+**/*.log
+**/*.xlsx
+**/*.zip
+
+# 上游内容由 scripts/install.sh 安装时拉取，不进仓库
+skills/dei-daily-report/skills/ai/sources/follow-builders/
+skills/dei-daily-report/skills/zhihu/tools/zhihu/
+
+# 依赖与缓存
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/.DS_Store

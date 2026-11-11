@@ -1,0 +1,19 @@
+# Agent 调用配置模板
+#
+# 用法：把本文件复制为 agent.conf，取消注释并按需修改 AGENT_CMD。
+# 协议：脚本会在 skill 根目录执行该命令，提示词通过 stdin 传入；
+#       agent 需要支持从 stdin 读任务，并允许在当前目录读写文件。
+#
+# 命令模板示例（任选其一去掉行首 "# AGENT_CMD=" 并按实际 CLI 调整）：
+
+# Codex CLI（默认自动探测，通常无需配置）
+# AGENT_CMD='codex exec --sandbox workspace-write --skip-git-repo-check -'
+
+# Claude Code
+# AGENT_CMD='claude -p --permission-mode acceptEdits'
+
+# workbuddy：请按其文档填写无头/非交互调用命令，示意格式如下
+# AGENT_CMD='workbuddy run --headless --cwd . -'
+
+# 任意其他 agent CLI，只要支持 stdin 任务 + 目录读写即可
+# AGENT_CMD='your-agent --task-stdin --allow-write .'

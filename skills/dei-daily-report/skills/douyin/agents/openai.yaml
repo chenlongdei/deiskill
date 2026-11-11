@@ -1,0 +1,4 @@
+interface:
+  display_name: "抖音近7天拆解表"
+  short_description: "抓取抖音博主视频、语音转写并增量写回多Sheet拆解工作簿"
+  default_prompt: "使用 $dei-daily-report 只运行抖音模块，更新当前抖音博主拆解工作簿。"

@@ -1,0 +1,10 @@
+**/data/
+**/node_modules/
+**/__pycache__/
+**/.DS_Store
+**/.aihot-actor-id
+**/config.json
+**/agent.conf
+**/*.log
+**/*.xlsx
+**/*.zip

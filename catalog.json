@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "router": "dei",
+  "layers": {
+    "router": "总入口",
+    "input": "输入：采集、转写、检索、日报",
+    "process": "处理：理解、提问、诊断、学习",
+    "output": "输出：把结论变成成品"
+  },
+  "skills": [
+    {
+      "name": "dei-daily-report",
+      "layer": "input",
+      "summary": "政策、AI、知乎、抖音的综合日报与按领域日报",
+      "install": "default",
+      "requires": ["Python 3.10+", "Node.js（AI 模块）", "openpyxl（抖音模块）"]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# 运行数据不入库：安装时由 install.sh 自动生成并回填
+data/
+
+# 个人 agent 配置不入库（参考 agent.conf.example）
+agent.conf

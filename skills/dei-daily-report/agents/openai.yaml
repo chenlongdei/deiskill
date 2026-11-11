@@ -1,0 +1,4 @@
+interface:
+  display_name: "dei-daily-report 日报系统"
+  short_description: "串联政策、AI、知乎与抖音信息源，生成综合日报或按领域路由执行"
+  default_prompt: "使用 $dei-daily-report 生成全平台日报，保留各渠道时间口径、成品链接和完成状态。"

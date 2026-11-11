@@ -1,0 +1,59 @@
+{
+  "version": "1.1.0",
+  "timezone": "Asia/Shanghai",
+  "config": "输出目录和抖音默认工作簿在本 Skill 目录的 config.json 中配置，见 config.example.json",
+  "default_modules": [
+    "policy",
+    "ai",
+    "zhihu",
+    "douyin"
+  ],
+  "modules": [
+    {
+      "id": "policy",
+      "label": "政策与商机",
+      "entrypoint": "skills/policy/SKILL.md",
+      "default_window": "昨日播出日",
+      "historical": "指定播出日，按真实源覆盖",
+      "dependencies": [],
+      "output": "子skill data/reports/YYYY-MM-DD_分析报告.md"
+    },
+    {
+      "id": "ai",
+      "label": "AI消息与价值分析",
+      "entrypoint": "skills/ai/SKILL.md",
+      "default_window": "滚动过去24小时",
+      "historical": "指定北京时间自然日；日期采集限最近七天，Builders按真实快照覆盖",
+      "dependencies": [
+        "模块内 sources/aihot/guide.md",
+        "模块内 sources/follow-builders/guide.md"
+      ],
+      "output": "子skill data/reports/YYYY-MM-DD_分析报告.md"
+    },
+    {
+      "id": "zhihu",
+      "label": "知乎热榜与表达空间",
+      "entrypoint": "skills/zhihu/SKILL.md",
+      "default_window": "当前热榜前20条，入选题各前10条回答摘要",
+      "historical": "仅已有真实本地快照",
+      "dependencies": [
+        "模块内 tools/zhihu/guide.md"
+      ],
+      "output": "项目/知乎热榜表达空间/YYYY-MM-DD/HHMMSS/报告.md"
+    },
+    {
+      "id": "douyin",
+      "label": "抖音博主监控",
+      "entrypoint": "skills/douyin/SKILL.md",
+      "default_window": "滚动近7天，零发布账号补最近7条",
+      "historical": "当前管线不支持任意历史日，仅分析真实归档",
+      "default_input": "config.json 的 douyin_default_input",
+      "dependencies": [
+        "TikHub",
+        "大圣",
+        "阿里云百炼paraformer-v2"
+      ],
+      "output": "输入旁 outputs/douyin-weekly-workbook/ 新工作簿及摘要"
+    }
+  ]
+}

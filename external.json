@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "note": "上游内容不放进本仓库，由 scripts/install.sh 安装时拉取。kind=skill 安装为独立 Skill；kind=vendor 放进某个自有 Skill 的子目录；kind=manual 无法自动获取，安装器只保留本机已有副本。",
+  "externals": [
+    {
+      "name": "dbs-diagnosis",
+      "kind": "skill",
+      "layer": "process",
+      "summary": "判断商业问题是否成立，或全面检查一门生意",
+      "repo": "https://github.com/dontbesilent2025/dbskill",
+      "path": "skills/dbs-diagnosis",
+      "license": "dbskill 保留所有权利：允许安装和自用，禁止再分发"
+    },
+    {
+      "name": "dbs-learning",
+      "kind": "skill",
+      "layer": "process",
+      "summary": "把一个课题拆成连续的学习文章，按反馈调整下一篇",
+      "repo": "https://github.com/dontbesilent2025/dbskill",
+      "path": "skills/dbs-learning",
+      "license": "dbskill 保留所有权利：允许安装和自用，禁止再分发"
+    },
+    {
+      "name": "dbs-chatroom",
+      "kind": "skill",
+      "layer": "process",
+      "summary": "请几位专家角色围绕一个话题分别发言，最后汇总",
+      "repo": "https://github.com/dontbesilent2025/dbskill",
+      "path": "skills/dbs-chatroom",
+      "license": "dbskill 保留所有权利：允许安装和自用，禁止再分发"
+    },
+    {
+      "name": "dbs-deconstruct",
+      "kind": "skill",
+      "layer": "process",
+      "summary": "拆解一个说不清的概念，讲清它在不同场合的意思",
+      "repo": "https://github.com/dontbesilent2025/dbskill",
+      "path": "skills/dbs-deconstruct",
+      "license": "dbskill 保留所有权利：允许安装和自用，禁止再分发"
+    },
+    {
+      "name": "follow-builders",
+      "kind": "vendor",
+      "owner": "dei-daily-report",
+      "install_into": "skills/ai/sources/follow-builders",
+      "repo": "https://github.com/zarazhangrui/follow-builders",
+      "path": ".",
+      "rename": {"SKILL.md": "guide.md"},
+      "post_install": ["npm", "install", "--prefix", "scripts", "--ignore-scripts", "--no-audit", "--no-fund"],
+      "license": "上游未声明许可证，不再分发"
+    },
+    {
+      "name": "zhihu-cli-skill",
+      "kind": "manual",
+      "owner": "dei-daily-report",
+      "install_into": "skills/zhihu/tools/zhihu",
+      "summary": "知乎官方 CLI Skill（知乎模块依赖）",
+      "instructions": "从知乎开放平台获取官方知乎 Skill，把其中的 SKILL.md 改名为 guide.md 后放到该目录；覆盖安装时安装器会保留本机已有副本。",
+      "license": "来源与许可待确认，不再分发"
+    }
+  ]
+}
