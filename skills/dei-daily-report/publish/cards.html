@@ -30,15 +30,15 @@ body.export{padding:0}
 .card{width:1080px;height:1440px;margin:0 auto 40px;position:relative;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;padding:56px 72px 52px}
 body.export .card{margin:0}
 h1,h2,h3,p{margin:0}
-h2,h3,.dek,.cl div{text-wrap:balance}
+h2,h3,.contents li,.points b{text-wrap:balance}
 
 /* ================= 封面 ================= */
-#cover{background:var(--accent);color:var(--on-accent);padding:52px 64px 48px}
+#cover{background:var(--accent);color:var(--on-accent);padding:60px 64px 48px}
 .cl{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid currentColor;border-bottom:1px solid currentColor;padding:14px 0 16px}
 .cl div{padding:0 18px;border-left:1px solid currentColor;font-size:21px;line-height:1.45;font-weight:500}
 .cl div:first-child{border-left:0;padding-left:0}
 .cl b{display:block;font-family:var(--mono);font-size:15px;letter-spacing:.12em;margin-bottom:6px}
-.masthead{display:flex;align-items:flex-end;justify-content:space-between;margin-top:26px}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;border-top:3px solid currentColor;padding-top:28px}
 .masthead h1{font-family:var(--serif);font-weight:900;font-size:184px;line-height:.9;letter-spacing:-.03em;display:flex;align-items:flex-end;white-space:nowrap}
 .masthead h1 .sub{writing-mode:vertical-rl;font-size:50px;letter-spacing:.12em;line-height:1;background:var(--on-accent);color:var(--accent);padding:14px 9px;margin:0 0 10px 20px}
 .vol{text-align:right;font-family:var(--mono);font-size:17px;line-height:1.55;padding-bottom:12px}
@@ -56,14 +56,39 @@ h2,h3,.dek,.cl div{text-wrap:balance}
 .cover-foot{display:flex;align-items:center;justify-content:space-between;margin-top:30px;padding-top:14px;border-top:1px solid currentColor;font-family:var(--mono);font-size:15px;letter-spacing:.08em}
 .cover-foot svg{display:block}
 
+
+/* 封面目录 */
+.contents{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid currentColor}
+.contents section{padding:20px 20px 4px 0}
+.contents section+section{padding-left:22px;border-left:1px solid currentColor}
+.contents h4{margin:0 0 12px;font-family:var(--mono);font-size:16px;letter-spacing:.14em}
+.contents ol{margin:0;padding:0;list-style:none;counter-reset:c}
+.contents li{counter-increment:c;font-size:22px;line-height:1.45;font-weight:700;padding:7px 0 7px 34px;position:relative}
+.contents li::before{content:counter(c);position:absolute;left:0;top:9px;width:22px;height:22px;display:grid;place-items:center;font-family:var(--display);font-size:15px;font-weight:400;background:var(--on-accent);color:var(--accent)}
+
+/* points：小标题 + 一两句解释 */
+.points{border-top:3px solid currentColor}
+.points div{padding:24px 0;border-bottom:1px solid var(--hair)}
+.points b{display:block;font-family:var(--serif);font-weight:900;font-size:36px;line-height:1.4;margin-bottom:10px}
+.points span{display:block;font-size:28px;line-height:1.7;opacity:.88}
+.card.dark .points div{border-color:rgba(242,237,226,.18)}
+.card.dark .points b::before{content:"";display:inline-block;width:12px;height:12px;background:var(--accent-dark);margin-right:12px;vertical-align:6px}
+
+/* table */
+.mini{width:100%;border-collapse:collapse}
+.mini th{text-align:left;font-family:var(--mono);font-size:18px;letter-spacing:.08em;padding:12px 14px 12px 0;border-top:3px solid var(--ink);border-bottom:1px solid var(--ink)}
+.mini td{font-size:27px;line-height:1.55;padding:28px 14px 28px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+.mini td:first-child{font-family:var(--serif);font-weight:900;font-size:34px;color:var(--accent-text);white-space:nowrap}
+.mini td:last-child{font-weight:700}
+
 /* ================= 内页卡片 ================= */
 .top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:15px;letter-spacing:.1em;padding-bottom:14px;border-bottom:3px solid var(--ink)}
 .top b{font-family:var(--serif);font-size:22px;letter-spacing:.02em}
 .kicker{margin-top:44px;display:flex;align-items:center;gap:16px}
 .kicker span{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.16em;padding:7px 12px 6px;background:var(--accent);color:var(--on-accent)}
 .kicker i{flex:1;height:1px;background:var(--hair)}
-.card h2{font-family:var(--serif);font-weight:900;font-size:76px;line-height:1.16;letter-spacing:-.01em;margin:22px 0 10px}
-.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:44px;padding:20px 0}
+.card h2{font-family:var(--serif);font-weight:900;font-size:72px;line-height:1.2;letter-spacing:-.01em;margin:22px 0 10px}
+.body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;gap:40px;padding:34px 0 20px}
 .foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;letter-spacing:.1em;color:var(--muted);padding-top:14px;border-top:1px solid var(--hair)}
 
 .card.dark{background:var(--ink);color:var(--paper)}
@@ -81,7 +106,7 @@ h2,h3,.dek,.cl div{text-wrap:balance}
 .vsteps .s:last-child::before{background:var(--accent-dark)}
 .vsteps .d{font-family:var(--mono);font-size:17px;letter-spacing:.08em;color:var(--accent-dark)}
 .vsteps .h{font-family:var(--serif);font-weight:900;font-size:40px;margin:4px 0 8px}
-.vsteps .t{font-size:23px;line-height:1.7;opacity:.85}
+.vsteps .t{font-size:26px;line-height:1.7;opacity:.85}
 .lead{font-family:var(--serif);font-weight:900;font-size:36px;line-height:1.5;border-top:3px solid currentColor;padding-top:26px}
 .lead::before{content:"";display:inline-block;width:18px;height:18px;background:var(--accent-dark);margin-right:14px;vertical-align:4px}
 
@@ -90,21 +115,21 @@ h2,h3,.dek,.cl div{text-wrap:balance}
 .stats div{padding:22px 16px 0 0}
 .stats div+div{padding-left:22px;border-left:1px solid var(--hair)}
 .stats strong{display:block;font-family:var(--display);font-weight:400;font-size:86px;line-height:1;color:var(--accent-text);white-space:nowrap}
-.stats span{display:block;font-size:22px;font-weight:700;margin-top:12px;line-height:1.4}
+.stats span{display:block;font-size:25px;font-weight:700;margin-top:12px;line-height:1.4}
 .stats small{display:block;font-family:var(--mono);font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
-.note{font-size:22px;line-height:1.7;color:#3a3732;background:var(--paper-2);padding:20px 24px;border-left:6px solid var(--accent)}
+.note{font-size:27px;line-height:1.7;color:#3a3732;background:var(--paper-2);padding:20px 24px;border-left:6px solid var(--accent)}
 
 /* list */
 .list{border-top:1px solid var(--ink)}
-.list div{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:18px 0;border-bottom:1px solid var(--hair);align-items:baseline}
-.list b{font-family:var(--mono);font-size:16px;letter-spacing:.1em;color:var(--accent-text)}
-.list span{font-size:24px;line-height:1.6}
+.list div{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--hair);align-items:baseline}
+.list b{font-family:var(--mono);font-size:19px;letter-spacing:.1em;color:var(--accent-text)}
+.list span{font-size:28px;line-height:1.6}
 
 /* bars */
 .bars{border-top:3px solid var(--ink);padding-top:18px}
 .bars .u{font-family:var(--mono);font-size:15px;color:var(--muted);letter-spacing:.06em;margin-bottom:12px}
 .bar{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:16px;margin:14px 0}
-.bar span{font-size:22px;font-weight:700}
+.bar span{font-size:26px;font-weight:700}
 .bar .track{position:relative;height:46px}
 .bar .fill{height:100%;background:var(--ink);min-width:6px}
 .bar.hi .fill{background:var(--accent)}
@@ -124,7 +149,7 @@ h2,h3,.dek,.cl div{text-wrap:balance}
 .agenda div{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:26px 0;border-bottom:1px solid var(--hair);align-items:baseline}
 .agenda div:first-child{border-top:3px solid var(--ink)}
 .agenda b{font-family:var(--display);font-weight:400;font-size:40px;color:var(--accent-text);letter-spacing:.01em}
-.agenda span{font-size:26px;line-height:1.55}
+.agenda span{font-size:28px;line-height:1.55}
 .cta{background:var(--accent);color:var(--on-accent);padding:34px 36px}
 .cta p{font-family:var(--serif);font-weight:900;font-size:34px;line-height:1.5}
 .cta small{display:block;margin-top:14px;font-family:var(--mono);font-size:16px;letter-spacing:.08em}
@@ -153,6 +178,7 @@ const WEEK = ["red","orange","yellow","blue","green","pink","mint"];
 const qs = new URLSearchParams(location.search);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const total = R.cards.length + 1;
+const ISSUE = String(R.issue).padStart(3,"0");
 const pad = n => String(n).padStart(2,"0");
 
 function pickTheme(){
@@ -181,6 +207,8 @@ function block(b){
     }
     case "groups": return `<div class="groups">${b.items.map(g=>`<div class="g"><div class="gh">${esc(g.h)}</div><div><div class="gs">${esc(g.s)}</div><ul>${g.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div></div>`).join("")}</div>`;
     case "agenda": return `<div class="agenda">${b.items.map(([d,t])=>`<div><b>${esc(d)}</b><span>${esc(t)}</span></div>`).join("")}</div>`;
+    case "points": return `<div class="points">${b.items.map(p=>`<div><b>${esc(p.h)}</b><span>${esc(p.t)}</span></div>`).join("")}</div>`;
+    case "table": return `<table class="mini"><tr>${b.head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${b.rows.map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</table>`;
     case "cta": return `<div class="cta"><p>${esc(b.t)}</p><small>${esc(b.s)}</small></div>`;
   }
   return "";
@@ -189,19 +217,17 @@ function block(b){
 function render(){
   const cover = `
   <section class="card" id="cover">
-    <div class="cl">${R.coverlines.map(c=>`<div><b>${esc(c.k)}</b>${esc(c.t)}</div>`).join("")}</div>
-    <div class="masthead"><h1>${esc(R.brand||"")}<span class="sub">日报</span></h1><div class="vol">第<strong>${esc(R.issue)}</strong>期</div></div>
+    <div class="masthead"><h1>${esc(R.brand||"")}<span class="sub">日报</span></h1><div class="vol">第<strong>${ISSUE}</strong>期</div></div>
     <div class="issueline"><span>${esc(R.date)} ${esc(R.weekday)}</span><span>${esc(R.read)}</span></div>
     <div class="headline" id="headline">${R.headline.map(l=>`<div>${esc(l)}</div>`).join("")}</div>
-    <p class="dek">${esc(R.dek)}</p>
-    <div class="steps">${R.steps.map(s=>`<div><div class="d">${esc(s.d)}</div><div class="k">${esc(s.k)}</div><div class="t">${esc(s.t)}</div></div>`).join("")}</div>
-    <div class="cover-foot"><span>向后滑动，看每个版块的重点 →</span>${barcode(R.issue+R.date)}</div>
+    <div class="contents">${R.contents.map(g=>`<section><h4>${esc(g.k)}</h4><ol>${g.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ol></section>`).join("")}</div>
+    <div class="cover-foot"><span>本期 ${R.contents.reduce((a,g)=>a+g.items.length,0)} 条 · 向后滑动 →</span>${barcode(ISSUE+R.date)}</div>
   </section>`;
   const cards = R.cards.map((c,i)=>`
   <section class="card ${c.dark?"dark":""}" id="card-${esc(c.id)}">
-    <div class="top"><b>${esc((R.brand||"")+"日报")}</b><span>第 ${esc(R.issue)} 期 · ${pad(i+2)} / ${pad(total)}</span></div>
+    <div class="top"><b>${esc((R.brand||"")+"日报")}</b><span>第 ${ISSUE} 期 · ${pad(i+2)} / ${pad(total)}</span></div>
     <div class="kicker"><span>${esc(c.kicker)}</span><i></i></div>
-    <h2>${esc(c.title)}</h2>
+    <h2>${esc(c.title).replace(/\n/g,"<br>")}</h2>
     <div class="body">${c.blocks.map(block).join("")}</div>
     <div class="foot"><span>${esc(R.date)}</span><span>${i+2<total?"继续滑动 →":"完整版见长文"}</span></div>
   </section>`).join("");

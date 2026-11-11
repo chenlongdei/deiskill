@@ -22,7 +22,7 @@ class PublishCheckTests(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_internal_words_rejected(self):
-        md = (EXAMPLE / "report.md").read_text(encoding="utf-8").replace("## 二、AI", "抖音模块未配置。\n\n## 二、AI")
+        md = (EXAMPLE / "report.md").read_text(encoding="utf-8").replace("## 二、AI", "本期未配置抖音。\n\n## 二、AI")
         _, errors, _ = self.run_check(md=md)
         self.assertTrue(any("未配置" in e for e in errors))
 
@@ -34,16 +34,28 @@ class PublishCheckTests(unittest.TestCase):
     def test_cover_headline_rules(self):
         data = json.loads((EXAMPLE / "data.json").read_text(encoding="utf-8"))
         data["headline"] = ["学时记账。", "智能体挑工具。", "旧闻重播。"]
-        data["coverlines"][0]["t"] = "国家政策"
+        data["contents"][0]["items"][0] = "国家政策"
+        data["issue"] = "1112"
         _, errors, warns = self.run_check(data=data)
         self.assertTrue(any("句号" in e for e in errors))
-        self.assertTrue(any("具体看点" in e for e in errors))
+        self.assertTrue(any("具体条目" in e for e in errors))
+        self.assertTrue(any("期号" in e for e in errors))
         self.assertTrue(any("清单" in w for w in warns))
 
     def test_too_short_rejected(self):
         md = (EXAMPLE / "report.md").read_text(encoding="utf-8").split("## 一、国家政策")[0]
         _, errors, _ = self.run_check(md=md)
         self.assertTrue(any("字" in e for e in errors))
+
+
+
+
+class TrafficDeckTests(unittest.TestCase):
+    def test_single_card_per_module_warns(self):
+        data = json.loads((EXAMPLE / "data.json").read_text(encoding="utf-8"))
+        data["cards"] = [c for c in data["cards"] if c["id"] in ("core-1", "policy-1", "ai-1", "social-1", "next")]
+        _, _, warns = PublishCheckTests().run_check(data=data)
+        self.assertTrue(any("至少两张" in w for w in warns))
 
 
 if __name__ == "__main__":

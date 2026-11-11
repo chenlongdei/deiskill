@@ -146,14 +146,14 @@ const modHtml = mods.map((m,i)=>{
 // 3. 报头 + 目录
 const toc = mods.filter(m=>m.n!=="").map((m,i)=>`<a href="#${m.id}"><b>${m.n}</b><span>${esc(m.title)}</span><small>${Math.max(1,Math.round(m.chars/450))} 分钟</small>${R.toc&&R.toc[i]?`<em>${esc(R.toc[i])}</em>`:""}</a>`).join("");
 const hero = `<header class="hero" id="hero">
-  <div class="bar"><span>${esc(R.date)} ${esc(R.weekday)}</span><span>第 ${esc(R.issue)} 期</span></div>
+  <div class="bar"><span>${esc(R.date)} ${esc(R.weekday)}</span><span>第 ${String(R.issue).padStart(3,"0")} 期</span></div>
   <h1>${esc(R.brand||"")}<span class="sub">日报</span></h1>
   <div class="line"><span>${esc(R.read)}</span></div>
   <div class="hl">${R.headline.map(esc).join("<br>")}</div>
   <p class="dek">${esc(R.dek)}</p>
   <nav class="toc">${toc}</nav>
 </header>${note?`<p class="note">${esc(note)}</p>`:""}`;
-const sign = `<footer class="sign"><div class="m">${esc(R.brand||"")}<small>日报</small></div><div class="r">第 ${esc(R.issue)} 期<br>${esc(R.date)}</div></footer>`;
+const sign = `<footer class="sign"><div class="m">${esc(R.brand||"")}<small>日报</small></div><div class="r">第 ${String(R.issue).padStart(3,"0")} 期<br>${esc(R.date)}</div></footer>`;
 wrap.innerHTML = hero + modHtml + sign;
 document.fonts.ready.then(()=>{ window.__ready=true; });
 })();

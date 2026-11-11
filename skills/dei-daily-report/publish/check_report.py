@@ -11,7 +11,7 @@ MODULES = ["今天最重要的一件事", "国家政策", "AI", "社会热点", 
 # 执行过程、内部判断和自用建议不进成品
 FORBIDDEN = ["deiskill", "config", "未配置", "未取得", "未检索到", "运行记录", "unsupported", "partial",
              "研究补查", "值得验证", "商机", "课程素材", "对我的", "〔事实", "〔推断", "暂评", "A级", "B级", "S级",
-             "表达角度", "开头句", "抖音模块"]
+             "表达角度", "开头句", "抖音"]
 
 
 def body_chars(md: str) -> int:
@@ -77,11 +77,31 @@ def check(md_path, data_path=None):
             warns.append(f"封面大标题 {len(hl)} 字，超过 18 字会被缩得很小")
         if len(d.get("headline", [])) > 2:
             warns.append("封面大标题最多分两行，应是一句话的判断，不是清单")
-        if len(d.get("coverlines", [])) != 3:
-            errors.append("封面顶部应有 3 栏：国家政策、AI、社会热点各一句当天看点")
-        for c in d.get("coverlines", []):
-            if c.get("t", "").strip() in ("", c.get("k")):
-                errors.append(f"封面「{c.get('k')}」栏要写当天的具体看点")
+        if not isinstance(d.get("issue"), int) or d["issue"] < 1:
+            errors.append("issue 应为从 1 开始的整数期号，用 publish/issue.py 生成")
+        groups = d.get("contents", [])
+        if [g.get("k") for g in groups] != ["国家政策", "AI", "社会热点"]:
+            errors.append("封面目录 contents 应依次为国家政策、AI、社会热点")
+        if sum(len(g.get("items", [])) for g in groups) < 8:
+            warns.append("封面目录少于 8 条，引流图卡要让人看到这一期的信息量")
+        for g in groups:
+            for i in g.get("items", []):
+                if i.strip() in ("国家政策", "AI", "社会热点", ""):
+                    errors.append(f"封面「{g.get('k')}」目录要写具体条目")
+        cards = d.get("cards", [])
+        if len(cards) < 8:
+            warns.append(f"速览只有 {len(cards)} 张卡片，每个模块应拆到多条，不只挑一个重点")
+        for mod in ("国家政策", "AI", "社会热点"):
+            n_mod = sum(1 for x in cards if x.get("kicker", "").startswith(mod))
+            if n_mod < 2:
+                warns.append(f"「{mod}」只有 {n_mod} 张卡片，引流图卡每个模块至少两张")
+        if headline_dup := [x for x in cards if x.get("title", "").replace("\n", "") == "".join(d.get("headline", [])).replace(" ", "")]:
+            errors.append("头条卡片标题和封面大标题重复")
+        last = cards[-1] if cards else {}
+        if not any(b.get("type") == "cta" for b in last.get("blocks", [])):
+            errors.append("最后一张卡片要有 cta，引导去看完整版")
+        elif d.get("community") and d["community"] not in json.dumps(last, ensure_ascii=False):
+            warns.append("最后一张卡片没有写出完整版在哪里（community）")
         numbered = [t for t in titles if not t.startswith("主要资料来源")]
         if len(d.get("toc", [])) != len(numbered):
             errors.append(f"toc 有 {len(d.get('toc', []))} 条，长文有 {len(numbered)} 个模块，应一一对应")
