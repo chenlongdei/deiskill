@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "note": "上游内容不放进本仓库，由 scripts/install.sh 安装时拉取。kind=skill 安装为独立 Skill；kind=vendor 放进某个自有 Skill 的子目录；kind=manual 无法自动获取，安装器只保留本机已有副本。",
+  "note": "上游内容不放进本仓库，由 scripts/install.sh 安装时拉取（repo 为 Git 仓库，archive 为官方 zip）。kind=skill 安装为独立 Skill；kind=vendor 放进某个自有 Skill 的子目录；kind=manual 无法自动获取，安装器只保留本机已有副本。",
   "externals": [
     {
       "name": "dbs-diagnosis",
@@ -45,18 +45,32 @@
       "install_into": "skills/ai/sources/follow-builders",
       "repo": "https://github.com/zarazhangrui/follow-builders",
       "path": ".",
-      "rename": {"SKILL.md": "guide.md"},
-      "post_install": ["npm", "install", "--prefix", "scripts", "--ignore-scripts", "--no-audit", "--no-fund"],
+      "rename": {
+        "SKILL.md": "guide.md"
+      },
+      "post_install": [
+        "npm",
+        "install",
+        "--prefix",
+        "scripts",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
       "license": "上游未声明许可证，不再分发"
     },
     {
       "name": "zhihu-cli-skill",
-      "kind": "manual",
+      "kind": "vendor",
       "owner": "dei-daily-report",
       "install_into": "skills/zhihu/tools/zhihu",
-      "summary": "知乎官方 CLI Skill（知乎模块依赖）",
-      "instructions": "从知乎开放平台获取官方知乎 Skill，把其中的 SKILL.md 改名为 guide.md 后放到该目录；覆盖安装时安装器会保留本机已有副本。",
-      "license": "来源与许可待确认，不再分发"
+      "archive": "https://developer-cdn.zhihu.com/zhihu-cli/releases/stable/skill/zhihu-cli-skill.zip",
+      "path": "zhihu",
+      "rename": {
+        "SKILL.md": "guide.md"
+      },
+      "summary": "知乎官方 CLI Skill（知乎模块依赖）；CLI 二进制与 Access Secret 由其 setup 脚本在用户目录管理",
+      "license": "知乎官方发布，安装时从官方 CDN 获取，不再分发"
     }
   ]
 }

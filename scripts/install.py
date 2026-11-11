@@ -14,6 +14,8 @@ import json
 import shutil
 import subprocess
 import sys
+import urllib.request
+import zipfile
 from datetime import datetime
 from pathlib import Path
 
@@ -50,6 +52,26 @@ def fetch_repo(url: str) -> Path:
     return local
 
 
+def fetch_archive(url: str) -> Path:
+    """下载并解压上游 zip 到缓存目录，返回解压根目录。每次安装都重新下载，保证是最新发布。"""
+    slug = url.split("://", 1)[-1].replace("/", "__")
+    root = CACHE / "archives" / slug
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+    archive = root / "download.zip"
+    with urllib.request.urlopen(url, timeout=60) as response, archive.open("wb") as out:
+        shutil.copyfileobj(response, out)
+    extracted = root / "extracted"
+    with zipfile.ZipFile(archive) as bundle:
+        for member in bundle.namelist():
+            target = (extracted / member).resolve()
+            if not str(target).startswith(str(extracted.resolve())):
+                raise ValueError(f"压缩包含不安全路径：{member}")
+        bundle.extractall(extracted)
+    return extracted
+
+
 def restore_state(backup: Path, destination: Path, extra: list[str]) -> list[str]:
     """把旧目录里的运行数据、本机配置和 manual 依赖恢复到新目录，不覆盖新文件。"""
     restored: list[str] = []
@@ -79,7 +101,8 @@ def restore_state(backup: Path, destination: Path, extra: list[str]) -> list[str
 
 
 def install_vendor(item: dict, destination: Path) -> None:
-    source = fetch_repo(item["repo"]) / item.get("path", ".")
+    origin = fetch_archive(item["archive"]) if "archive" in item else fetch_repo(item["repo"])
+    source = origin / item.get("path", ".")
     target = destination / item["install_into"]
     if target.exists():
         shutil.rmtree(target)
@@ -98,7 +121,8 @@ def install_vendor(item: dict, destination: Path) -> None:
     say(f"  + 上游依赖 {item['name']} → {item['install_into']}")
 
 
-def place(name: str, source: Path, target_dir: Path, stamp: str, vendors: list[dict], manuals: list[dict]) -> None:
+def place(name: str, source: Path, target_dir: Path, stamp: str, vendors: list[dict], manuals: list[dict],
+          local_only: list[dict] | None = None) -> None:
     destination = target_dir / name
     backup = None
     if destination.exists() or destination.is_symlink():
@@ -109,10 +133,11 @@ def place(name: str, source: Path, target_dir: Path, stamp: str, vendors: list[d
     for item in vendors:
         try:
             install_vendor(item, destination)
-        except subprocess.CalledProcessError as exc:
+        except (subprocess.CalledProcessError, OSError, ValueError, zipfile.BadZipFile) as exc:
             say(f"  ! 拉取 {item['name']} 失败（{exc}），该模块暂不可用")
     if backup:
-        restored = restore_state(backup, destination, [m["install_into"] for m in manuals])
+        keep = [m["install_into"] for m in manuals + (local_only or [])]
+        restored = restore_state(backup, destination, keep)
         say(f"已安装 {name}（旧版本备份在 {backup}）")
         if restored:
             say("  保留本机状态：" + "、".join(restored))
@@ -165,7 +190,8 @@ def main() -> int:
             if name in local:
                 vendors = [e for e in external if e["kind"] == "vendor" and e["owner"] == name]
                 manuals = [e for e in external if e["kind"] == "manual" and e["owner"] == name]
-                place(name, REPO / "skills" / name, target_dir, stamp, vendors, manuals)
+                local_only = [{"install_into": path, "name": path, "instructions": ""} for path in local[name].get("local_only", [])]
+                place(name, REPO / "skills" / name, target_dir, stamp, vendors, manuals, local_only)
             else:
                 item = upstream[name]
                 try:

@@ -13,7 +13,14 @@
       "layer": "input",
       "summary": "政策、AI、知乎、抖音的综合日报与按领域日报",
       "install": "default",
-      "requires": ["Python 3.10+", "Node.js（AI 模块）", "openpyxl（抖音模块）"]
+      "requires": [
+        "Python 3.10+",
+        "Node.js（AI 模块）",
+        "openpyxl（抖音模块）"
+      ],
+      "local_only": [
+        "skills/policy/references/examples"
+      ]
     }
   ]
 }

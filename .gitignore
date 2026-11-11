@@ -16,3 +16,6 @@ skills/dei-daily-report/skills/zhihu/tools/zhihu/
 **/__pycache__/
 **/*.pyc
 **/.DS_Store
+
+# 本机私有样例
+skills/dei-daily-report/skills/policy/references/examples/
