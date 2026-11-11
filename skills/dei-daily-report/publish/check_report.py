@@ -88,6 +88,10 @@ def check(md_path, data_path=None):
             for i in g.get("items", []):
                 if i.strip() in ("国家政策", "AI", "社会热点", ""):
                     errors.append(f"封面「{g.get('k')}」目录要写具体条目")
+                for line in i.split("\n"):
+                    width = len(re.sub(r"[\x00-\x7f]", "", line)) + len(re.sub(r"[^\x00-\x7f]", "", line)) / 2
+                    if width > 12:
+                        warns.append(f"封面目录「{line}」一行放不下，会在词中间断开；缩短到 11 个字以内，或用 \\n 在自然停顿处换行")
         cards = d.get("cards", [])
         if len(cards) < 8:
             warns.append(f"速览只有 {len(cards)} 张卡片，每个模块应拆到多条，不只挑一个重点")

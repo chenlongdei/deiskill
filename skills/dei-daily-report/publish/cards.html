@@ -30,7 +30,7 @@ body.export{padding:0}
 .card{width:1080px;height:1440px;margin:0 auto 40px;position:relative;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;padding:56px 72px 52px}
 body.export .card{margin:0}
 h1,h2,h3,p{margin:0}
-h2,h3,.contents li,.points b{text-wrap:balance}
+h2,h3,.points b{text-wrap:balance}
 
 /* ================= 封面 ================= */
 #cover{background:var(--accent);color:var(--on-accent);padding:60px 64px 48px}
@@ -205,7 +205,7 @@ function block(b){
       const max = Math.max(...b.items.map(i=>i[1]));
       return `<div class="bars"><div class="u">${esc(b.unit)}</div>${b.items.map(([k,v])=>{const w=v/max*100,hi=v===max;const pos=w>70?`right:14px;color:var(--${hi?"on-accent":"paper"})`:`left:calc(${w}% + 14px)`;return `<div class="bar ${hi?"hi":""}"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${w}%"></div><b class="v" style="${pos}">${v.toLocaleString("en-US")}</b></div></div>`}).join("")}${b.callout?`<div class="callout">${esc(b.callout)}</div>`:""}</div>`;
     }
-    case "groups": return `<div class="groups">${b.items.map(g=>`<div class="g"><div class="gh">${esc(g.h)}</div><div><div class="gs">${esc(g.s)}</div><ul>${g.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div></div>`).join("")}</div>`;
+    case "groups": return `<div class="groups">${b.items.map(g=>`<div class="g"><div class="gh">${esc(g.h)}</div><div><div class="gs">${esc(g.s)}</div><ul>${g.items.map(i=>`<li>${esc(i).replace(/\n/g,"<br>")}</li>`).join("")}</ul></div></div>`).join("")}</div>`;
     case "agenda": return `<div class="agenda">${b.items.map(([d,t])=>`<div><b>${esc(d)}</b><span>${esc(t)}</span></div>`).join("")}</div>`;
     case "points": return `<div class="points">${b.items.map(p=>`<div><b>${esc(p.h)}</b><span>${esc(p.t)}</span></div>`).join("")}</div>`;
     case "table": return `<table class="mini"><tr>${b.head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${b.rows.map(r=>`<tr>${r.map(x=>`<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</table>`;
@@ -220,7 +220,7 @@ function render(){
     <div class="masthead"><h1>${esc(R.brand||"")}<span class="sub">日报</span></h1><div class="vol">第<strong>${ISSUE}</strong>期</div></div>
     <div class="issueline"><span>${esc(R.date)} ${esc(R.weekday)}</span><span>${esc(R.read)}</span></div>
     <div class="headline" id="headline">${R.headline.map(l=>`<div>${esc(l)}</div>`).join("")}</div>
-    <div class="contents">${R.contents.map(g=>`<section><h4>${esc(g.k)}</h4><ol>${g.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ol></section>`).join("")}</div>
+    <div class="contents">${R.contents.map(g=>`<section><h4>${esc(g.k)}</h4><ol>${g.items.map(i=>`<li>${esc(i).replace(/\n/g,"<br>")}</li>`).join("")}</ol></section>`).join("")}</div>
     <div class="cover-foot"><span>本期 ${R.contents.reduce((a,g)=>a+g.items.length,0)} 条 · 向后滑动 →</span>${barcode(ISSUE+R.date)}</div>
   </section>`;
   const cards = R.cards.map((c,i)=>`
