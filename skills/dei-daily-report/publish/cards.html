@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日报 · 速览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;900&display=block" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2EDE2; --paper-2:#E8E1D2; --ink:#141414; --muted:#6E685D; --hair:rgba(20,20,20,.16);
+  --serif:"Noto Serif SC","Songti SC",serif;
+  --sans:"Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif;
+  --display:"Anton","Noto Sans SC",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+[data-theme=red]   {--accent:#E43A2A;--on-accent:#141414;--accent-text:#D2301F;--accent-dark:#FF6B5A}
+[data-theme=orange]{--accent:#F26A24;--on-accent:#141414;--accent-text:#DD5512;--accent-dark:#FF8A4C}
+[data-theme=yellow]{--accent:#E8E23A;--on-accent:#141414;--accent-text:#8A7F00;--accent-dark:#E8E23A}
+[data-theme=blue]  {--accent:#2340D8;--on-accent:#F2EDE2;--accent-text:#2340D8;--accent-dark:#7F93FF}
+[data-theme=green] {--accent:#3DE35C;--on-accent:#141414;--accent-text:#12943A;--accent-dark:#3DE35C}
+[data-theme=pink]  {--accent:#EC3F8C;--on-accent:#141414;--accent-text:#D92B78;--accent-dark:#FF6FAE}
+[data-theme=mint]  {--accent:#A6D7BF;--on-accent:#141414;--accent-text:#1E7A55;--accent-dark:#A6D7BF}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#2a2925;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px 0;zoom:var(--z,1)}
+body.export{padding:0}
+.card{width:1080px;height:1440px;margin:0 auto 40px;position:relative;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;padding:56px 72px 52px}
+body.export .card{margin:0}
+h1,h2,h3,p{margin:0}
+h2,h3,.dek,.cl div{text-wrap:balance}
+
+/* ================= 封面 ================= */
+#cover{background:var(--accent);color:var(--on-accent);padding:52px 64px 48px}
+.cl{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid currentColor;border-bottom:1px solid currentColor;padding:14px 0 16px}
+.cl div{padding:0 18px;border-left:1px solid currentColor;font-size:21px;line-height:1.45;font-weight:500}
+.cl div:first-child{border-left:0;padding-left:0}
+.cl b{display:block;font-family:var(--mono);font-size:15px;letter-spacing:.12em;margin-bottom:6px}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;margin-top:26px}
+.masthead h1{font-family:var(--serif);font-weight:900;font-size:184px;line-height:.9;letter-spacing:-.03em;display:flex;align-items:flex-end;white-space:nowrap}
+.masthead h1 .sub{writing-mode:vertical-rl;font-size:50px;letter-spacing:.12em;line-height:1;background:var(--on-accent);color:var(--accent);padding:14px 9px;margin:0 0 10px 20px}
+.vol{text-align:right;font-family:var(--mono);font-size:17px;line-height:1.55;padding-bottom:12px}
+.vol strong{display:block;font-family:var(--display);font-size:64px;line-height:1;font-weight:400}
+.issueline{display:flex;justify-content:space-between;border-top:1px solid currentColor;border-bottom:3px solid currentColor;margin-top:22px;padding:10px 0;font-family:var(--mono);font-size:16px;letter-spacing:.06em}
+.headline{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 0}
+.headline div{font-weight:900;line-height:1.08;letter-spacing:-.035em;white-space:nowrap}
+.dek{font-size:27px;line-height:1.7;font-weight:500;max-width:900px;margin-bottom:34px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid currentColor;position:relative}
+.steps div{padding:18px 18px 0 0;position:relative}
+.steps div+div{padding-left:22px;border-left:1px solid currentColor}
+.steps .d{font-family:var(--mono);font-size:16px;letter-spacing:.08em;opacity:.8}
+.steps .k{font-size:34px;font-weight:900;margin:6px 0 2px}
+.steps .t{font-size:18px;opacity:.8}
+.cover-foot{display:flex;align-items:center;justify-content:space-between;margin-top:30px;padding-top:14px;border-top:1px solid currentColor;font-family:var(--mono);font-size:15px;letter-spacing:.08em}
+.cover-foot svg{display:block}
+
+/* ================= 内页卡片 ================= */
+.top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:15px;letter-spacing:.1em;padding-bottom:14px;border-bottom:3px solid var(--ink)}
+.top b{font-family:var(--serif);font-size:22px;letter-spacing:.02em}
+.kicker{margin-top:44px;display:flex;align-items:center;gap:16px}
+.kicker span{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.16em;padding:7px 12px 6px;background:var(--accent);color:var(--on-accent)}
+.kicker i{flex:1;height:1px;background:var(--hair)}
+.card h2{font-family:var(--serif);font-weight:900;font-size:76px;line-height:1.16;letter-spacing:-.01em;margin:22px 0 10px}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:44px;padding:20px 0}
+.foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;letter-spacing:.1em;color:var(--muted);padding-top:14px;border-top:1px solid var(--hair)}
+
+.card.dark{background:var(--ink);color:var(--paper)}
+.card.dark .top{border-color:var(--paper)}
+.card.dark .kicker i{background:rgba(242,237,226,.25)}
+.card.dark .foot{color:rgba(242,237,226,.55);border-color:rgba(242,237,226,.2)}
+.card.dark h2{color:var(--paper)}
+
+/* steps (竖排时间线) */
+.vsteps{position:relative;padding-left:56px}
+.vsteps::before{content:"";position:absolute;left:13px;top:12px;bottom:12px;width:3px;background:currentColor;opacity:.35}
+.vsteps .s{position:relative;padding:4px 0 30px}
+.vsteps .s:last-child{padding-bottom:0}
+.vsteps .s::before{content:"";position:absolute;left:-56px;top:6px;width:29px;height:29px;border-radius:50%;background:var(--ink);border:3px solid var(--accent-dark)}
+.vsteps .s:last-child::before{background:var(--accent-dark)}
+.vsteps .d{font-family:var(--mono);font-size:17px;letter-spacing:.08em;color:var(--accent-dark)}
+.vsteps .h{font-family:var(--serif);font-weight:900;font-size:40px;margin:4px 0 8px}
+.vsteps .t{font-size:23px;line-height:1.7;opacity:.85}
+.lead{font-family:var(--serif);font-weight:900;font-size:36px;line-height:1.5;border-top:3px solid currentColor;padding-top:26px}
+.lead::before{content:"";display:inline-block;width:18px;height:18px;background:var(--accent-dark);margin-right:14px;vertical-align:4px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:3px solid var(--ink)}
+.stats div{padding:22px 16px 0 0}
+.stats div+div{padding-left:22px;border-left:1px solid var(--hair)}
+.stats strong{display:block;font-family:var(--display);font-weight:400;font-size:86px;line-height:1;color:var(--accent-text);white-space:nowrap}
+.stats span{display:block;font-size:22px;font-weight:700;margin-top:12px;line-height:1.4}
+.stats small{display:block;font-family:var(--mono);font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+.note{font-size:22px;line-height:1.7;color:#3a3732;background:var(--paper-2);padding:20px 24px;border-left:6px solid var(--accent)}
+
+/* list */
+.list{border-top:1px solid var(--ink)}
+.list div{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:18px 0;border-bottom:1px solid var(--hair);align-items:baseline}
+.list b{font-family:var(--mono);font-size:16px;letter-spacing:.1em;color:var(--accent-text)}
+.list span{font-size:24px;line-height:1.6}
+
+/* bars */
+.bars{border-top:3px solid var(--ink);padding-top:18px}
+.bars .u{font-family:var(--mono);font-size:15px;color:var(--muted);letter-spacing:.06em;margin-bottom:12px}
+.bar{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:16px;margin:14px 0}
+.bar span{font-size:22px;font-weight:700}
+.bar .track{position:relative;height:46px}
+.bar .fill{height:100%;background:var(--ink);min-width:6px}
+.bar.hi .fill{background:var(--accent)}
+.bar .v{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:19px;font-weight:700;white-space:nowrap}
+.bars .callout{font-family:var(--display);font-size:96px;line-height:1;color:var(--accent-text);text-align:right;margin-top:-8px}
+
+/* groups */
+.groups .g{display:grid;grid-template-columns:118px 1fr;gap:26px;padding:32px 0;border-top:1px solid var(--hair)}
+.groups .g:first-child{border-top:3px solid var(--ink)}
+.groups .gh{font-family:var(--serif);font-weight:900;font-size:46px;line-height:1;color:var(--accent-text)}
+.groups .gs{font-size:28px;font-weight:900;margin-bottom:10px}
+.groups ul{margin:0;padding:0;list-style:none}
+.groups li{font-size:24px;line-height:1.6;padding-left:22px;position:relative;color:#34312c;margin:4px 0}
+.groups li::before{content:"";position:absolute;left:0;top:.72em;width:9px;height:9px;background:var(--accent)}
+
+/* agenda */
+.agenda div{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:26px 0;border-bottom:1px solid var(--hair);align-items:baseline}
+.agenda div:first-child{border-top:3px solid var(--ink)}
+.agenda b{font-family:var(--display);font-weight:400;font-size:40px;color:var(--accent-text);letter-spacing:.01em}
+.agenda span{font-size:26px;line-height:1.55}
+.cta{background:var(--accent);color:var(--on-accent);padding:34px 36px}
+.cta p{font-family:var(--serif);font-weight:900;font-size:34px;line-height:1.5}
+.cta small{display:block;margin-top:14px;font-family:var(--mono);font-size:16px;letter-spacing:.08em}
+
+[data-theme=yellow] .stats strong,[data-theme=yellow] .bars .callout,[data-theme=yellow] .agenda b,[data-theme=yellow] .groups .gh{color:var(--ink)}
+
+/* 预览工具条 */
+.toolbar{position:fixed;right:20px;bottom:20px;z-index:9;display:flex;align-items:center;gap:8px;background:#141414;color:#F2EDE2;padding:10px 12px;border-radius:12px;font:14px var(--sans);box-shadow:0 8px 30px rgba(0,0,0,.35);zoom:calc(1 / var(--z,1))}
+.toolbar .sw{width:22px;height:22px;border-radius:50%;padding:0;border:2px solid transparent;cursor:pointer}
+.toolbar .sw[aria-pressed=true]{border-color:#fff}
+body.export .toolbar{display:none}
+</style>
+</head>
+<body>
+<div id="deck"></div>
+<div class="toolbar"><span id="swatches" style="display:flex;gap:6px"></span><span style="opacity:.7;margin-left:6px">换色预览</span></div>
+
+<script>window.REPORT = /*__REPORT__*/null;</script>
+<script>
+(function(){
+const R = window.REPORT;
+if (R) document.title = (R.brand||"")+"日报 · 速览";
+if (!R){ document.getElementById("deck").innerHTML = '<p style="color:#eee;padding:80px;font-size:22px">这是空模板，请打开 output/期号/速览.html 查看成品。</p>'; return; }
+const THEMES = {red:"#E43A2A",orange:"#F26A24",yellow:"#E8E23A",blue:"#2340D8",green:"#3DE35C",pink:"#EC3F8C",mint:"#A6D7BF"};
+const WEEK = ["red","orange","yellow","blue","green","pink","mint"];
+const qs = new URLSearchParams(location.search);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const total = R.cards.length + 1;
+const pad = n => String(n).padStart(2,"0");
+
+function pickTheme(){
+  const t = qs.get("theme") || R.theme;
+  if (THEMES[t]) return t;
+  const m = /(\d+)\s*年\s*(\d+)\s*月\s*(\d+)/.exec(R.date);
+  const d = m ? new Date(+m[1], +m[2]-1, +m[3]) : new Date();
+  return WEEK[(d.getDay()+6)%7];
+}
+function barcode(seed){
+  let x=0,h="";
+  for(let i=0;i<46;i++){const w=1+((seed.charCodeAt(i%seed.length)*(i+7))%3); if(i%2===0) h+=`<rect x="${x}" y="0" width="${w}" height="44"/>`; x+=w+1;}
+  return `<svg width="${x}" height="44" fill="currentColor">${h}</svg>`;
+}
+
+function block(b){
+  switch(b.type){
+    case "steps": return `<div class="vsteps">${b.items.map(s=>`<div class="s"><div class="d">${esc(s.d)}</div><div class="h">${esc(s.h)}</div><div class="t">${esc(s.t)}</div></div>`).join("")}</div>`;
+    case "lead": return `<p class="lead">${esc(b.t)}</p>`;
+    case "stats": return `<div class="stats">${b.items.map(([n,l,s])=>`<div><strong>${esc(n)}</strong><span>${esc(l)}</span><small>${esc(s)}</small></div>`).join("")}</div>`;
+    case "note": return `<p class="note">${esc(b.t)}</p>`;
+    case "list": return `<div class="list">${b.items.map(([k,t])=>`<div><b>${esc(k)}</b><span>${esc(t)}</span></div>`).join("")}</div>`;
+    case "bars": {
+      const max = Math.max(...b.items.map(i=>i[1]));
+      return `<div class="bars"><div class="u">${esc(b.unit)}</div>${b.items.map(([k,v])=>{const w=v/max*100,hi=v===max;const pos=w>70?`right:14px;color:var(--${hi?"on-accent":"paper"})`:`left:calc(${w}% + 14px)`;return `<div class="bar ${hi?"hi":""}"><span>${esc(k)}</span><div class="track"><div class="fill" style="width:${w}%"></div><b class="v" style="${pos}">${v.toLocaleString("en-US")}</b></div></div>`}).join("")}${b.callout?`<div class="callout">${esc(b.callout)}</div>`:""}</div>`;
+    }
+    case "groups": return `<div class="groups">${b.items.map(g=>`<div class="g"><div class="gh">${esc(g.h)}</div><div><div class="gs">${esc(g.s)}</div><ul>${g.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div></div>`).join("")}</div>`;
+    case "agenda": return `<div class="agenda">${b.items.map(([d,t])=>`<div><b>${esc(d)}</b><span>${esc(t)}</span></div>`).join("")}</div>`;
+    case "cta": return `<div class="cta"><p>${esc(b.t)}</p><small>${esc(b.s)}</small></div>`;
+  }
+  return "";
+}
+
+function render(){
+  const cover = `
+  <section class="card" id="cover">
+    <div class="cl">${R.coverlines.map(c=>`<div><b>${esc(c.k)}</b>${esc(c.t)}</div>`).join("")}</div>
+    <div class="masthead"><h1>${esc(R.brand||"")}<span class="sub">日报</span></h1><div class="vol">第<strong>${esc(R.issue)}</strong>期</div></div>
+    <div class="issueline"><span>${esc(R.date)} ${esc(R.weekday)}</span><span>${esc(R.read)}</span></div>
+    <div class="headline" id="headline">${R.headline.map(l=>`<div>${esc(l)}</div>`).join("")}</div>
+    <p class="dek">${esc(R.dek)}</p>
+    <div class="steps">${R.steps.map(s=>`<div><div class="d">${esc(s.d)}</div><div class="k">${esc(s.k)}</div><div class="t">${esc(s.t)}</div></div>`).join("")}</div>
+    <div class="cover-foot"><span>向后滑动，看每个版块的重点 →</span>${barcode(R.issue+R.date)}</div>
+  </section>`;
+  const cards = R.cards.map((c,i)=>`
+  <section class="card ${c.dark?"dark":""}" id="card-${esc(c.id)}">
+    <div class="top"><b>${esc((R.brand||"")+"日报")}</b><span>第 ${esc(R.issue)} 期 · ${pad(i+2)} / ${pad(total)}</span></div>
+    <div class="kicker"><span>${esc(c.kicker)}</span><i></i></div>
+    <h2>${esc(c.title)}</h2>
+    <div class="body">${c.blocks.map(block).join("")}</div>
+    <div class="foot"><span>${esc(R.date)}</span><span>${i+2<total?"继续滑动 →":"完整版见长文"}</span></div>
+  </section>`).join("");
+  document.getElementById("deck").innerHTML = cover + cards;
+}
+
+function fitHeadline(){
+  const box=document.getElementById("headline"); const lines=[...box.children]; const W=box.clientWidth;
+  let size=400;
+  lines.forEach(l=>{l.style.fontSize="100px"; l.style.width="max-content"; size=Math.min(size,100*W/l.offsetWidth); l.style.width="";});
+  size=Math.min(Math.floor(size),210);
+  lines.forEach(l=>l.style.fontSize=size+"px");
+  const avail=box.clientHeight, need=lines.reduce((a,l)=>a+l.offsetHeight,0);
+  if(need>avail) lines.forEach(l=>l.style.fontSize=Math.floor(size*avail/need)+"px");
+}
+function setTheme(t){ document.documentElement.dataset.theme=t; document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===t)); }
+function scale(){ document.body.style.setProperty("--z", document.body.classList.contains("export")?1:Math.min(1,innerWidth/1080)); }
+
+if (qs.has("export")) document.body.classList.add("export");
+render();
+document.getElementById("swatches").innerHTML = Object.entries(THEMES).map(([k,c])=>`<button class="sw" data-t="${k}" style="background:${c}"></button>`).join("");
+setTheme(pickTheme());
+document.getElementById("swatches").addEventListener("click",e=>{ if(e.target.dataset.t) setTheme(e.target.dataset.t); });
+scale(); addEventListener("resize",scale);
+document.fonts.ready.then(()=>{ fitHeadline(); window.__ready=true; });
+})();
+</script>
+</body>
+</html>
