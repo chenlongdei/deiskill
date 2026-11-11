@@ -1,5 +1,6 @@
 {
   "output_root": "",
   "zhihu_output_dir": "",
-  "douyin_default_input": ""
+  "douyin_default_input": "",
+  "history_days": 7
 }

@@ -66,6 +66,13 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
   name=futures[future]
   try: out['sources'][name]=future.result()
   except Exception as err: out['errors'][name]=type(err).__name__+': source unavailable'
+if args.date and 'aihot_selected' in out['sources']:
+ def _in_window(item):
+  try: t=datetime.fromisoformat(item['publishedAt'].replace('Z','+00:00')).astimezone(CST)
+  except (KeyError,ValueError): return False
+  return start<=t<end
+ pool=[i for p in out['sources']['aihot_selected'].get('pages',[]) for i in (p.get('items') or [])]
+ out['sources']['aihot_selected_in_window']=[i for i in pool if _in_window(i)]
 out['historicalCoverageNote']='Builders 已查询 GitHub 历史快照；覆盖仅限中心源曾采集内容，当前热点不是历史热点快照。' if args.date else None
 raw=BASE/'sources'/start.strftime('%Y-%m-%d'); raw.mkdir(parents=True,exist_ok=True)
 path=raw/(now.strftime('%Y-%m-%d_%H%M%S')+'.json')
