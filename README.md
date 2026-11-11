@@ -42,9 +42,15 @@ dbs 系列版权归 dontbesilent 所有，仅安装自用，本仓库不包含�
 
 规划中。
 
+## 模板
+
+| 文件 | 用途 |
+| --- | --- |
+| [templates/dei-选题表.xlsx](templates/dei-选题表.xlsx) | 选题策划表：开头、主体叙事、结尾、主标题、选题理由、内容策划，以及点赞、评论、收藏、转发 |
+
 ## 配置
 
-需要本机路径或凭证的 Skill 带有 `config.example.json`。复制为 `config.json` 后填写；`config.json` 不进 Git。
+Skill 不预设你电脑上有哪些文件夹。第一次运行时会询问保存位置或输入文件，确认后帮你创建目录并写入该 Skill 的 `config.json`；之后不再重复问。凭证类配置见各 Skill 的 `config.example.json`。`config.json` 不进 Git。
 
 ## 维护
 

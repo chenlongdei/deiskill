@@ -14,9 +14,23 @@ metadata:
 
 把已有独立 skill 组合成一次可追踪的日报运行。通过读取子 skill 的 SKILL.md 与必要引用执行，保持它们独立维护，不复制业务规则。不假设存在直接调用的skill函数；采集脚本只是采集步骤，不等于完成分析和交付。
 
+## 首次配置
+
+不假设用户电脑上有任何文件夹。每次运行先读本 Skill 目录的 `config.json`：
+
+1. **文件不存在，或本次要用的路径为空**：停下来问用户，一次问清本次需要的项。
+   - `output_root`：日报保存在哪。给出一个建议位置（例如 `~/Documents/dei-日报`），说明用户直接确认即可。
+   - `zhihu_output_dir`：仅本次包含知乎模块时问；默认放在 `<output_root>/知乎热榜表达空间`，用户确认默认就不用另填。
+   - `douyin_default_input`：仅本次包含抖音模块时问。工作簿必须由用户提供，不代为新建，也不在磁盘上搜索候选文件。
+2. **用户回答后**：把路径展开为绝对路径；目录不存在时说明将要创建的完整路径，得到确认后再创建；写入 `config.json`（只写用户确认过的项）。
+3. **已配置但路径不存在**（例如换了电脑、云盘未同步）：不要按原路径静默新建，说明哪一项失效，请用户确认是新建、改路径，还是这次跳过对应模块。
+4. 同一项不重复询问。只有用户主动要求修改时才改 config。
+
+定时或无人值守运行时无法提问：缺配置的模块标 unsupported 并写明缺哪一项，其他模块照常执行。
+
 ## 路由
 
-先读本 Skill 目录的 `config.json`（缺失时按 `config.example.json` 的默认值，并提醒用户配置），再读 [模块注册表](references/modules.json)，再只读本次选中的子 skill。注册表 entrypoint 是相对本总skill目录的路径，读取前以本 SKILL.md 所在目录解析为绝对路径。渠道实体统一按 `skills/policy/`、`skills/ai/`、`skills/zhihu/`、`skills/douyin/` 四块管理。AI来源和知乎工具属于模块内部实现，不作为同级小skill；各业务模块保留 SKILL.md、脚本、引用及历史数据。
+先按下方「首次配置」确认 `config.json` 可用，再读 [模块注册表](references/modules.json)，再只读本次选中的子 skill。注册表 entrypoint 是相对本总skill目录的路径，读取前以本 SKILL.md 所在目录解析为绝对路径。渠道实体统一按 `skills/policy/`、`skills/ai/`、`skills/zhihu/`、`skills/douyin/` 四块管理。AI来源和知乎工具属于模块内部实现，不作为同级小skill；各业务模块保留 SKILL.md、脚本、引用及历史数据。
 
 | 请求 | 选择模块 |
 |---|---|
@@ -37,7 +51,7 @@ AI 模块已整合 AIHOT 和 Follow Builders 两个来源；执行 ai 时不再�
 
 指定历史日期时，policy 与 ai 使用各自支持的日期参数及覆盖限制。知乎只能分析已有真实历史快照，没有则标无法回溯，不用当前榜冒充历史。抖音现有管线不支持任意历史日，按真实归档分析或标不支持，不编造参数。混合请求继续完成可执行模块，区分报告日与内容发生日。
 
-抖音默认输入为 `config.json` 的 `douyin_default_input`，先确认存在；未配置时请用户指定工作簿，用户指定文件优先。不随意挑候选工作簿，不自动把上次输出改成新输入。遵守其副本、人工字段保护、计费接口和去重转写规则；不因总入口而增加额外模型API。
+抖音默认输入为 `config.json` 的 `douyin_default_input`，按「首次配置」确认；用户本次指定的文件优先。不随意挑候选工作簿，不自动把上次输出改成新输入。遵守其副本、人工字段保护、计费接口和去重转写规则；不因总入口而增加额外模型API。
 
 ## 执行、留档与恢复
 
@@ -66,7 +80,7 @@ AI 模块已整合 AIHOT 和 Follow Builders 两个来源；执行 ai 时不再�
 
 通过 deiskill 仓库的 `scripts/install.sh` 安装。安装器会从上游拉取 Follow Builders 到 `skills/ai/sources/follow-builders/`；知乎官方工具从知乎 CDN 拉取到 `skills/zhihu/tools/zhihu/`，其 CLI 二进制和 Access Secret 由官方 setup 脚本在用户目录管理，不随 Skill 目录覆盖。两者缺失时，对应模块标 unsupported 并说明缺什么，不冒充完成。覆盖安装会保留各模块的 `data/`、`config.json` 等本机状态。
 
-依赖 Node.js、Python 及抖音模块的 openpyxl；知乎 CLI 通过其官方工具的状态检查定位。部署到新电脑时，先复制 `config.example.json` 为 `config.json` 并填写输出目录和抖音工作簿。
+依赖 Node.js、Python 及抖音模块的 openpyxl；知乎 CLI 通过其官方工具的状态检查定位。部署到新电脑不需要手动建配置：第一次运行时按「首次配置」询问并写入 `config.json`。
 
 需要离线分享包时运行 `python3 scripts/package_skill.py --output <输出zip绝对路径>`；本机 config.json、Actor 标识、原始数据、历史报告、日志、依赖缓存和上游内容不进入分享包。
 
