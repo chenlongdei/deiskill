@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # deiskill 一键安装：把仓库克隆或更新到 ~/.deiskill/repo，再运行安装器。
 #
-#   curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.sh | bash -s -- dei-capture
+#   curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash -s -- dei-capture
 #
 # "bash -s --" 后面的参数原样交给安装器（见 bash scripts/install.sh --help）。
 set -euo pipefail
 
-REPO_URL="${DEISKILL_REPO:-https://github.com/chenlongdei12-dev/deiskill.git}"
+REPO_URL="${DEISKILL_REPO:-https://github.com/chenlongdei/deiskill.git}"
 DEST="${DEISKILL_HOME:-$HOME/.deiskill}/repo"
 
 for cmd in git python3; do

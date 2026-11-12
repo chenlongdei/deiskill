@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 chenlongdei12-dev
+Copyright (c) 2026 chenlongdei
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ Exceptions / 例外
 The MIT License above does NOT apply to the following:
 
 1. skills/dei-capture/scripts/douyin/
-   Derived from content-toolkit (https://github.com/chenlongdei12-dev/content-toolkit),
+   Derived from content-toolkit (https://github.com/chenlongdei/content-toolkit),
    licensed under CC BY-NC-SA 4.0. Non-commercial use only. See the LICENSE file
    in that directory.
    本目录源自 content-toolkit，采用 CC BY-NC-SA 4.0，仅限非商业使用。

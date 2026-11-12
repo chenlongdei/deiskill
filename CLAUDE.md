@@ -3,11 +3,11 @@
 > 最后更新：2026-11-11。新开窗口先读这份文件，再继续任务。
 > 这是公开仓库：本文件不写本机绝对路径、凭证和个人草稿（校验器会检查）。
 
-这个文件夹是 deiskill 的唯一维护位置（GitHub：chenlongdei12-dev/deiskill）。新增、修改、删除 Skill 都在这里做，改完再安装到 Agent。
+这个文件夹是 deiskill 的唯一维护位置（GitHub：chenlongdei/deiskill）。新增、修改、删除 Skill 都在这里做，改完再安装到 Agent。
 
 ## 总目标
 
-建一套覆盖日常「输入 → 处理 → 输出」的个人中文 Skill 体系，逐步替代旧仓库 chenlongdei12-dev/dei-skill。
+建一套覆盖日常「输入 → 处理 → 输出」的个人中文 Skill 体系，逐步替代旧仓库 chenlongdei/dei-skill。
 
 设计参考 dontbesilent 的 dbskill：
 
@@ -43,7 +43,7 @@
 | 1a | 日报对外成品：对外文字版、速览图卡、长文图片（`publish/`），头条原文存档为 PDF（`archive/`） | ✅ 2026-11-11 加入 |
 | 1b | dbs-diagnosis / dbs-learning / dbs-chatroom / dbs-deconstruct | ✅ 登记为上游，安装时从 dbskill 拉取 |
 | 2 | 旧 `yt-research` 并入 `dei-capture` 的 YouTube 模块；旧 `notebooklm-kb` 升级为 `dei-notebook`（导入任意文档资料并提问，不只服务视频） | ✅ 2026-11-11 已安装并端到端实测：搜索 → 逐字稿 → 导入 NotebookLM（本地文件 + YouTube 链接）→ 带引用提问 → 思维导图 |
-| 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei12-dev/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ✅ 2026-11-12 content-toolkit 已并入（`scripts/douyin/`，保留 LICENSE 和署名），统一转写入口 `scripts/transcribe.py` + `scripts/asr.py`；链接出稿实测通过。旧 douyin-paraformer-transcriber 在本机已找不到，功能已被覆盖。日报抖音模块尚未改接 |
+| 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ✅ 2026-11-12 content-toolkit 已并入（`scripts/douyin/`，保留 LICENSE 和署名），统一转写入口 `scripts/transcribe.py` + `scripts/asr.py`；链接出稿实测通过。旧 douyin-paraformer-transcriber 在本机已找不到，功能已被覆盖。日报抖音模块尚未改接 |
 | 4 | 总入口 `dei`：按 handoff 从最终交付倒推组合 | 🔧 2026-11-11 先做最小版（用户要求），配方 A 实测进行中 |
 | 5 | 输出层 Skill | 规划中 |
 

@@ -59,7 +59,7 @@
 只装依赖最少的 `dei-capture`。需要 Python 3.9+ 和 [yt-dlp](https://github.com/yt-dlp/yt-dlp)（`pip install yt-dlp`），不用注册任何账号：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.sh | bash -s -- dei-capture
+curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash -s -- dei-capture
 ```
 
 重启 Agent，然后对它说：
@@ -126,7 +126,7 @@ curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scr
 **许可**
 
 - 本仓库自有代码采用 [MIT](LICENSE)。
-- ⚠️ `skills/dei-capture/scripts/douyin/` 源自 [content-toolkit](https://github.com/chenlongdei12-dev/content-toolkit)，采用 **CC BY-NC-SA 4.0，仅限非商业使用**，不能用于收费代采集或打包进付费课程。
+- ⚠️ `skills/dei-capture/scripts/douyin/` 源自 [content-toolkit](https://github.com/chenlongdei/content-toolkit)，采用 **CC BY-NC-SA 4.0，仅限非商业使用**，不能用于收费代采集或打包进付费课程。
 - ⚠️ **dbs 系列不在本仓库里，安装时从 dbskill 拉取，只能安装自用，禁止再分发。** 不要把装好的 skills 目录打包转给别人。follow-builders、知乎官方 CLI 等上游内容同理，见 [external.json](external.json)。
 
 ## 安装
@@ -134,13 +134,13 @@ curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scr
 **macOS / Linux** 一键安装（仓库会放在 `~/.deiskill/repo`）：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash
 ```
 
 **Windows**：在 PowerShell 里运行（需要先装好 git 和 Python 3.9+，缺哪个脚本会告诉你用 winget 怎么装）：
 
 ```powershell
-irm https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.ps1 | iex
 ```
 
 不想敲命令：把这个仓库的网址发给你的 Agent，说「帮我安装 deiskill，按 README 操作」。
@@ -148,7 +148,7 @@ irm https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bo
 也可以手动安装：
 
 ```bash
-git clone https://github.com/chenlongdei12-dev/deiskill.git
+git clone https://github.com/chenlongdei/deiskill.git
 cd deiskill
 bash scripts/install.sh                 # 检测本机已有的 Agent；有多个时会问你装到哪些
 bash scripts/install.sh dei-capture     # 只装指定的 Skill

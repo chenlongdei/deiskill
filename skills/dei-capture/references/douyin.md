@@ -2,7 +2,7 @@
 
 把抖音博主的内容变成「逐字稿 + 点赞评论数据」的 Markdown 素材库：一个博主一个文件夹，每条视频一份带 frontmatter 的 Markdown，外加 INDEX 索引。
 
-> 全量导出线和监控线源自 content-toolkit（作者 chenlongdei12-dev），协议为 CC BY-NC-SA 4.0，全文见 `scripts/douyin/LICENSE`。仅限个人学习研究，不得用于商业用途（包括收费代采集、打包进付费课程）。
+> 全量导出线和监控线源自 content-toolkit（作者 chenlongdei），协议为 CC BY-NC-SA 4.0，全文见 `scripts/douyin/LICENSE`。仅限个人学习研究，不得用于商业用途（包括收费代采集、打包进付费课程）。
 
 ## 三条线怎么选
 

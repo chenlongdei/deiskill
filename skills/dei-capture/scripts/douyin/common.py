@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """抖音模块公共工具：配置加载、状态存取(videos.json)、HTTP、字段映射。仅用标准库，Python 3.9+。
 
-源自 content-toolkit（chenlongdei12-dev，CC BY-NC-SA 4.0，见同目录 LICENSE），并入 dei-capture 时改了配置读取：
+源自 content-toolkit（chenlongdei，CC BY-NC-SA 4.0，见同目录 LICENSE），并入 dei-capture 时改了配置读取：
 配置在 dei-capture 的 config.json 里（douyin 段 + 顶层共用的 dashscope 段），数据默认放在 <output_root>/抖音/ 下。
 """
 import json
