@@ -104,3 +104,17 @@ class TemplateTests(unittest.TestCase):
         v = videos[0]
         self.assertEqual((v["collects"], v["bgm"], v["_followers"]), (3, "", None))
         self.assertEqual(v["url"], "https://www.douyin.com/video/111")
+
+
+class BackupTests(unittest.TestCase):
+    def test_backup_keeps_latest(self):
+        with tempfile.TemporaryDirectory() as temp:
+            src = Path(temp) / "表.xlsx"
+            src.write_bytes(b"x")
+            d = Path(temp) / "备份"
+            d.mkdir()
+            for i in range(12):
+                (d / f"表_20260101_0000{i:02d}.xlsx").write_bytes(b"old")
+            dst = pipeline.backup_copy(src, keep=10)
+            self.assertTrue(dst.exists())
+            self.assertEqual(len(list(d.glob("表_*.xlsx"))), 10)

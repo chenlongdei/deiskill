@@ -58,7 +58,7 @@ python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-s
 - 模板在本 Skill 的 `templates/抖音监控工作簿模板.xlsx`，由 `scripts/douyin/make_template.py` 生成。
 - 数据来源跟 `douyin.provider`：Monid 没有 BGM 和粉丝量（这两列留空，赞粉比也就空着）；TikHub 都有。去水印用大圣，没配置大圣时用 Monid。时间一律按北京时间写。
 
-输出是输入文件旁 `outputs/douyin-weekly-workbook/<原名>_更新_<日期>.xlsx`，不覆盖原文件；同名 `.report.json` 是失败清单。账号覆盖表在 `<output_root>/抖音/监控工作簿/account_overrides.json`（或 `--overrides` 指定），优先级高于总表；转写任务记录在同目录 `asr_tasks.json`，重跑不重复转写。
+默认**直接更新原表**：写入前先备份到同目录 `备份/`（保留最近 10 份），失败清单写在同目录 `运行记录/<表名>_<时间>.report.json`；要另存时加 `--output`。账号覆盖表在 `<output_root>/抖音/监控工作簿/account_overrides.json`（或 `--overrides` 指定），优先级高于总表；转写任务记录在同目录 `asr_tasks.json`，重跑不重复转写。
 
 固定规则：
 

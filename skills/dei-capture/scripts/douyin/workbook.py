@@ -7,7 +7,7 @@
 数据：Monid 或 TikHub（douyin.provider）；去水印：大圣（没配置时用 Monid）；转写：阿里云百炼 paraformer-v2。凭证都在 dei-capture 的 config.json。
 用法（在 dei-capture 目录下）：
   python3 scripts/douyin/workbook.py init                      # 把模板复制到 <output_root>/抖音/监控工作簿/
-  python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7]
+  python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7]   # 直接更新原表，先自动备份到 备份/；--output 另存
 """
 from __future__ import annotations
 import argparse, copy, json, os, re, shutil, sys, time
@@ -211,6 +211,18 @@ def blogger_sheets(wb):
     return [n for n in wb.sheetnames[1:] if not n.startswith("_") and wb[n].sheet_state == "visible"]
 
 
+def backup_copy(src, keep=10):
+    """直接更新前先备份到同目录「备份/」，只保留最近 keep 份。"""
+    d = src.parent / "备份"
+    d.mkdir(exist_ok=True)
+    dst = d / f"{src.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}{src.suffix}"
+    shutil.copyfile(src, dst)
+    olds = sorted(d.glob(f"{src.stem}_*{src.suffix}"))
+    for f in olds[:-keep]:
+        f.unlink()
+    return dst
+
+
 def cmd_init(args):
     target = Path(args.output).expanduser() if args.output else work_dir() / "抖音监控工作簿.xlsx"
     if target.exists():
@@ -244,7 +256,12 @@ def main():
         return m
     ov_path=Path(a.overrides).expanduser() if a.overrides else wd/"account_overrides.json"
     ov=json.loads(ov_path.read_text(encoding="utf-8")) if ov_path.exists() else {}
-    src0=Path(a.input).resolve(); out=Path(a.output).resolve() if a.output else src0.parent/"outputs"/"douyin-weekly-workbook"/(src0.stem+"_更新_"+datetime.now().strftime("%Y-%m-%d")+src0.suffix); out.parent.mkdir(parents=True,exist_ok=True)
+    src0=Path(a.input).resolve()
+    if not src0.exists(): ap.error(f"工作簿不存在：{src0}")
+    if a.output:
+        out=Path(a.output).resolve(); out.parent.mkdir(parents=True,exist_ok=True)
+    else:
+        out=src0; backup=backup_copy(src0); print(f"已备份：{backup}",flush=True)
     src,created=prepare(src0,out)
     if created: print("新建分页："+"、".join(created),flush=True)
     rb=openpyxl.load_workbook(src,read_only=False,data_only=True)
@@ -301,6 +318,7 @@ def main():
             if not v.get("transcript") and not v.get("media_error") and not v.get("asr_error"):
                 failures.append({"sheet":r["sheet"],"video_id":v["id"],"error":"未取得逐字稿"})
     fetched=datetime.now(TZ).replace(tzinfo=None); write_book(src,out,records,fetched,replace)
-    report=out.with_suffix(".report.json"); report.write_text(json.dumps({"output":str(out),"provider":provider,"created_sheets":created,"accounts":len(records),"videos":sum(len(x["videos"]) for x in records),"failures":failures},ensure_ascii=False,indent=2))
+    logs=out.parent/"运行记录"; logs.mkdir(exist_ok=True)
+    report=logs/f"{out.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}.report.json"; report.write_text(json.dumps({"output":str(out),"provider":provider,"created_sheets":created,"accounts":len(records),"videos":sum(len(x["videos"]) for x in records),"failures":failures},ensure_ascii=False,indent=2))
     print(json.dumps({"output":str(out),"report":str(report),"provider":provider,"failures":len(failures)},ensure_ascii=False))
 if __name__=="__main__": main()
