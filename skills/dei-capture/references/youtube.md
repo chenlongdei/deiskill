@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `yt-dlp` | 是 | 搜索、频道、字幕都靠它。命令名不同时写 `youtube.yt_dlp_cmd` |
 | `youtube.cookies_from_browser` | 遇到风控时 | 已登录 YouTube 的浏览器名：`chrome`、`safari`、`firefox`、`edge`、`brave`，可写 `chrome:Profile 1` 指定资料夹。只在用户同意后填写；macOS 读 Chrome 时可能弹出钥匙串授权 |
-| `youtube.tikhub_token` | 可选 | TikHub 用户中心获取；也可用环境变量 `TIKHUB_TOKEN`。写不写 `Bearer ` 前缀都可以 |
+| `tikhub.token`（顶层，YouTube 和抖音共用） | 可选 | TikHub 用户中心获取；也可用环境变量 `TIKHUB_TOKEN`。写不写 `Bearer ` 前缀都可以；旧版的 `youtube.tikhub_token` 仍然兼容 |
 | `whisper.model`（顶层，各平台共用） | 可选 | 本地 whisper.cpp 模型文件的绝对路径。推荐 `ggml-large-v3-turbo-q5_0.bin`（约 550 MB，准确度接近完整版）或 `ggml-large-v3-turbo.bin`（约 1.6 GB），从 Hugging Face 的 ggerganov/whisper.cpp 仓库下载，存放位置问用户；small、base 等小模型中文错字多，不推荐；视频没有字幕时才用。需要 `whisper-cli`（命令名不同写 `whisper.cmd`）和 `ffmpeg`。旧版写在 youtube 段的 `whisper_*` 仍然兼容 |
 | `whisper.prompt` | 可选 | 转写时给 Whisper 的提示句。默认「以下是普通话的句子。」，让中文输出简体；转写英文时 `whisper.language` 设为 `en`，或清空此项 |
 | `youtube.subtitle_langs` | 可选 | 人工字幕语言优先级，默认中文 → 英文 |

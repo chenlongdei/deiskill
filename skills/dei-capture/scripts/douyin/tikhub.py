@@ -12,6 +12,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+TZ = ZoneInfo("Asia/Shanghai")  # 抖音时间一律按北京时间写
 
 API = "https://api.tikhub.io"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36"
@@ -82,7 +85,7 @@ def aweme_to_video(a: dict) -> dict:
     author = a.get("author") or {}
     followers_raw = author.get("follower_count") or author.get("mplatform_followers_count")
     return {"id": vid, "title": str(a.get("desc") or ""), "url": f"https://www.douyin.com/video/{vid}", "ts": t,
-            "publish": datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S") if t else "",
+            "publish": datetime.fromtimestamp(t, TZ).strftime("%Y-%m-%d %H:%M:%S") if t else "",
             "bgm": str(mu.get("title") or ""), "author": str(author.get("nickname") or ""),
             "author_sec_uid": str(author.get("sec_uid") or ""),
             "likes": num(st.get("digg_count")), "comments": num(st.get("comment_count")),

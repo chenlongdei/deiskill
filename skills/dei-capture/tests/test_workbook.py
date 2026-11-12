@@ -1,13 +1,20 @@
+"""监控工作簿（原日报抖音模块）的离线测试。"""
+import unittest
 import importlib.util
 import tempfile
 from pathlib import Path
 from datetime import datetime
-import unittest
 from unittest.mock import patch
 import urllib.error
-import openpyxl
+try:
+    import openpyxl
+except ImportError:  # 监控工作簿依赖 openpyxl；没装时跳过整组测试
+    raise unittest.SkipTest("需要 openpyxl：python3 -m pip install openpyxl")
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("pipeline", ROOT / "skills/douyin/scripts/run_pipeline.py")
+import sys
+sys.path.insert(0, str(ROOT / "scripts/douyin"))
+import tikhub  # noqa: E402
+spec = importlib.util.spec_from_file_location("pipeline", ROOT / "scripts/douyin/workbook.py")
 pipeline = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pipeline)
 class WorkbookTests(unittest.TestCase):
@@ -43,8 +50,8 @@ class WorkbookTests(unittest.TestCase):
             self.assertEqual(sum("/video/" in str(sheet.cell(row,5).value) for row in range(3,sheet.max_row+1)),1)
     def test_credentials_stop_without_retry(self):
         for status in [401,402,403]:
-            with patch.object(pipeline.urllib.request,"urlopen",side_effect=urllib.error.HTTPError("https://example.com",status,"blocked",{},None)) as request:
-                with self.assertRaises(pipeline.StopExternal): pipeline.req("https://example.com")
+            with patch.object(tikhub.urllib.request,"urlopen",side_effect=urllib.error.HTTPError("https://example.com",status,"blocked",{},None)) as request:
+                with self.assertRaises(tikhub.StopExternal): tikhub.req("https://example.com")
                 self.assertEqual(request.call_count,1)
     def test_transcription_stops_before_second_video(self):
         with patch.object(pipeline,"submit",side_effect=pipeline.StopExternal("HTTP 401")) as submit:
@@ -67,3 +74,33 @@ class WorkbookTests(unittest.TestCase):
             self.assertEqual(pipeline.transcribe([{"id":"1","media":"url"}],"test")["1"][0],"done")
             submit.assert_not_called()
 if __name__ == "__main__":unittest.main()
+
+
+class TemplateTests(unittest.TestCase):
+    def test_template_creates_blogger_sheets(self):
+        with tempfile.TemporaryDirectory() as temp:
+            src, out = Path(temp) / "监控.xlsx", Path(temp) / "out.xlsx"
+            book = openpyxl.load_workbook(pipeline.TEMPLATE)
+            total = book["相似博主总表"]
+            total.cell(3, 3, "博主甲"); total.cell(3, 5, "https://www.douyin.com/user/MS4wLjABAAAAabc-_x?from=web")
+            total.cell(4, 3, "博主乙")
+            book.save(src)
+            path, created = pipeline.prepare(src, out)
+            self.assertEqual((path, created), (out, ["博主甲", "博主乙"]))
+            wb = openpyxl.load_workbook(out)
+            self.assertEqual(pipeline.blogger_sheets(wb), ["博主甲", "博主乙"])  # 隐藏模板页和示例行不算
+            self.assertEqual(wb["博主甲"].cell(2, 3).value, "标题")
+            self.assertEqual(dict((n, s) for n, _, s in pipeline.read_total(wb))["博主甲"], "MS4wLjABAAAAabc-_x")
+            again, created2 = pipeline.prepare(out, Path(temp) / "x.xlsx")
+            self.assertEqual((again, created2), (out, []))
+
+    def test_monid_posts_mapping_and_window(self):
+        page = {"output": {"data": {"hasMore": False, "posts": [
+            {"id": "111", "caption": "新视频", "createdUtc": 2_000_000_000, "likes": 10, "comments": 2, "saves": 3, "shares": 1},
+            {"id": "222", "caption": "旧视频", "createdUtc": 1_000_000_000, "likes": 5}]}}}
+        with patch.object(pipeline, "monid_run", return_value=page):
+            videos = pipeline.MonidSource({}).posts("sec", since=1_500_000_000)
+        self.assertEqual([v["id"] for v in videos], ["111"])
+        v = videos[0]
+        self.assertEqual((v["collects"], v["bgm"], v["_followers"]), (3, "", None))
+        self.assertEqual(v["url"], "https://www.douyin.com/video/111")

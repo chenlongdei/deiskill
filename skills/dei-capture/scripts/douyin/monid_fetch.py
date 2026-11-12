@@ -140,7 +140,7 @@ def fetch_from_tikhub(cfg):
             videos = tk.posts(sec, 0, pages=max(1, (limit + 19) // 20))[:limit]
         except Exception as e:
             if type(e).__name__ == "StopExternal":
-                raise SystemExit(f"[停止] TikHub：{e}（Token 无效或余额不足）")
+                raise
             print(f"  [拉取失败] {sec[:24]}…：{e}")
             continue
         print(f"  [{(videos[0].get('author') if videos else '') or sec[:20]}] {len(videos)} 条（TikHub）")
@@ -164,8 +164,10 @@ def links_entries(cfg, urls):
                     e.update(tikhub_entry(aweme_to_video(a)))
             except Exception as ex:
                 if type(ex).__name__ == "StopExternal":
-                    raise SystemExit(f"[停止] TikHub：{ex}（Token 无效或余额不足）")
-                print(f"  [TikHub 未取到数据] {u}：{ex}（继续，数据由解析步骤回填）")
+                    print(f"  [停用 TikHub] {ex}（Token 无效或余额不足，请更新 tikhub.token）；继续用去水印接口出稿")
+                    tk = None
+                else:
+                    print(f"  [TikHub 未取到数据] {u}：{ex}（继续，数据由解析步骤回填）")
         out.append(e)
     return out
 
@@ -197,7 +199,16 @@ def main():
         provider = data_provider(cfg)
         print(f"[数据来源] {provider}")
         if provider == "tikhub":
-            entries = fetch_from_tikhub(cfg)
+            try:
+                entries = fetch_from_tikhub(cfg)
+            except Exception as e:
+                if type(e).__name__ != "StopExternal":
+                    raise
+                m = cfg.get("monid") or {}
+                if not (m.get("enabled") and m.get("token")):
+                    raise SystemExit(f"[停止] TikHub：{e}（Token 无效或余额不足，请更新 tikhub.token；也没有可用的 Monid）")
+                print(f"[停用 TikHub] {e}（请更新 tikhub.token）；改用 Monid 拉取")
+                items = fetch_from_monid(cfg)
         elif provider == "monid":
             items = fetch_from_monid(cfg)
         else:

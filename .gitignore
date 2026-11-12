@@ -22,3 +22,4 @@ skills/dei-daily-report/skills/policy/references/examples/
 
 # 模板例外
 !templates/*.xlsx
+!skills/*/templates/*.xlsx

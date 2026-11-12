@@ -49,11 +49,9 @@
       "historical": "当前管线不支持任意历史日，仅分析真实归档",
       "default_input": "config.json 的 douyin_default_input",
       "dependencies": [
-        "TikHub",
-        "大圣",
-        "阿里云百炼paraformer-v2"
+        "已安装的内容采集能力：接手抖音监控工作簿 → 交出更新后的工作簿（TikHub、大圣、阿里云百炼由它负责）"
       ],
-      "output": "输入旁 outputs/douyin-weekly-workbook/ 新工作簿及摘要"
+      "output": "客观更新摘要；更新后的工作簿在输入旁 outputs/douyin-weekly-workbook/（由采集能力生成）"
     }
   ]
 }

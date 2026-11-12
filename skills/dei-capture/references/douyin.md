@@ -2,18 +2,18 @@
 
 把抖音博主的内容变成「逐字稿 + 点赞评论数据」的 Markdown 素材库：一个博主一个文件夹，每条视频一份带 frontmatter 的 Markdown，外加 INDEX 索引。
 
-> 本模块源自 content-toolkit（作者 chenlongdei12-dev），协议为 CC BY-NC-SA 4.0，全文见 `scripts/douyin/LICENSE`。仅限个人学习研究，不得用于商业用途（包括收费代采集、打包进付费课程）。
+> 全量导出线和监控线源自 content-toolkit（作者 chenlongdei12-dev），协议为 CC BY-NC-SA 4.0，全文见 `scripts/douyin/LICENSE`。仅限个人学习研究，不得用于商业用途（包括收费代采集、打包进付费课程）。
 
-## 两条流水线怎么选
+## 三条线怎么选
 
-| | 监控流水线 | 导出流水线 |
-| --- | --- | --- |
-| 适合 | 几条链接直接出稿；持续盯博主，只要最新 N 条 | 一次性导出博主**全部**历史内容 |
-| 数据来源 | Monid 网关（抖音数据 + 无水印直链） | Get笔记（得到大脑）订阅 + 社媒助手插件 |
-| 需要 | 阿里云百炼 Key + Monid Key（都计费，有免费额度） | 在 Get笔记订阅该博主并扫码登录一次；社媒助手插件 |
-| 速度 | 每条约 1—2 分钟（主要是转写） | 约 3 篇/秒，700 篇约 6 分钟 |
+| | 全量导出线 | 监控线 | 监控工作簿 |
+| --- | --- | --- | --- |
+| 适合 | 一个博主的**全部**历史 | 几条链接出稿；盯几个博主的最新 N 条 | 日报用的「相似博主」表，按近 7 天增量更新 |
+| 数据 | Get笔记订阅 + 社媒助手插件 | TikHub 或 Monid（`douyin.provider`） | TikHub 或 Monid |
+| 去水印 / 转写 | 不需要（Get笔记自带逐字稿） | 大圣（或 Monid）/ 阿里云 | 大圣（或 Monid）/ 阿里云 |
+| 费用 | 免费 | 计费 | 计费 |
 
-用户只给链接 → 监控线 `--links`。要博主全部历史 → 先问用户是否在 Get笔记订阅了该博主；订阅了走导出线（免费、快），没订阅走监控线（按条计费，先报数量和费用）。
+全量只走 Get笔记：用户没订阅时，告诉他先在 Get笔记订阅该博主再导出，不用计费接口硬抓全量。监控线也能处理快手、小红书、B 站等平台的短视频链接（大圣去水印 → 阿里云转写），这些平台的点赞等数据视大圣返回而定。
 
 ## 第一步：自检
 
@@ -21,17 +21,17 @@
 python3 scripts/douyin/doctor.py
 ```
 
-照 ↳ 提示补齐。key 都在 dei-capture 的 `config.json`：百炼 Key 在顶层 `dashscope.api_key`（sk- 开头，YouTube 本地转写之外的直链转写也用它）；Monid Key 在 `douyin.monid.token`（monid_live_ 开头）。用到哪条线才问对应的 key。
+照 ↳ 提示补齐。凭证都在 dei-capture 的 `config.json`：百炼 Key 在顶层 `dashscope.api_key`（sk- 开头）；TikHub 在顶层 `tikhub.token`；大圣在 `douyin.dasheng` 的 `uid`、`key`；Monid 在 `douyin.monid.token`（monid_live_ 开头）。用到哪条线才问对应的凭证。
 
 ## 命令（在 dei-capture 目录下）
 
 ```bash
-# 监控流水线
+# 监控线（数据来源看 douyin.provider；去水印顺序：Monid（仅数据来源是 Monid 时）→ 大圣 → 自定义接口）
 python3 scripts/douyin/run.py monitor --links "https://v.douyin.com/xxxx/,https://v.douyin.com/yyyy/"
 python3 scripts/douyin/run.py monitor --blogger-sec-uid MS4wLjAB...   # 加入监控列表并拉最新视频
 python3 scripts/douyin/run.py monitor                                  # 跑监控列表里所有博主
 
-# 导出流水线
+# 全量导出线
 python3 scripts/douyin/biji_export.py login                     # 扫码，一次；之后无头自动刷新
 python3 scripts/douyin/run.py export-biji "博主名" --with-data   # 名字模糊匹配，导完自动合并数据
 python3 scripts/douyin/run.py export-data "https://www.douyin.com/user/MS4..."  # 社媒助手自动导数据
@@ -45,10 +45,35 @@ python3 scripts/douyin/run.py export-merge 博主名               # 单独合�
 
 `sec_user_id` 是博主主页链接 `/user/` 后面那一串。用户只给抖音号或昵称时，请用户给主页链接或任意一条作品链接。
 
+## 监控工作簿
+
+一张 Excel 表盯一组对标博主：第一页「相似博主总表」列出博主，后面每个博主一页，记录他近 7 天的视频（客观数据 + 逐字稿），右边留给用户写自己的创作与复盘。日报的抖音部分读的就是它。
+
+```bash
+python3 scripts/douyin/workbook.py init        # 第一次：从模板生成 <output_root>/抖音/监控工作簿/抖音监控工作簿.xlsx
+python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-sheets 页签1,页签2] [--replace-sheets 页签1]
+```
+
+- 用户只填总表：C 列博主名称、E 列主页链接（浏览器打开博主主页，复制地址栏，里面带 `/user/MS4wLjAB…`）；D 列抖音号可选，只有 TikHub 能用抖音号反查账号。总表里有、还没有分页的博主，运行时自动从隐藏的「_博主页模板」建分页。
+- 模板在本 Skill 的 `templates/抖音监控工作簿模板.xlsx`，由 `scripts/douyin/make_template.py` 生成。
+- 数据来源跟 `douyin.provider`：Monid 没有 BGM 和粉丝量（这两列留空，赞粉比也就空着）；TikHub 都有。去水印用大圣，没配置大圣时用 Monid。时间一律按北京时间写。
+
+输出是输入文件旁 `outputs/douyin-weekly-workbook/<原名>_更新_<日期>.xlsx`，不覆盖原文件；同名 `.report.json` 是失败清单。账号覆盖表在 `<output_root>/抖音/监控工作簿/account_overrides.json`（或 `--overrides` 指定），优先级高于总表；转写任务记录在同目录 `asr_tasks.json`，重跑不重复转写。
+
+固定规则：
+
+- 只录入客观数据：标题、BGM、链接、发布时间、抓取时间、粉丝量、点赞、评论、收藏、转发、赞粉比、逐字稿、前 5 秒和结尾。不生成分类、内容逻辑、钩子类型等主观字段，除非用户另行要求。
+- 分页名就是总表的博主名称；账号以主页链接里的 `sec_uid` 为准。改名、拼写错误用账号覆盖表修正（值可填 `sec_uid`、`share_url` 或 `unique_id`，后两种只有 TikHub 能用），不要凭相似度猜账号。
+- 跑完核对分页里视频的作者是不是这个博主；覆盖表里的 `sec_uid` 优先级最高。发现表内旧视频作者与目标账号不一致时，用 `--only-sheets` 加 `--replace-sheets` 替换该页（只清 A:S 的对方视频区，T:AJ 的个人创作与复盘区保留），不能继续增量追加。
+- 优先抓滚动近 7 天；某账号为 0 条时，取消时间限制补抓最近 7 条；近 7 天已有 1 条以上时不补足。
+- 视频 ID 是唯一键。已有视频只刷新客观指标和抓取时间，人工字段和已有逐字稿不覆盖；新视频追加并延续模板样式与公式。同一视频出现在多个 Sheet 只转写一次；中断后恢复同一任务，不重复提交。
+- 单账号或单视频失败不中断整批；缺失不能写成 0。401/403 凭证无效、402 余额不足：停止外部调用并报告。
+- 工作簿第 2 行预期列：A 序号、C 标题、D BGM、E 视频链接、F 发布时间、G 抓取时间、H 视频文案、K 结尾、L 前 5 秒钩子、N 粉丝量、O 点赞、P 评论、Q 收藏、R 转发、S 赞粉比。依赖 `openpyxl`（`python3 -m pip install openpyxl`）。
+
 ## 核心机制
 
 - **幂等状态库**：监控线所有步骤读写 `<监控>/videos.json`，阶段 collected → parsed → transcribed → merged；中断重跑不重复计费（task_id 都会保存）。导出线按文件名里的 post_id 去重、增量续传。
-- **计费**：Monid 每次调用 $0.0012，每条视频约 2 次（列表 + 解析）；阿里云按语音时长，约每小时几毛钱。Monid 花费自动记在 `<监控>/.cost_log.json`，doctor 会显示累计。粗算：100 条视频约 $0.25 加几块钱转写费。
+- **计费**：TikHub、大圣按次计费；Monid 每次调用 $0.0012，每条视频约 2 次（列表 + 解析）；阿里云按语音时长，约每小时几毛钱。Monid 花费自动记在 `<监控>/.cost_log.json`，doctor 会显示累计。粗算：100 条视频约 $0.25 加几块钱转写费。
 - **逐字稿复用**：`douyin.transcript_library` 指向导出线的素材库根目录时，监控线遇到库里已有的视频（按 aweme_id 匹配）直接复用逐字稿，不花转写费。
 - **直链时效**：无水印直链几小时就失效，解析完要尽快转写，别隔天。
 - 纯 BGM 无人声的视频转写返回 `SUCCESS_WITH_NO_VALID_FRAGMENT`，属正常，跳过。
@@ -92,6 +117,34 @@ open -na "Google Chrome" --args --user-data-dir="$HOME/.shejiao_automation" \
 ```text
 <output_root>/抖音/
 ├── 监控/            videos.json（状态库）、transcripts/、<博主>/<日期>-<标题>.md、INDEX.md、.cost_log.json
+├── 监控工作簿/      account_overrides.json、asr_tasks.json（更新后的工作簿在输入文件旁）
 ├── Get笔记导出/     <博主>_<id>/ 逐字稿；merged/<博主>/ 合并了数据的版本
 └── 社媒数据/        <博主>_作品数据_YYYYMMDD.xlsx
 ```
+
+## 监控工作簿：已验证的问题与解决办法
+
+### TikHub
+
+- Python 默认 User-Agent 曾触发 Cloudflare 1010。统一使用浏览器 User-Agent 和 `Accept-Encoding: identity`，避免大响应解压截断。
+- `unique_id` 解析失败时，用作品分享链接调用 `fetch_one_video_by_share_url` 反查作者 `sec_uid`。
+- 返回结构存在 `data.data` 和字段名变体；递归查找 `sec_uid`，作品列表兼容 `aweme_list`、`items`。
+- 置顶旧视频会混入第一页，必须按 `create_time` 本地过滤。
+- 400、429 和偶发上游失败按账号隔离并有限退避重试。
+
+### 大圣与百炼
+
+- 大圣用 POST 表单调用，优先取 `video`、`video_url`、`url`、`play_url`，最后才取 `video4k`。
+- Paraformer-v2 必须设置 `X-DashScope-Async: enable`，批量先提交再轮询。
+- 同一视频按视频 ID 去重提交，避免重复 Sheet 重复计费。
+- 前5秒使用 `begin_time < 5000` 的句子；结尾取最后3个有效语音句。没有时间戳时用首60字、末80字降级。
+
+### 工作簿
+
+- 模板可能预留格式化空行，优先复用视频链接为空的预留行，而非一律从 `max_row + 1` 追加。
+- 抓取时间可能显示为 Excel 日期序列，必须应用 `yyyy-mm-dd hh:mm:ss` 并视觉检查。
+- Excel 不接受带 `tzinfo` 的 Python datetime。写入前先转换为目标时区，再执行 `.replace(tzinfo=None)`；时区语义由本地时间和显示格式保留。
+- 已有视频只更新客观数据；人工字段必须保留。
+- 使用 `sec_uid` 覆盖时若拿不到账号资料，优先从作品作者对象补取粉丝数；仍缺失则留空，禁止写成0。
+- 历史表曾出现 `dontebeslient` 页混入“行者”文稿：原因是旧视频已经写入错误 Sheet，后续增量逻辑又刻意保留已有逐字稿。解决方案是用主页 `sec_uid` 锁定账号，并以 `--replace-sheets` 清空 A:S 后重建；不能靠追加修复污染数据。
+- 24h、7d、30d指标不能用当前快照冒充历史快照，没有定时历史数据时保持空白。

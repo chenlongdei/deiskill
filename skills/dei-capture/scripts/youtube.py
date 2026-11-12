@@ -28,7 +28,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from capture_paths import data_dir, section, slug  # noqa: E402
+from capture_paths import data_dir, load_config, section, slug  # noqa: E402
 
 DEFAULT_LANGS = ["zh-Hans", "zh-CN", "zh", "zh-Hant", "zh-TW", "en", "en-US", "en-GB"]
 TIKHUB_URL = "https://mcp.tikhub.io/youtube/mcp"
@@ -102,7 +102,7 @@ def ytdlp_json(args: list[str], timeout: int = 300, cookies: bool = False) -> di
 
 
 def tikhub_token() -> str:
-    tok = os.environ.get("TIKHUB_TOKEN") or cfg().get("tikhub_token") or ""
+    tok = os.environ.get("TIKHUB_TOKEN") or (load_config().get("tikhub") or {}).get("token") or cfg().get("tikhub_token") or ""
     tok = tok.strip()
     return tok[len("Bearer "):].strip() if tok.startswith("Bearer ") else tok
 
@@ -113,7 +113,7 @@ class TikHub:
     def __init__(self) -> None:
         self.token = tikhub_token()
         if not self.token:
-            raise RuntimeError("未配置 TikHub Token（config.youtube.tikhub_token 或环境变量 TIKHUB_TOKEN）")
+            raise RuntimeError("未配置 TikHub Token（config 顶层 tikhub.token 或环境变量 TIKHUB_TOKEN）")
         self.url = cfg().get("tikhub_mcp_url") or TIKHUB_URL
         self.sid = None
         self.rid = 0

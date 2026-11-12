@@ -1,5 +1,8 @@
 {
   "output_root": "",
+  "tikhub": {
+    "token": ""
+  },
   "whisper": {
     "model": "",
     "cmd": "whisper-cli",
@@ -20,7 +23,6 @@
   "youtube": {
     "yt_dlp_cmd": "",
     "cookies_from_browser": "",
-    "tikhub_token": "",
     "tikhub_mcp_url": "",
     "subtitle_langs": [
       "zh-Hans",
@@ -34,9 +36,14 @@
     "per_channel": 2
   },
   "douyin": {
+    "provider": "auto",
     "workspace": "",
     "biji_export_base": "",
     "transcript_library": "",
+    "dasheng": {
+      "uid": "",
+      "key": ""
+    },
     "monid": {
       "enabled": true,
       "api_base": "https://api.monid.ai",
