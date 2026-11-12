@@ -22,6 +22,14 @@ sources.json 由 Agent 按 references/source-archive.md 第一、二步写好（
 """
 import argparse, datetime, html, json, pathlib, re, sys, urllib.request, zipfile
 from playwright.sync_api import sync_playwright
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")

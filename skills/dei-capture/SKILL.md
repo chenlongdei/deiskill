@@ -68,7 +68,7 @@ metadata:
 
 ## 流程
 
-**Step 0**：读 `config.json`，按「首次配置」补齐保存位置；按平台读对应 references。第一次在这台电脑上用某个平台时，先跑它的自检：`python3 scripts/youtube.py doctor`、`python3 scripts/douyin/doctor.py`、`python3 scripts/transcribe.py doctor`。
+**Step 0**：读 `config.json`，按「首次配置」补齐保存位置；按平台读对应 references。命令写作 `python3`，Windows 上通常换成 `python`；自检报缺依赖时读 [references/setup.md](references/setup.md)，按用户的系统给安装命令。第一次在这台电脑上用某个平台时，先跑它的自检：`python3 scripts/youtube.py doctor`、`python3 scripts/douyin/doctor.py`、`python3 scripts/transcribe.py doctor`。
 
 **Step 1 判断任务**
 

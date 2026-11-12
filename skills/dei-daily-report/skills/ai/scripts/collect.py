@@ -3,6 +3,14 @@ import argparse,concurrent.futures,json,os,subprocess,uuid
 from pathlib import Path
 from datetime import datetime,timedelta,timezone
 from urllib.parse import urlencode
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 ROOT=Path(__file__).resolve().parents[1]
 def _data_dir(module):
     """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
@@ -25,13 +33,13 @@ if args.date:
  if start < now-timedelta(days=7) or end > now: parser.error('日期必须是最近七天内已结束的一天')
 ua='aihot-skill/1.7.0 (+https://aihot.news/aihot-skill/)'
 try:
- actor=(ROOT/'sources/aihot/.aihot-actor-id').read_text().strip()
+ actor=(ROOT/'sources/aihot/.aihot-actor-id').read_text(encoding="utf-8").strip()
  parsed=uuid.UUID(actor)
  if parsed.version==4: ua+=' aihot-actor/'+str(parsed)
 except (OSError,ValueError): pass
 
 def get(url):
- result=subprocess.run(['curl','-fsSL','--max-time','35','-A',ua if url.startswith('https://aihot.news/') else 'dei-ai-brief/2.0',url],capture_output=True,text=True,check=True)
+ result=subprocess.run(['curl','-fsSL','--max-time','35','-A',ua if url.startswith('https://aihot.news/') else 'dei-ai-brief/2.0',url],capture_output=True,text=True, encoding="utf-8", errors="replace",check=True)
  return json.loads(result.stdout)
 
 def selected():
@@ -46,7 +54,7 @@ def selected():
  return {'pages':pages,'truncated':True}
 
 def builders():
- result=subprocess.run(['node',str(ROOT/'sources/follow-builders/scripts/prepare-digest.js')],capture_output=True,text=True,check=True,timeout=180)
+ result=subprocess.run(['node',str(ROOT/'sources/follow-builders/scripts/prepare-digest.js')],capture_output=True,text=True, encoding="utf-8", errors="replace",check=True,timeout=180)
  current=json.loads(result.stdout)
  # Current feed is a replacement snapshot, not a historical archive.
  commits=get('https://api.github.com/repos/zarazhangrui/follow-builders/commits?path=feed-x.json&per_page=10')
@@ -85,5 +93,5 @@ if args.date and 'aihot_selected' in out['sources']:
 out['historicalCoverageNote']='Builders 已查询 GitHub 历史快照；覆盖仅限中心源曾采集内容，当前热点不是历史热点快照。' if args.date else None
 raw=BASE/'sources'/start.strftime('%Y-%m-%d'); raw.mkdir(parents=True,exist_ok=True)
 path=raw/(now.strftime('%Y-%m-%d_%H%M%S')+'.json')
-path.write_text(json.dumps(out,ensure_ascii=False,indent=2))
+path.write_text(json.dumps(out,ensure_ascii=False,indent=2), encoding="utf-8")
 print(json.dumps({'path':str(path),'window':out['window'],'available_sources':list(out['sources']),'errors':out['errors']},ensure_ascii=False))

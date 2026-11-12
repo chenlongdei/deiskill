@@ -13,6 +13,14 @@ Markdown（相对 data.json 所在目录）。输出：
 """
 import argparse, json, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 HERE = pathlib.Path(__file__).resolve().parent
 THEMES = ["red", "orange", "yellow", "blue", "green", "pink", "mint"]

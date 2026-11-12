@@ -131,6 +131,10 @@
 - [ ] 知乎 CLI 0.6.3 的额度列表不再单列「问题回答」，计量方式待官方说明
 - [ ] Codex 的 skills 目录里还有以前的旧 Skill（ai-sources-brief、follow-builders、zhihu-hot-expression、douyin-weekly-workbook、news-broadcast-analysis 等），和 deiskill 重复，清理前需用户确认
 
+## 跨平台（2026-11-12）
+
+目标是学员在任何电脑、任何 Agent 上装好就能用。规则见 [docs/skill-spec.md](docs/skill-spec.md)「跨平台」。已做：Windows 一键安装 `scripts/bootstrap.ps1`；全部入口脚本强制 UTF-8；外部命令按 UTF-8 解码；北京时间用固定 +8；社媒助手 Chrome 在三个系统都能拉起；`dei-capture/references/setup.md` 给出三个系统的安装命令；学习路线案例移到 `dei-notebook/examples/`，抖音监控工作簿模板在 `dei-capture/templates/`，都随 Skill 安装。未在真实 Windows 机器上实测。
+
 ## 下一步从这里开始
 
 第 3 步收尾：用户更新 TikHub Token、提供监控工作簿后实测 `workbook.py` 和日报抖音模块；Get笔记导出线实测（需用户扫码登录）。之后是第 5 步输出层。日报抖音模块已改为只读工作簿（不点名采集 Skill，按 handoff 找「接手监控工作簿」的能力），由 `dei` 串联。

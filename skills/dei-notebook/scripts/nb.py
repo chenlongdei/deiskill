@@ -25,6 +25,14 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 CONFIG = SKILL_ROOT / "config.json"
@@ -86,7 +94,7 @@ def nb_cmd() -> list[str]:
 def nb(args: list[str], timeout: int = 300, want_json: bool = True, cwd: Path | None = None):
     cmd = nb_cmd() + args + (["--json"] if want_json else [])
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+        proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, cwd=cwd)
     except FileNotFoundError:
         raise NbError("找不到 notebooklm 命令：先安装 notebooklm-py，或在 config.notebooklm_cmd 指定")
     except subprocess.TimeoutExpired:
@@ -217,7 +225,7 @@ def expand(items: list[str]) -> tuple[list[dict], list[dict]]:
 def cmd_doctor(a) -> int:
     checks = []
     try:
-        ver = subprocess.run(nb_cmd() + ["--version"], capture_output=True, text=True, timeout=30).stdout.strip()
+        ver = subprocess.run(nb_cmd() + ["--version"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30).stdout.strip()
         checks.append({"name": "notebooklm-py", "ok": bool(ver), "detail": ver or "无输出"})
     except FileNotFoundError:
         checks.append({"name": "notebooklm-py", "ok": False, "detail": "未安装"})

@@ -73,3 +73,13 @@ Skill 之间的关系只由 `dei` 掌握。叶子 Skill 结尾使用固定句：
 
 - 许可证允许再分发（如 MIT）的，保留原 LICENSE 一起提交。
 - 没有许可证或禁止再分发的（如 dbskill、follow-builders），登记在 `external.json`，由 `scripts/install.sh` 安装时从上游拉取。
+
+## 跨平台（macOS / Windows / Linux，任意 Agent）
+
+学员的电脑、系统和 Agent 都不确定，新增或修改 Skill 时遵守：
+
+- **不写死 Agent 和路径**：命令写成相对 Skill 目录的 `python3 scripts/...`，并在 SKILL.md 说明 Windows 上通常换成 `python`。用户数据放在首次运行时确认的 `output_root`。
+- **编码一律 UTF-8**：读写文件写 `encoding="utf-8"`；`subprocess` 用 `text=True` 时同时写 `encoding="utf-8", errors="replace"`；入口脚本开头加统一的 UTF-8 输出片段（搜 `PYTHONUTF8` 可看到现成写法），让它调用的 Python 工具也用 UTF-8。
+- **不用系统专属命令**：需要 `open`、`launchctl` 之类时按 `sys.platform` 分支，并给出 Windows 和 Linux 的做法；时区用固定偏移（北京时间 = UTC+8），不依赖 Windows 默认没有的时区数据库。
+- **依赖按需安装**：每个 Skill 有自检命令，缺依赖时按用户系统给出一条安装命令（macOS 用 brew、Windows 用 winget、Linux 用 apt 或 pip），用户同意后再执行。安装说明写在 Skill 自己的 references 里，因为装好的 Skill 看不到仓库根目录。
+- **模板、案例放在 Skill 目录里**（`templates/`、`examples/`），会随 Skill 一起安装；SKILL.md 或 references 要写明何时去看它们。

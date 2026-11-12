@@ -14,6 +14,14 @@ import argparse, copy, json, os, re, shutil, sys, time
 from datetime import datetime, timedelta
 from pathlib import Path
 import openpyxl
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import HttpError, data_provider, douyin_root, load_config, monid_run  # noqa: E402
@@ -48,11 +56,11 @@ def parse(p):
 
 def transcribe(videos,key):
     pending={}; done={}
-    journal=json.loads(ASR_JOURNAL.read_text()) if ASR_JOURNAL.exists() else {}
+    journal=json.loads(ASR_JOURNAL.read_text(encoding="utf-8")) if ASR_JOURNAL.exists() else {}
     def save():
         ASR_JOURNAL.parent.mkdir(parents=True,exist_ok=True)
         temporary=ASR_JOURNAL.with_suffix(".tmp")
-        temporary.write_text(json.dumps(journal,ensure_ascii=False,indent=2))
+        temporary.write_text(json.dumps(journal,ensure_ascii=False,indent=2), encoding="utf-8")
         temporary.replace(ASR_JOURNAL)
     for v in videos:
         try:
@@ -319,6 +327,6 @@ def main():
                 failures.append({"sheet":r["sheet"],"video_id":v["id"],"error":"未取得逐字稿"})
     fetched=datetime.now(TZ).replace(tzinfo=None); write_book(src,out,records,fetched,replace)
     logs=out.parent/"运行记录"; logs.mkdir(exist_ok=True)
-    report=logs/f"{out.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}.report.json"; report.write_text(json.dumps({"output":str(out),"provider":provider,"created_sheets":created,"accounts":len(records),"videos":sum(len(x["videos"]) for x in records),"failures":failures},ensure_ascii=False,indent=2))
+    report=logs/f"{out.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}.report.json"; report.write_text(json.dumps({"output":str(out),"provider":provider,"created_sheets":created,"accounts":len(records),"videos":sum(len(x["videos"]) for x in records),"failures":failures},ensure_ascii=False,indent=2), encoding="utf-8")
     print(json.dumps({"output":str(out),"report":str(report),"provider":provider,"failures":len(failures)},ensure_ascii=False))
 if __name__=="__main__": main()

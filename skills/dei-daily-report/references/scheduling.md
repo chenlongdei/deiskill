@@ -6,7 +6,7 @@
 
 | 用户环境 | 方式 | 注意 |
 | --- | --- | --- |
-| Claude Code（本机） | macOS 用 launchd、Linux 用 cron，定时运行 `claude -p` 并传入下方提示；或在 policy 模块用 `bash install.sh --launchd` | 电脑需开机联网，`claude` 已登录；保存位置在外接盘或云盘时需确保已挂载 |
+| Claude Code（本机） | macOS 用 launchd、Linux 用 cron、Windows 用「任务计划程序」（`schtasks /Create`），定时运行 `claude -p` 并传入下方提示；或在 macOS 上用 policy 模块的 `bash install.sh --launchd` | 电脑需开机联网，`claude` 已登录；保存位置在外接盘或云盘时需确保已挂载 |
 | Claude Code 云端定时（/schedule） | 只适合不依赖本机文件的任务 | 云端读不到本机的 config.json、数据目录和凭证，日报一般不适用 |
 | 其他 Agent（Codex、WorkBuddy 等） | 使用该 Agent 自带的定时功能 | 按该 Agent 文档，先列出已有任务，优先更新避免重复 |
 

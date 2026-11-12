@@ -11,10 +11,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
-TZ = ZoneInfo("Asia/Shanghai")  # 抖音时间一律按北京时间写
+# 抖音时间一律按北京时间写。用固定 +8（中国没有夏令时），不依赖 Windows 上默认没有的时区数据库
+TZ = timezone(timedelta(hours=8), "Asia/Shanghai")
 
 API = "https://api.tikhub.io"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36"

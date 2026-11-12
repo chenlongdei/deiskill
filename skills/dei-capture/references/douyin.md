@@ -82,7 +82,7 @@ python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-s
 
 **Get笔记**：API 是 `knowledge-api.trytalks.com`，JWT 30 分钟自动刷新。凭据和登录态在 `~/.biji_exporter/`（由脚本自己管理，不进任何仓库）。登录需要 playwright：`pip3 install --user playwright && python3 -m playwright install chromium`。开着代理软件报错时，关掉代理或设 `BIJI_USE_SYSTEM_PROXY=1`。
 
-**社媒助手（自动）**：需要一个专用 Chrome 实例，一次性搭好：
+**社媒助手（自动）**：需要一个专用 Chrome 实例，一次性搭好。`run.py export-data` 找不到实例时会自动拉起（macOS、Windows、Linux 都支持）；也可以手动打开（下面是 macOS 命令，Windows 上用 chrome.exe 加同样的参数）：
 
 ```bash
 open -na "Google Chrome" --args --user-data-dir="$HOME/.shejiao_automation" \

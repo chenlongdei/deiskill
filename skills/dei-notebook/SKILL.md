@@ -38,7 +38,7 @@ metadata:
 
 ## 流程
 
-**Step 0 自检**：读 `config.json`；运行 `python3 scripts/nb.py doctor`。
+**Step 0 自检**：读 `config.json`；运行 `python3 scripts/nb.py doctor`（Windows 上 `python3` 通常换成 `python`）。缺 notebooklm-py 或未登录时读 [references/notebooklm-cli.md](references/notebooklm-cli.md) 的「安装」「登录」。
 - 未安装或未登录 → 读 [references/notebooklm-cli.md](references/notebooklm-cli.md)「安装」「登录」，把需要用户亲自完成的步骤（浏览器登录 Google）一次说清，等用户完成再继续。
 
 **Step 1 判断任务**

@@ -26,6 +26,14 @@ import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from capture_paths import data_dir, load_config, section, slug  # noqa: E402
@@ -83,7 +91,7 @@ def ytdlp(args: list[str], timeout: int = 300, cookies: bool = False) -> str:
 
 def _ytdlp(cmd: list[str], timeout: int) -> str:
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except FileNotFoundError:
         raise YtdlpError("找不到 yt-dlp，请先安装（pip/uv/brew 均可）或在 config.youtube.yt_dlp_cmd 指定命令")
     except subprocess.TimeoutExpired:

@@ -21,6 +21,14 @@ import sys
 import time
 
 from playwright.sync_api import sync_playwright
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 CDP = "http://127.0.0.1:9222"
 EXT = "iecafjejbggeoldcjiehgoolokaebpdf"
@@ -62,11 +70,24 @@ def default_outdir():
 
 
 def launch_instance():
+    """拉起带远程调试端口的专用 Chrome 实例（macOS / Windows / Linux）。"""
+    import shutil
     import subprocess
-    subprocess.run(["open", "-na", "Google Chrome", "--args",
-                    f"--user-data-dir={os.path.expanduser('~/.shejiao_automation')}",
-                    "--remote-debugging-port=9222",
-                    "--no-first-run", "--no-default-browser-check"], check=False)
+    args = [f"--user-data-dir={os.path.expanduser('~/.shejiao_automation')}", "--remote-debugging-port=9222",
+            "--no-first-run", "--no-default-browser-check"]
+    if sys.platform == "darwin":
+        subprocess.run(["open", "-na", "Google Chrome", "--args", *args], check=False)
+        return
+    candidates = [shutil.which("chrome"), shutil.which("google-chrome"), shutil.which("google-chrome-stable"),
+                  shutil.which("chromium")]
+    if sys.platform.startswith("win"):
+        for base in (os.environ.get("PROGRAMFILES"), os.environ.get("PROGRAMFILES(X86)"), os.environ.get("LOCALAPPDATA")):
+            if base:
+                candidates.append(os.path.join(base, "Google", "Chrome", "Application", "chrome.exe"))
+    exe = next((c for c in candidates if c and os.path.exists(c)), None)
+    if not exe:
+        raise SystemExit("没找到 Chrome：请先安装 Google Chrome，或手动用上面的参数打开一个 Chrome 实例")
+    subprocess.Popen([exe, *args])
 
 
 def main():

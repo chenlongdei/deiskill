@@ -18,6 +18,14 @@ import urllib.request
 import zipfile
 from datetime import datetime
 from pathlib import Path
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 REPO = Path(__file__).resolve().parents[1]
 CACHE = Path.home() / ".deiskill" / "cache"
@@ -73,7 +81,7 @@ def fetch_repo(url: str) -> Path:
     slug = url.rstrip("/").removesuffix(".git").split("github.com/")[-1].replace("/", "__")
     local = CACHE / slug
     if (local / ".git").is_dir():
-        result = subprocess.run(["git", "-C", str(local), "pull", "--ff-only", "-q"], capture_output=True, text=True)
+        result = subprocess.run(["git", "-C", str(local), "pull", "--ff-only", "-q"], capture_output=True, text=True, encoding="utf-8", errors="replace")
         if result.returncode != 0:
             say(f"  ! 更新 {url} 失败，使用缓存版本：{result.stderr.strip()}")
     else:
@@ -145,7 +153,7 @@ def install_vendor(item: dict, destination: Path) -> None:
         if shutil.which(command[0]) is None:
             say(f"  ! 未找到 {command[0]}，跳过 {item['name']} 的依赖安装：{' '.join(command)}")
         else:
-            result = subprocess.run(command, cwd=target, capture_output=True, text=True)
+            result = subprocess.run(command, cwd=target, capture_output=True, text=True, encoding="utf-8", errors="replace")
             if result.returncode != 0:
                 say(f"  ! {item['name']} 依赖安装失败：{result.stderr.strip()[-300:]}")
     say(f"  + 上游依赖 {item['name']} → {item['install_into']}")

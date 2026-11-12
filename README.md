@@ -40,9 +40,9 @@
 
 | 文件 | 内容 |
 | --- | --- |
-| [知识地图](examples/学习路线-Claude-Code/01_知识地图.md) | 按道、法、术、器、用分层；标出只有一个来源支持的说法，以及已经过时的做法 |
-| [学习计划](examples/学习路线-Claude-Code/02_学习计划.md) | 5 个单元，每个单元有观看顺序、练习、验收标准和常见卡点；另附一条给非程序员的路线 |
-| [实操手册](examples/学习路线-Claude-Code/实操手册.md) | 写给内容创作者、运营、老师：每个任务一段可以直接复制的大白话指令，再加上「怎么算成功」「翻车了怎么救」 |
+| [知识地图](skills/dei-notebook/examples/学习路线-Claude-Code/01_知识地图.md) | 按道、法、术、器、用分层；标出只有一个来源支持的说法，以及已经过时的做法 |
+| [学习计划](skills/dei-notebook/examples/学习路线-Claude-Code/02_学习计划.md) | 5 个单元，每个单元有观看顺序、练习、验收标准和常见卡点；另附一条给非程序员的路线 |
+| [实操手册](skills/dei-notebook/examples/学习路线-Claude-Code/实操手册.md) | 写给内容创作者、运营、老师：每个任务一段可以直接复制的大白话指令，再加上「怎么算成功」「翻车了怎么救」 |
 
 学习计划节选：
 
@@ -98,7 +98,12 @@ curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scr
 | `dbs-chatroom` | 「请几位专家聊聊这个话题」 |
 | `dbs-deconstruct` | 「『私域』这个词到底指什么」 |
 
-**模板**：[选题策划表](templates/dei-选题表.xlsx)，包含开头、主体叙事、结尾、标题、选题理由，以及点赞、评论、收藏、转发。
+**模板**
+
+- [选题策划表](templates/dei-选题表.xlsx)：开头、主体叙事、结尾、标题、选题理由，以及点赞、评论、收藏、转发。
+- [抖音监控工作簿](skills/dei-capture/templates/抖音监控工作簿模板.xlsx)：只填博主名称和主页链接，每个博主的分页自动建；左边是对方近 7 天视频的数据和逐字稿，右边留给你写自己的创作与复盘。装好 `dei-capture` 后说「帮我建一个抖音监控表」即可。
+
+**参考成品**：[学习路线案例](skills/dei-notebook/examples/学习路线-Claude-Code/)随 `dei-notebook` 一起安装，Agent 写学习计划和手册前会先看它。
 
 ## 依赖、成本与许可
 
@@ -126,11 +131,19 @@ curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scr
 
 ## 安装
 
-一键安装（仓库会放在 `~/.deiskill/repo`）：
+**macOS / Linux** 一键安装（仓库会放在 `~/.deiskill/repo`）：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.sh | bash
 ```
+
+**Windows**：在 PowerShell 里运行（需要先装好 git 和 Python 3.9+，缺哪个脚本会告诉你用 winget 怎么装）：
+
+```powershell
+irm https://raw.githubusercontent.com/chenlongdei12-dev/deiskill/main/scripts/bootstrap.ps1 | iex
+```
+
+不想敲命令：把这个仓库的网址发给你的 Agent，说「帮我安装 deiskill，按 README 操作」。
 
 也可以手动安装：
 
@@ -143,12 +156,18 @@ bash scripts/install.sh --target ~/.claude/skills --target ~/.workbuddy/skills  
 bash scripts/install.sh --list          # 查看全部 Skill
 ```
 
+Windows 上把 `bash scripts/install.sh` 换成 `python scripts\install.py`，参数相同。
+
+- **支持哪些 Agent**：安装器会自动识别 Claude Code（`~/.claude/skills`）、Codex（`~/.codex/skills`）、WorkBuddy（`~/.workbuddy/skills`）和 `~/.agents/skills`。其他支持 Skills 的 Agent，用 `--target <它的 skills 目录>` 指定；实在不行，把 `skills/` 下对应的文件夹整个复制进去也能用。
+- **缺依赖怎么办**：不用提前装全。第一次用到某个功能时，Skill 会先自检，告诉你缺什么，并按你的系统（macOS / Windows / Linux）给出一条安装命令，你同意后再装。
+
 - **第一次用某个 Skill 时**，它会问你结果存在哪里，给出 2—3 个建议，你确认后才创建文件夹，以后不再重复问。报告和数据放在你选的位置，不放进 Agent 的安装目录。
 - **重装或升级时**，旧版本会备份到 `~/.deiskill/backups/<时间>/`，你的配置和运行数据会自动保留。
 - 凭证只写进本机的 `config.json`，不进 Git。各 Skill 的 `config.example.json` 列出了全部配置项。
 
 ## 更新记录
 
+- **2026-11-12**　支持 Windows：一键安装脚本、UTF-8 输出、各 Skill 的环境准备说明；新增抖音监控工作簿模板；学习路线案例随 `dei-notebook` 安装
 - **2026-11-12**　`dei-capture` 新增抖音：链接出稿、盯博主、导出博主全部文案并合并点赞评论数据；音视频转写合并成一个入口
 - **2026-11-12**　新增 `dei-capture`（YouTube）、`dei-notebook`，以及总入口 `dei`（学习路线、主题研究两套流程）
 - **2026-11-11**　`dei-daily-report` 新增对外成品：文字版、速览图卡、长图；头条原文存档为 PDF

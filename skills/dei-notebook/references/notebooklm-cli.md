@@ -14,6 +14,8 @@ notebooklm --version
 
 命令不在 PATH 里时，把完整路径写进 `config.json` 的 `notebooklm_cmd`。
 
+还没有 uv 时：macOS / Linux 用 `curl -LsSf https://astral.sh/uv/install.sh | sh`；Windows（PowerShell）用 `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`，装完重开终端。Windows 上 notebooklm 的命令是 `notebooklm.exe`，`uv tool install` 后通常在 `%USERPROFILE%\.local\bin`。
+
 ## 登录
 
 登录要用户本人在浏览器里完成，Agent 只负责启动命令和说明步骤：

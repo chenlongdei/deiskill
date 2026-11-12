@@ -11,6 +11,14 @@ import time
 from pathlib import Path
 from datetime import datetime
 from html.parser import HTMLParser
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 
 BASE_URL = "https://cn.govopendata.com/xinwenlianbo"
@@ -31,7 +39,7 @@ def fetch_html(url, attempts=4):
                     "curl", "-sS", "--fail", "--max-time", "30",
                     "-A", HEADERS["User-Agent"], url,
                 ],
-                capture_output=True, text=True, timeout=40,
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=40,
             )
             if result.returncode == 0:
                 return result.stdout

@@ -9,6 +9,14 @@ import shutil
 import subprocess
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -69,7 +77,7 @@ def main():
                     return 1
             prompt = f'''Read SKILL.md, references/analysis-method.md and templates/daily-report.md in this directory. Generate the full policy and business-opportunity report for broadcast date {day}; morning date is {day + timedelta(days=1)}. Transcripts have been fetched; inspect actual history coverage. Follow the hypothesis-driven method, verify public sources with your network tools, preserve marginal-change tables and prose elsewhere, with no industry preference or fixed card count. Data directory is {data}: transcripts, sources and revisions live there. Update {data / 'topics.json'} and record substantive revisions under {data / 'revisions'}. Write the finished report to {report} and include the exact metadata marker {marker}. If browsing is unavailable disclose that limitation, do not claim verification. Do not install schedules or call other agents.'''
             try:
-                result = subprocess.run(['bash', str(ROOT / 'scripts/run_agent.sh')], input=prompt, text=True, stdout=log, stderr=log, timeout=int(os.environ.get('XWLB_AGENT_TIMEOUT', '1800')))
+                result = subprocess.run(['bash', str(ROOT / 'scripts/run_agent.sh')], input=prompt, text=True, encoding="utf-8", errors="replace", stdout=log, stderr=log, timeout=int(os.environ.get('XWLB_AGENT_TIMEOUT', '1800')))
             except subprocess.TimeoutExpired:
                 print(f'FAIL: agent timed out; see {data / "logs/daily.log"}')
                 return 1

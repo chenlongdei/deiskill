@@ -22,6 +22,14 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+# Windows 中文系统默认 GBK：本脚本和它调用的 Python 工具（yt-dlp、notebooklm 等）一律用 UTF-8 输入输出
+import os as _os, sys as _sys
+_os.environ.setdefault("PYTHONUTF8", "1"); _os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 HERE = Path(__file__).resolve().parent
 PY = f'"{sys.executable}"'
@@ -56,7 +64,7 @@ def cmd_monitor(args):
 def cmd_export_biji(args):
     # 按名字找博主：topics → follows 匹配
     out = subprocess.run(f'{PY} biji_export.py topics', shell=True, cwd=HERE,
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, encoding="utf-8", errors="replace")
     try:
         topics = json.loads(out.stdout)["items"]
     except Exception:
@@ -65,7 +73,7 @@ def cmd_export_biji(args):
     target = None
     for t in topics:
         fo = subprocess.run(f'{PY} biji_export.py follows "{t["alias"]}"',
-                            shell=True, cwd=HERE, capture_output=True, text=True)
+                            shell=True, cwd=HERE, capture_output=True, text=True, encoding="utf-8", errors="replace")
         try:
             for f in json.loads(fo.stdout).get("items", []):
                 if args.name in f["name"]:
