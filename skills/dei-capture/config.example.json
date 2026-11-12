@@ -1,0 +1,23 @@
+{
+  "output_root": "",
+  "youtube": {
+    "yt_dlp_cmd": "",
+    "cookies_from_browser": "",
+    "tikhub_token": "",
+    "tikhub_mcp_url": "",
+    "whisper_model": "",
+    "whisper_cmd": "",
+    "whisper_language": "auto",
+    "whisper_prompt": "以下是普通话的句子。",
+    "subtitle_langs": [
+      "zh-Hans",
+      "zh-CN",
+      "zh",
+      "zh-Hant",
+      "en",
+      "en-US"
+    ],
+    "min_views": 10000,
+    "per_channel": 2
+  }
+}

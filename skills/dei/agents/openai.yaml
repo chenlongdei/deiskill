@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei 总入口"
+  short_description: "从最终交付倒推，串联采集、知识库、日报与方法 Skill"
+  default_prompt: "使用 $dei 帮我找一批 YouTube 教程，做一份从入门到精通的学习计划和实操手册。"
+policy:
+  allow_implicit_invocation: true

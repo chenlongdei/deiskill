@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-notebook 资料知识库"
+  short_description: "用 NotebookLM 导入文档和 YouTube 视频，带引用提问并存档"
+  default_prompt: "使用 $dei-notebook 把这些资料建成 NotebookLM 知识库，按章节提问并保存带引用的答案。"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-capture 内容采集"
+  short_description: "YouTube 搜索、频道清单与逐字稿，结果存为本地 Markdown"
+  default_prompt: "使用 $dei-capture 搜索这个主题的 YouTube 优质视频，并把推荐视频的逐字稿扒下来。"
+policy:
+  allow_implicit_invocation: true

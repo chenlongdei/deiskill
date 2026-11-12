@@ -26,6 +26,19 @@ bash scripts/install.sh dei-daily-report   # 只装指定的 Skill
 | Skill | 用途 |
 | --- | --- |
 | `dei-daily-report` | 政策、AI、知乎、抖音的综合日报与按领域日报 |
+| `dei-capture` | YouTube 关键词搜索、频道视频清单、单视频逐字稿（yt-dlp 为主，TikHub、本地 Whisper 兜底） |
+
+### 处理
+
+| Skill | 用途 |
+| --- | --- |
+| `dei-notebook` | 用 NotebookLM 把文档和 YouTube 视频建成知识库；7 个问题做出学习计划和面向应用的实操手册，或主题研究综述；生成简体中文音频、思维导图 |
+
+### 总入口
+
+| Skill | 用途 |
+| --- | --- |
+| `dei` | 从想要的最终交付倒推，串联上面的 Skill；收尾可把文档同步到飞书或 Notion |
 
 ### 处理（上游 Skill，安装时从 [dbskill](https://github.com/dontbesilent2025/dbskill) 拉取）
 

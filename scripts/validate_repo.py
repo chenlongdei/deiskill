@@ -88,7 +88,8 @@ def main() -> int:
             errors.append(f"{name}: 缺少 description")
         if item.get("layer") != "router":
             check_handoff(name, handoff(block), errors)
-            others = all_names - {name} - NAMING_ALLOWLIST.get(name, set())
+            # 规范的统一结尾句允许提到总入口（「可以用 $dei 继续」）
+            others = all_names - {name, catalog.get("router", "dei")} - NAMING_ALLOWLIST.get(name, set())
             for other in sorted(others):
                 if re.search(rf"(?<![\w-]){re.escape(other)}(?![\w-])", text.split("\n---\n", 1)[1]):
                     errors.append(f"{name}: 叶子 Skill 正文点名了 {other}（工具依赖请登记 NAMING_ALLOWLIST）")

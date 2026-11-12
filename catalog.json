@@ -9,6 +9,13 @@
   },
   "skills": [
     {
+      "name": "dei",
+      "layer": "router",
+      "summary": "总入口：从最终交付倒推，串联已安装的 Skill；内置「YouTube 教程 → 学习路线」「多渠道资料 → 主题研究」两条配方",
+      "install": "default",
+      "requires": []
+    },
+    {
       "name": "dei-daily-report",
       "layer": "input",
       "summary": "政策、AI、知乎、抖音的综合日报与按领域日报",
@@ -20,6 +27,28 @@
       ],
       "local_only": [
         "skills/policy/references/examples"
+      ]
+    },
+    {
+      "name": "dei-capture",
+      "layer": "input",
+      "summary": "内容采集：YouTube 搜索、频道清单与逐字稿（抖音、小红书计划中）",
+      "install": "default",
+      "requires": [
+        "Python 3.9+",
+        "yt-dlp",
+        "可选：TikHub Token、浏览器 cookies、whisper.cpp + ffmpeg"
+      ]
+    },
+    {
+      "name": "dei-notebook",
+      "layer": "process",
+      "summary": "用 NotebookLM 导入文档和 YouTube 视频，带引用深度提问；学习路线（道法术器用）、主题研究、实操手册，生成音频播客与导图",
+      "install": "default",
+      "requires": [
+        "Python 3.9+",
+        "notebooklm-py 0.8.5+（含 playwright chromium）",
+        "Google 账号"
       ]
     }
   ]
