@@ -26,7 +26,7 @@ bash scripts/install.sh dei-daily-report   # 只装指定的 Skill
 | Skill | 用途 |
 | --- | --- |
 | `dei-daily-report` | 政策、AI、知乎、抖音的综合日报与按领域日报 |
-| `dei-capture` | YouTube 关键词搜索、频道视频清单、单视频逐字稿（yt-dlp 为主，TikHub、本地 Whisper 兜底） |
+| `dei-capture` | 各平台采集的总入口：YouTube 搜索、频道、逐字稿；抖音链接出稿、盯博主、导出博主全部文案并合并点赞评论数据；本地音视频转写。抖音模块源自 [content-toolkit](https://github.com/chenlongdei12-dev/content-toolkit)，CC BY-NC-SA 4.0，仅限非商业使用 |
 
 ### 处理
 

@@ -32,12 +32,13 @@
     {
       "name": "dei-capture",
       "layer": "input",
-      "summary": "内容采集：YouTube 搜索、频道清单与逐字稿（抖音、小红书计划中）",
+      "summary": "内容采集总入口：YouTube 搜索、频道清单与逐字稿；抖音链接出稿、盯博主、全量导出与数据合并；本地音视频统一转写",
       "install": "default",
       "requires": [
         "Python 3.9+",
         "yt-dlp",
-        "可选：TikHub Token、浏览器 cookies、whisper.cpp + ffmpeg"
+        "可选：TikHub Token、浏览器 cookies、whisper.cpp + ffmpeg",
+        "抖音：阿里云百炼 Key + Monid Key（监控线），或 Get笔记订阅 + playwright（导出线）"
       ]
     },
     {

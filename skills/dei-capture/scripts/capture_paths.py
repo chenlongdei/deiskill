@@ -5,6 +5,8 @@
     <output_root>/YouTube/搜索/     关键词搜索清单
     <output_root>/YouTube/频道/     频道视频清单（增量合并）
     <output_root>/YouTube/逐字稿/   单视频逐字稿（Markdown，带 frontmatter）
+    <output_root>/抖音/             监控、Get笔记导出、社媒数据（见 references/douyin.md）
+    <output_root>/转写/             统一转写入口的产出
 
 优先级：环境变量 DEI_CAPTURE_DATA_DIR（测试或临时运行） > config.json 的 output_root。
 都没有时报错退出，由 Agent 按 SKILL.md「首次配置」询问用户。
@@ -19,8 +21,8 @@ import sys
 from pathlib import Path
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-CONFIG = SKILL_ROOT / "config.json"
-MODULE_DIRS = {"youtube": "YouTube"}
+CONFIG = Path(os.environ.get("DEI_CAPTURE_CONFIG") or SKILL_ROOT / "config.json")  # 环境变量供测试用
+MODULE_DIRS = {"youtube": "YouTube", "douyin": "抖音", "transcribe": "转写"}
 
 
 def load_config() -> dict:

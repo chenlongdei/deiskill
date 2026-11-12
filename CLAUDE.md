@@ -21,7 +21,7 @@
 | 层 | 职责 | 现有 / 计划 |
 | --- | --- | --- |
 | router | 总入口 `dei` | 🔧 最小版：配方 A「YouTube 教程 → 学习路线」、配方 B「多渠道资料 → 主题研究」 |
-| input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube 模块） |
+| input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
 | output | 把结论变成成品 | 计划；已有模板 `templates/dei-选题表.xlsx` |
 
@@ -43,7 +43,7 @@
 | 1a | 日报对外成品：对外文字版、速览图卡、长文图片（`publish/`），头条原文存档为 PDF（`archive/`） | ✅ 2026-11-11 加入 |
 | 1b | dbs-diagnosis / dbs-learning / dbs-chatroom / dbs-deconstruct | ✅ 登记为上游，安装时从 dbskill 拉取 |
 | 2 | 旧 `yt-research` 并入 `dei-capture` 的 YouTube 模块；旧 `notebooklm-kb` 升级为 `dei-notebook`（导入任意文档资料并提问，不只服务视频） | ✅ 2026-11-11 已安装并端到端实测：搜索 → 逐字稿 → 导入 NotebookLM（本地文件 + YouTube 链接）→ 带引用提问 → 思维导图 |
-| 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei12-dev/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ⏳ |
+| 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei12-dev/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ✅ 2026-11-12 content-toolkit 已并入（`scripts/douyin/`，保留 LICENSE 和署名），统一转写入口 `scripts/transcribe.py` + `scripts/asr.py`；链接出稿实测通过。旧 douyin-paraformer-transcriber 在本机已找不到，功能已被覆盖。日报抖音模块尚未改接 |
 | 4 | 总入口 `dei`：按 handoff 从最终交付倒推组合 | 🔧 2026-11-11 先做最小版（用户要求），配方 A 实测进行中 |
 | 5 | 输出层 Skill | 规划中 |
 
@@ -63,7 +63,7 @@
 
 本机安装位置和日报保存位置以 Skill 的 `config.json` 为准（不进 Git）。日报保存文件夹里另有一份 `CLAUDE.md`，记录日报的运行情况和数据结构。
 
-### dei-capture（YouTube 模块）
+### dei-capture
 
 用户已确定：数据 yt-dlp 优先、TikHub 补充；本次做搜索、频道清单、单视频逐字稿（评论暂不做）。
 
@@ -72,6 +72,17 @@
 | 关键词搜索 | ✅ 实测 | yt-dlp 扁平结果没有发布日期；按时间筛选需要 TikHub |
 | 频道清单 | ✅ 实测 | 增量合并，标出本次新增 |
 | 逐字稿 | ✅ 实测 | 单视频请求要带浏览器 cookies（macOS 需给终端「完全磁盘访问权限」）；yt-dlp 须保持较新（旧版报 `The page needs to be reloaded`）；取信息时加 `--ignore-no-formats-error`，否则缺 JS 运行环境会报格式不可用。无字幕视频的本地 whisper 转写需配置模型，未实测 |
+
+抖音模块（2026-11-12 并入 content-toolkit）：
+
+| 能力 | 状态 | 备注 |
+| --- | --- | --- |
+| 链接出稿（Monid → 去水印 → Paraformer → 合并） | ✅ 实测 | 1 条约 25 秒；Monid 余额 2026-11-12 为 $0.90 |
+| 盯博主（监控列表） | 未实测 | 与链接出稿共用后三步 |
+| Get笔记全量导出 + 社媒助手数据合并 | 未实测 | 本机 `~/.biji_exporter` 不存在，需用户扫码登录；旧导出在 `02_长期素材库/` 根目录（谢胜子、姜Dora在此、merged） |
+| 统一转写 `transcribe.py` | ✅ 直链实测 | 本地文件走 whisper，模型未配置 |
+
+并入时修了两处原工具的问题：链接入口没取抖音视频号就用了哈希；`merge_output.py --force` 跳过已合并条目。
 
 用户明确：**YouTube → NotebookLM 直接导入链接即可**，NotebookLM 自己读字幕；逐字稿只在需要本地文字稿、导入失败或下游读不了链接时才做。
 
@@ -118,7 +129,7 @@
 
 ## 下一步从这里开始
 
-第 3 步：把旧 `douyin-paraformer-transcriber` 与 chenlongdei12-dev/content-toolkit 合并进 `dei-capture` 的抖音模块。content-toolkit 是 CC BY-NC-SA 4.0，合并时保留 LICENSE 和署名；ASR（百炼 Paraformer）与 YouTube 的本地 whisper 统一成一个转写入口。
+第 3 步收尾：日报抖音模块改接 dei-capture（叶子 Skill 不能互相点名，需要设计共享方式）；Get笔记导出线实测。之后是第 5 步输出层。
 
 ## 常用操作
 

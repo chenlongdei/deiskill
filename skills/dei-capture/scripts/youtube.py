@@ -641,24 +641,16 @@ def fetch_tikhub_subs(vid: str) -> list[tuple[float, str]]:
 
 
 def whisper_transcribe(url: str, workdir: Path) -> list[tuple[float, str]]:
-    c = cfg()
-    model = c.get("whisper_model") or ""
-    if not model or not Path(model).expanduser().is_file():
-        raise RuntimeError("没有字幕，且未配置本地转写模型（config.youtube.whisper_model）")
-    cli = c.get("whisper_cmd") or "whisper-cli"
-    if not shutil.which(cli) or not shutil.which("ffmpeg"):
-        raise RuntimeError(f"本地转写需要 {cli} 和 ffmpeg")
+    import asr
+    ok, why = asr.whisper_ready()
+    if not ok:
+        raise RuntimeError("没有字幕，且" + why)
     js = [] if shutil.which("deno") else (["--js-runtimes", "node"] if shutil.which("node") else [])
     ytdlp(js + ["-f", "bestaudio/best", "-o", str(workdir / "audio.%(ext)s"), url], timeout=1800, cookies=True)
     audio = next(iter(sorted(workdir.glob("audio.*"))), None)
     if not audio:
         raise RuntimeError("音频下载失败")
-    wav = workdir / "audio16k.wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(audio), "-ar", "16000", "-ac", "1", str(wav)], check=True)
-    subprocess.run([cli, "-m", str(Path(model).expanduser()), "-f", str(wav), "-l", c.get("whisper_language") or "auto",
-                    "-osrt", "-of", str(workdir / "whisper")] + (["--prompt", c["whisper_prompt"]] if c.get("whisper_prompt") else []),
-                   check=True, capture_output=True)
-    return parse_subtitles((workdir / "whisper.srt").read_text(encoding="utf-8", errors="replace"))
+    return asr.whisper_file(audio, workdir)
 
 
 def yaml_str(value) -> str:
@@ -771,8 +763,9 @@ def cmd_doctor(a) -> int:
     checks.append(("ffmpeg", bool(shutil.which("ffmpeg")), shutil.which("ffmpeg") or "未安装（仅本地转写需要）"))
     checks.append(("cookies_from_browser", bool(c.get("cookies_from_browser")), c.get("cookies_from_browser") or "未配置（遇到风控时需要）"))
     checks.append(("TikHub Token", bool(tikhub_token()), "已配置" if tikhub_token() else "未配置（可选补充）"))
-    model = c.get("whisper_model") or ""
-    checks.append(("whisper_model", bool(model and Path(model).expanduser().is_file()), model or "未配置（无字幕视频需要）"))
+    import asr
+    w_ok, w_why = asr.whisper_ready()
+    checks.append(("whisper", w_ok, w_why if w_ok else w_why + "（无字幕视频需要）"))
     try:
         checks.append(("output_root", True, str(data_dir("youtube"))))
     except SystemExit as exc:

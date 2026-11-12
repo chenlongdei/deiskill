@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""步骤2：视频链接 → 视频文件直链（去水印解析）
+
+规则：
+  - share_url/page_url 已是音视频直链（.mp4 等）→ 直接采用，跳过去水印（用户约定）
+  - Monid 已给 video_file_url → 跳过
+  - 否则调用 config.json 中 parser 配置的第三方解析接口
+  - 解析接口返回结构未知时：先按 video_url_paths 取，取不到就递归扫描响应里的直链
+
+产出：videos.json 中各条目的 video_file_url 填好，stage → parsed。
+注意：抖音 CDN 直链通常有时效（几小时），解析完尽快跑步骤3转写。
+"""
+import argparse
+import sys
+import time
+from pathlib import Path
+import urllib.parse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import (DEFAULT_FIELD_MAP, data_provider, deep_get, first_value, http_json,
+                    is_direct_media_url, monid_run, now_str, normalize_time,
+                    scan_media_urls, store_load, store_save, load_config)
+
+
+def parse_one(cfg, share_url):
+    """解析直链。返回 (media_url, 来源标记, extra_data)；extra_data 是视频详情 dict 时用于回填。
+
+    mode=auto（默认）：数据来源是 Monid 且是抖音链接时先走 Monid douyin.video（顺带回填数据），
+    再走大圣（douyin.dasheng 的 uid/key，支持抖音、快手、小红书、B 站等短视频链接），最后走自定义 url_template。
+    mode=monid / dasheng / http：只用对应的一种。"""
+    p = cfg.get("parser", {})
+    m = cfg.get("monid", {})
+    ds = cfg.get("dasheng") or {}
+    mode = p.get("mode") or "auto"
+    is_douyin = "douyin.com" in (share_url or "")
+
+    # 一级：Monid 网关 douyin.video（含数据回填）
+    if ((mode == "monid") or (mode == "auto" and data_provider(cfg) == "monid" and is_douyin)) \
+            and m.get("enabled") and m.get("token"):
+        try:
+            run = monid_run(cfg, p.get("provider", "anyapi"),
+                            p.get("video_endpoint", "/douyin.video"), {"url": share_url})
+            data = deep_get(run, "output.data") or {}
+            media = data.get("videoUrl")
+            if isinstance(media, str) and media.startswith("http"):
+                return media, "monid", data
+        except Exception as e:
+            print(f"    （Monid 解析未成：{e}；尝试兜底接口）")
+    if mode == "monid":
+        return None, "no_media_found", None
+
+    # 二级：大圣去水印
+    if mode in ("auto", "dasheng") and ds.get("uid") and ds.get("key"):
+        from tikhub import dasheng_media
+        try:
+            media, data = dasheng_media(share_url, ds["uid"], ds["key"])
+            return media, "dasheng", data
+        except Exception as e:
+            print(f"    （大圣解析未成：{e}）")
+    if mode == "dasheng":
+        return None, "no_media_found", None
+
+    # 三级：自定义去水印接口，{url} 替换为编码后的链接
+    if p.get("url_template"):
+        url = p["url_template"].replace("{url}", urllib.parse.quote(share_url, safe=""))
+        resp = http_json(p.get("method", "GET").upper(), url,
+                         headers=dict(p.get("headers", {})), body=p.get("body"))
+        for path in p.get("video_url_paths", []):
+            v = deep_get(resp, path)
+            if isinstance(v, str) and v.startswith("http"):
+                return v, "http", (resp.get("data") if isinstance(resp, dict) else None)
+        found = scan_media_urls(resp, limit=3)
+        if found:
+            return found[0], "http_scan", None
+        return resp, "no_media_found", None
+    return None, "not_configured", None
+
+
+def backfill(v, data, field_map):
+    """解析接口返回的视频详情：回填缺失的标题/作者/数据（增量更新 stats）。"""
+    if not isinstance(data, dict):
+        return
+    for key in ("title", "author_name", "author_id", "publish_time"):
+        cand = first_value(data, field_map.get(key) or [])
+        if cand and not v.get(key):
+            v[key] = normalize_time(cand) if key == "publish_time" else cand
+    stats = v.setdefault("stats", {})
+    changed = False
+    for k in ("likes", "comments", "shares", "collects"):
+        cand = first_value(data, field_map.get(k) or [])
+        if cand is not None:
+            try:
+                cand = int(cand)
+            except (TypeError, ValueError):
+                continue
+            if stats.get(k) != cand:
+                stats[k] = cand
+                changed = True
+    if changed:
+        v["stats_time"] = now_str()
+
+
+def main():
+    ap = argparse.ArgumentParser(description="解析视频文件直链")
+    ap.add_argument("--config", help="指定 config.json 路径")
+    ap.add_argument("--video-id", help="只处理指定 video_id（可选）")
+    args = ap.parse_args()
+
+    cfg = load_config(args.config)
+    store = store_load(cfg)
+    vids = store["videos"]
+
+    targets = [v for v in vids.values()
+               if (not args.video_id or v.get("video_id") == args.video_id)
+               and not v.get("video_file_url")
+               and (v.get("share_url") or v.get("page_url"))]
+    if not targets:
+        print("[完成] 没有待解析的条目（全部已有直链或缺少链接）。")
+        return
+
+    ok = fail = skip = 0
+    from concurrent.futures import ThreadPoolExecutor
+
+    def handle(v):
+        """返回 (kind, vid, info)；kind ∈ direct/ok/fail/error/not_configured"""
+        vid = v["video_id"]
+        url = v.get("share_url") or v.get("page_url")
+        if is_direct_media_url(url):
+            v["video_file_url"] = url
+            v["video_file_source"] = "direct"
+            v["stage"] = "parsed"
+            return "direct", vid, None
+        try:
+            media, status, extra = parse_one(cfg, url)
+            if status in ("monid", "dasheng", "http", "http_scan"):
+                v["video_file_url"] = media
+                v["video_file_source"] = f"parser:{status}"
+                v["parsed_at"] = now_str()
+                v["stage"] = "parsed"
+                if extra is not None:
+                    backfill(v, extra, cfg.get("monid", {}).get("field_map") or DEFAULT_FIELD_MAP)
+                return "ok", vid, status
+            if status == "not_configured":
+                return "not_configured", vid, None
+            v["parse_error"] = str(media)[:300]
+            return "fail", vid, str(media)[:120]
+        except Exception as e:
+            v["parse_error"] = str(e)[:300]
+            return "error", vid, str(e)[:120]
+
+    workers = max(1, min(4, int(cfg.get("parser", {}).get("concurrency", 3))))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for kind, vid, info in pool.map(handle, targets):
+            if kind == "direct":
+                skip += 1
+                print(f"  [跳过解析·已是直链] {vid}")
+            elif kind == "ok":
+                ok += 1
+                print(f"  [解析成功] {vid} ← {info}")
+            elif kind == "not_configured":
+                print("[跳过] 没有可用的去水印接口：在 config.json 填 douyin.dasheng 的 uid/key（大圣），或启用 Monid（douyin.monid.token），或在 douyin.parser.url_template 填自定义接口。")
+                break
+            elif kind == "fail":
+                fail += 1
+                print(f"  [解析失败] {vid}：{info}")
+            else:
+                fail += 1
+                print(f"  [解析出错] {vid}：{info}")
+
+    store_save(cfg, store)
+    print(f"[完成] 直链跳过 {skip} / 解析成功 {ok} / 失败 {fail}。提醒：直链有时效，尽快执行步骤3转写。")
+
+
+if __name__ == "__main__":
+    main()
