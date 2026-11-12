@@ -106,6 +106,15 @@ def main() -> int:
             elif (SKILLS / item["owner"] / item["install_into"]).exists():
                 errors.append(f"external {item['name']}: 上游内容不得提交到 skills/{item['owner']}/{item['install_into']}")
 
+    # README 是给人看的落地页，catalog / external.json 是事实源：每个可安装的 Skill 都要在 README 里出现
+    readme = (ROOT / "README.md").read_text(encoding="utf-8") if (ROOT / "README.md").is_file() else ""
+    for name in sorted(all_names):
+        if f"`{name}`" not in readme:
+            errors.append(f"README.md 没有写到 Skill `{name}`（登记在 catalog.json 或 external.json）")
+    for link in re.findall(r"\]\(((?!https?://|#)[^)\s]+)\)", readme):
+        if not (ROOT / link).exists():
+            errors.append(f"README.md 链接指向不存在的文件：{link}")
+
     for path in sorted(ROOT.rglob("*")):
         if ".git" in path.parts or not path.is_file():
             continue

@@ -148,3 +148,6 @@ bash scripts/install.sh --target <目录>  # 指定装到哪个 Agent 的 skills
 - 需要本机路径的写进 Skill 的 `config.json`（不进 Git），仓库里只放 `config.example.json`。
 - commit 前跑校验；推到公开仓库前确认没有本机路径、凭证和个人草稿。
 - 进度变化后更新本文件的「迁移进度」「当前状态」「下一步」。
+- **README 是给人看的落地页**（2026-11-12 按用户要求重写）：开头是场景故事（用户说一句话 → 拿到什么），然后是成品展示、5 分钟尝鲜、Skill 表（「你可以这样说 / 你会拿到」）、依赖与成本总表、许可、安装、更新记录。不写分层架构，不放「规划中」的半成品；新增或改动 Skill 时同步 Skill 表、成本表和更新记录。校验器会检查 README 写到了每个可安装的 Skill，且相对链接有效。
+- 成品示例放 `examples/`（只放基于公开资料、不含个人信息的真实产出）和 `docs/images/`；日报图卡用 `publish/render.py` 渲染 `publish/example/data.json` 得到。
+- 许可：仓库根目录 MIT；`skills/dei-capture/scripts/douyin/` 例外（CC BY-NC-SA 4.0），`aihot/` 保留自带的 MIT。新增第三方代码时在根目录 LICENSE 的 Exceptions 里登记。
