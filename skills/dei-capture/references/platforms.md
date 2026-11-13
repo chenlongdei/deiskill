@@ -7,6 +7,7 @@
 | YouTube 视频、频道、搜索 | yt-dlp 为主，TikHub 补充 | ✅ `youtube.py`，见 youtube.md |
 | 抖音博主全部历史 | Get笔记订阅后导出 + 社媒助手数据 | ✅ `douyin/run.py export-biji`，见 douyin.md |
 | 抖音监控、监控工作簿 | TikHub 或 Monid + 大圣 + 阿里云 | ✅ `douyin/run.py monitor`、`douyin/workbook.py` |
+| 抖音按关键词找近期热门视频、定期巡检 | 抖音指数视频搜索（专用 Chrome + 抖音登录）+ 阿里云转写；系统定时 | ✅ `douyin/keyword_watch.py`，见 douyin.md |
 | 本地音视频文件（下载的、自己录的） | 本地 whisper；或阿里云（需公网直链） | ✅ `transcribe.py` |
 | 抖音、快手、小红书、B 站等短视频的单条或多条 | 计费：大圣去水印 + 阿里云转写（`douyin/run.py monitor --links`）；免费：用户自己在 Get笔记粘贴链接 | ✅ 计费方式；数据字段视平台而定 |
 | 小宇宙等音频节目 | Get笔记粘贴链接（手动）；有音频直链时用 `transcribe.py` | 部分 |

@@ -70,6 +70,54 @@ python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-s
 - 单账号或单视频失败不中断整批；缺失不能写成 0。401/403 凭证无效、402 余额不足：停止外部调用并报告。
 - 工作簿第 2 行预期列：A 序号、C 标题、D BGM、E 视频链接、F 发布时间、G 抓取时间、H 视频文案、K 结尾、L 前 5 秒钩子、N 粉丝量、O 点赞、P 评论、Q 收藏、R 转发、S 赞粉比。依赖 `openpyxl`（`python3 -m pip install openpyxl`）。
 
+## 关键词巡检（抖音指数）
+
+按几个关键词，定期扒近期热门视频的数据和逐字稿。跑的时候不需要 AI：所有固定动作都在脚本里，Agent 只负责第一次帮用户配好。搜索和视频数据免费；只有阿里云转写计费（实测 98 条、3.5 小时音频约 1 元）。
+
+**第一次（每台电脑一次）**
+
+```bash
+python3 scripts/douyin/keyword_watch.py doctor        # 逐项自检，✗ 的按提示补
+python3 scripts/douyin/keyword_watch.py login         # 弹出专用 Chrome，用抖音 App 扫码
+python3 scripts/douyin/keyword_watch.py run --only <一个词> --per-keyword 2 --fast   # 试跑，结果进 *_试跑 文件夹
+python3 scripts/douyin/keyword_watch.py schedule --every-days 3 --at 02:00 [--run-now]
+```
+
+- 关键词问用户，写进 `douyin.keyword_watch.keywords`：每项 `{"word": "…"}`，要限垂类时加 `"category": "情感"`（抖音指数的垂类名）。
+- 只需要 Google Chrome 和抖音账号，**不需要社媒助手插件**。专用 Chrome 用独立用户目录 `~/.shejiao_automation` 和调试端口 9222，与用户日常 Chrome 互不影响。
+- `schedule` 用系统自带定时（macOS launchd、Windows 任务计划程序、Linux cron），与用哪个 Agent 无关。`--at` 是本机时间，输出里会换算成北京时间。保存位置在 macOS 受保护位置（外接盘、桌面、文稿等）时，`schedule` 先用后台任务试写一次，写不进去就给出要加进「完全磁盘访问权限」的 Python.app 路径。
+
+**日常**
+
+```bash
+python3 scripts/douyin/keyword_watch.py run                 # 跑全部关键词
+python3 scripts/douyin/keyword_watch.py run --only 商业思维   # 只跑某几个（计入去重，不算一轮定时）
+python3 scripts/douyin/keyword_watch.py unschedule          # 取消定时
+```
+
+**配置**（`douyin.keyword_watch`）：`date`（近3天 / 近7天 / 近一个月）、`duration`（页面时长选项）、`min_duration`（秒，>0 时脚本自己按时长筛，默认 0 不筛）、`label`（低粉爆款等）、`pages`（看前几页，默认 2，每页 10 条）、`per_keyword`（默认 20）、`dwell_seconds` 等停留秒数、`fix_words`（转写后的固定替换，英文不分大小写，如 `{"沃克巴迪": "WorkBuddy"}`）。`min_duration`、`duration`、`label` 也可以写在单个关键词里覆盖。
+
+**流程**：逐字输入关键词 → 点选垂类、时长、类型、发布时间 → 每页 10 条逐条打开视频页、停留观看，看完再翻下一页 → 截获页面的 `aweme/detail`（与社媒助手「复制视频信息」字段一致）→ 每看完一条立刻提交转写：原声交音频链接，配乐视频交视频文件链接；都失败再走去水印接口（Monid / 大圣，配了才有）→ 当天汇总表 + 逐字稿 → 更新跨期总表。关键词之间休息 1.5—3 分钟。以前采过的视频（`.seen.json`）跳过，但仍计入总表的「上榜次数」。
+
+**产出**
+
+```text
+<抖音>/关键词/
+├── 关键词总表.xlsx            跨期：首次出现、最近出现、上榜次数、最新视频指数、逐字稿路径
+├── YYYY-MM-DD/汇总.xlsx       当次：数据、标签、大家都在搜、逐字稿开头、转写来源和备注
+├── YYYY-MM-DD/逐字稿/<关键词>/NN_标题.md
+└── YYYY-MM-DD/运行记录.json
+```
+
+**已验证的事实与解决办法**（2026-11-12 至 11-13）
+
+- 抖音指数视频搜索接口 `api/v2/index/itemQuery` 一次返回最多 1000 条，前端分页。**时长筛选不生效**（选「大于180秒」仍返回 12 秒的视频）；发布时间、垂类有效。
+- 页面点不动时（抖音改版、弹窗挡住），脚本在已登录的创作者中心页面里直接 POST 同一个接口，不需要签名。筛选项对应的接口参数每次点选成功后记进 `.filter_values.json`。
+- 视频页常驻一个隐藏的无感验证 iframe（`rmc-nocaptcha`），只有可见的验证框才算被拦。被拦或登录失效时脚本停下、发系统通知，用户在专用 Chrome 里处理后重跑。
+- 视频和音频文件链接不需要 cookie，阿里云能直接下载，但几小时内失效，所以边看边提交转写。
+- 标着原声却没人说话的视频（字幕加配乐）：阿里云返回 `SUCCESS_WITH_NO_VALID_FRAGMENT`，或识别出乱码（每分钟中文不到 40 字），都记「无口播」，不算失败。
+- macOS 定时：「完全磁盘访问权限」按真正的 Python 程序判断，plist 必须直接写 `Python.app/Contents/MacOS/Python`；plist 日志不能放外接盘（launchd 起不来，EX_CONFIG），放 `~/Library/Logs/deiskill/`。这两点 `scheduler.py` 已处理。
+
 ## 核心机制
 
 - **幂等状态库**：监控线所有步骤读写 `<监控>/videos.json`，阶段 collected → parsed → transcribed → merged；中断重跑不重复计费（task_id 都会保存）。导出线按文件名里的 post_id 去重、增量续传。

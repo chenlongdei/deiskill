@@ -71,6 +71,32 @@
         "url"
       ],
       "concurrency": 3
+    },
+    "keyword_watch": {
+      "keywords": [],
+      "date": "近3天",
+      "duration": "大于180秒",
+      "min_duration": 0,
+      "label": "",
+      "pages": 2,
+      "per_keyword": 20,
+      "dwell_seconds": [
+        20,
+        45
+      ],
+      "between_videos_seconds": [
+        3,
+        8
+      ],
+      "keyword_pause_seconds": [
+        90,
+        180
+      ],
+      "transcribe_workers": 4,
+      "fix_words": {
+        "沃克巴迪": "WorkBuddy",
+        "workbuddy": "WorkBuddy"
+      }
     }
   }
 }

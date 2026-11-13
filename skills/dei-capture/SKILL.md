@@ -1,6 +1,6 @@
 ---
 name: dei-capture
-description: 内容采集总入口：把各平台的视频、账号和音视频文件变成可检索的清单、逐字稿和作品数据。支持 YouTube（关键词搜索、频道清单、单视频逐字稿）；抖音博主全部历史（Get笔记导出 + 社媒助手数据）；抖音监控与监控工作簿；抖音、快手、小红书、B 站等短视频链接出稿（TikHub/Monid + 大圣 + 阿里云）；本地音视频转写。用于「搜 YouTube 上关于 X 的视频」「把这个频道的视频列出来」「扒这几个视频的字幕」「把这几条抖音转成文字」「盯住这个博主」「导出这个博主的全部文案和数据」「更新抖音监控表」「把这段录音转成文字」；不用于对内容的分析、问答或日报。
+description: 内容采集总入口：把各平台的视频、账号和音视频文件变成可检索的清单、逐字稿和作品数据。支持 YouTube（关键词搜索、频道清单、单视频逐字稿）；抖音博主全部历史（Get笔记导出 + 社媒助手数据）；抖音监控与监控工作簿；抖音关键词巡检（抖音指数视频搜索 + 筛选 + 逐条打开 + 转写，可定时）；抖音、快手、小红书、B 站等短视频链接出稿（TikHub/Monid + 大圣 + 阿里云）；本地音视频转写。用于「搜 YouTube 上关于 X 的视频」「把这个频道的视频列出来」「扒这几个视频的字幕」「把这几条抖音转成文字」「盯住这个博主」「导出这个博主的全部文案和数据」「更新抖音监控表」「按这几个关键词扒抖音近 3 天的热门视频」「把这段录音转成文字」；不用于对内容的分析、问答或日报。
 metadata:
   dei-handoff: |
     - 一个或几个主题关键词 → YouTube 搜索清单（去重、按播放量排序、推荐子集）、results.json 和推荐链接 urls.txt
@@ -10,6 +10,7 @@ metadata:
     - 一个抖音博主（主页链接或 sec_user_id） → 加入监控列表，拉取最新 N 条并出稿；之后可随时增量更新
     - 一个抖音博主要全部历史 → Get笔记订阅后导出的全部逐字稿，合并社媒助手导出的作品数据后按博主归档（没订阅时告诉用户先去订阅）
     - 一组要盯的对标博主（名称 + 主页链接），或已有的抖音监控工作簿 → 从模板生成或更新后的工作簿副本（近 7 天作品的客观数据、逐字稿、前 5 秒、结尾）和失败清单 report.json
+    - 一组抖音关键词（可按词指定垂类） → 抖音指数视频搜索、按发布时间和时长筛选后每词前 N 条：汇总表（视频指数、互动数据、标签、大家都在搜、逐字稿开头）+ 每条一份逐字稿，以及跨期总表（首次出现、上榜次数）；无口播的视频标出；可登记成每 N 天自动运行的系统定时
     - 本地音视频文件或公网音视频直链 → Markdown 逐字稿（本地 whisper 或阿里云 Paraformer）
     - 不交出：对内容的总结、观点提炼或问答；日报；抖音以外平台的博主全量采集（只给做法）；评论区批量抓取；未经要求的下载视频文件
 ---
@@ -36,6 +37,7 @@ metadata:
 | 抖音单个博主的**全部**逐字稿 + 数据 | Get笔记（得到大脑）订阅 → 导出 → 合并社媒助手数据 | 免费、快。用户没订阅时，告诉他先在 Get笔记订阅该博主，不改用计费接口硬抓全量 |
 | YouTube | yt-dlp 为主，TikHub 补充 | 见 youtube.md |
 | 监控（盯博主更新、监控工作簿），以及各平台单条或多条视频 | 数据 TikHub 或 Monid；去水印大圣；转写阿里云 | 计费。`douyin.provider` 选数据来源，auto 时有 TikHub Token 用 TikHub |
+| 抖音按关键词找近期热门视频 | 抖音指数（创作者中心）视频搜索 + 专用 Chrome（只要抖音登录，不需要社媒助手）+ 阿里云转写；系统定时 | 搜索和数据免费，只有转写计费；跑的时候不需要 Agent；见 douyin.md「关键词巡检」 |
 | 其他平台的零散单条，用户不想花钱 | 告诉用户在 Get笔记里粘贴链接，手动得到逐字稿 | 不调用计费接口 |
 
 用户没说清时：要全量 → 第一行；要单条或几条 → 先问一句「走计费接口自动出稿，还是你自己去 Get笔记粘贴链接（免费）？」，一条两条且用户常用 Get笔记时直接建议后者。
@@ -58,7 +60,7 @@ metadata:
 1. **`output_root` 为空**：停下来问用户采集结果放哪里，给 2—3 个建议：用户已有的素材库文件夹（先看当前工作目录和常用位置有没有现成的）、`~/Documents/dei-采集`；建议位置在外接盘或云盘时，说明未挂载时会写入失败。用户确认后展开为绝对路径；目录不存在时说明完整路径，确认后再创建，然后写入 `config.json`。各平台在它下面各占一个子文件夹（`YouTube/`、`抖音/`、`转写/`）。
 2. **已配置但路径不存在**：说明哪一项失效，请用户决定新建、改路径还是本次跳过，不静默新建。
 3. **凭证只在用到时问**，一次问清在哪里申请、以什么开头：
-   - `dashscope.api_key`：阿里云百炼，sk- 开头；抖音转写和直链转写用
+   - `dashscope.api_key`：阿里云百炼，sk- 开头；抖音转写、关键词巡检和直链转写用
    - `tikhub.token`：TikHub；抖音监控、监控工作簿、YouTube 风控时用
    - `douyin.dasheng.uid`、`douyin.dasheng.key`：大圣去水印；监控和链接出稿用
    - `douyin.monid.token`：Monid，monid_live_ 开头；选 Monid 作数据来源时用
@@ -68,7 +70,7 @@ metadata:
 
 ## 流程
 
-**Step 0**：读 `config.json`，按「首次配置」补齐保存位置；按平台读对应 references。命令写作 `python3`，Windows 上通常换成 `python`；自检报缺依赖时读 [references/setup.md](references/setup.md)，按用户的系统给安装命令。第一次在这台电脑上用某个平台时，先跑它的自检：`python3 scripts/youtube.py doctor`、`python3 scripts/douyin/doctor.py`、`python3 scripts/transcribe.py doctor`。
+**Step 0**：读 `config.json`，按「首次配置」补齐保存位置；按平台读对应 references。命令写作 `python3`，Windows 上通常换成 `python`；自检报缺依赖时读 [references/setup.md](references/setup.md)，按用户的系统给安装命令。第一次在这台电脑上用某个平台时，先跑它的自检：`python3 scripts/youtube.py doctor`、`python3 scripts/douyin/doctor.py`（关键词巡检用 `python3 scripts/douyin/keyword_watch.py doctor`）、`python3 scripts/transcribe.py doctor`。
 
 **Step 1 判断任务**
 
@@ -80,6 +82,7 @@ metadata:
 | 这几条视频转成文字、要数据（抖音、快手、小红书、B 站等） | 先按「渠道分工」确认走计费接口，再 `scripts/douyin/run.py monitor --links "<链接,链接>"` |
 | 盯住某个抖音博主、对标账号更新 | `scripts/douyin/run.py monitor --blogger-sec-uid <id>`；之后 `monitor` 跑全部 |
 | 导出抖音博主全部文案 + 数据 | `scripts/douyin/run.py export-biji "<名字>" --with-data`；没订阅就让用户先去 Get笔记订阅 |
+| 按关键词定期扒抖音近期热门视频（数据 + 逐字稿），或要定时 | 读 douyin.md「关键词巡检」：没配关键词先问用户；首次在这台电脑上依次 `keyword_watch.py doctor` → `login` → 试跑 → `schedule`；之后 `keyword_watch.py run` |
 | 更新抖音监控工作簿（日报要用的「相似博主」表） | 没有工作簿时先 `scripts/douyin/workbook.py init` 生成，请用户在总表填博主名称和主页链接；然后 `scripts/douyin/workbook.py --input <工作簿.xlsx>` |
 | 把录音、视频文件转成文字 | `scripts/transcribe.py <文件>` |
 | 其他平台、其他内容类型 | 查 platforms.md，告诉用户做法和需要人工的环节 |
@@ -103,7 +106,8 @@ python3 scripts/transcribe.py <文件或直链> [...] [--engine auto|whisper|par
 ## 边界与停止条件
 
 - 401/402/403、余额不足、Monid BLOCKED：停止该渠道的调用，告诉用户原因和处理办法，已完成的部分照常交付。
-- 需要用户在场的步骤（Get笔记扫码登录、社媒助手专用 Chrome 实例的插件登录）：停下来说明要用户做什么，不反复重试。
+- 需要用户在场的步骤（Get笔记扫码登录、专用 Chrome 实例里扫码登录抖音或社媒助手、macOS 完全磁盘访问权限）：停下来说明要用户做什么，不反复重试。
+- 定时任务用系统自带的定时工具（`keyword_watch.py schedule`），不依赖当前 Agent；登记前说明本机时间和对应的北京时间。
 - 频道或博主全量（几百条以上）：先告诉用户数量、耗时和费用。
 - 不为绕过风控去高频重试或换 IP；不下载视频文件，转写用的临时音频用完即删。
 
@@ -112,7 +116,7 @@ python3 scripts/transcribe.py <文件或直链> [...] [--engine auto|whisper|par
 ```text
 <output_root>/
 ├── YouTube/   搜索/  频道/  逐字稿/                   见 youtube.md
-├── 抖音/      监控/  监控工作簿/  Get笔记导出/  社媒数据/   见 douyin.md
+├── 抖音/      监控/  监控工作簿/  关键词/  Get笔记导出/  社媒数据/   见 douyin.md
 └── 转写/      <文件名>.md                             统一转写入口的产出
 ```
 
