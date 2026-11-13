@@ -31,6 +31,10 @@
     python3 scripts/dei_workspace.py log <skill> <任务> <状态> [产出路径 ...]   记一行运行总账
     python3 scripts/dei_workspace.py latest [skill] [任务]   查最近一次运行
     python3 scripts/dei_workspace.py clean                 清理 99_系统/缓存 里 30 天前的文件
+    python3 scripts/dei_workspace.py publish               用户常用的在线文档平台，以及它的命令行装没装
+    python3 scripts/dei_workspace.py publish set <平台>     记下平台：feishu / notion / dingtalk / local
+
+发布平台记在 ~/.deiskill/config.json 的 publish_platform，所有 Skill 共用；安装 deiskill 时问一次。
 """
 
 from __future__ import annotations
@@ -58,6 +62,20 @@ STAGES = {
     "system": "99_系统",
 }
 SYSTEM_DIRS = ("日志", "状态", "备份", "测试", "缓存")
+
+# 用户常用的在线文档平台。命令行都是官方的；当前 Agent 已接好同一平台的连接器时也可以直接用连接器。
+PUBLISH_PLATFORMS = {
+    "feishu": {"name": "飞书", "cli": "lark-cli",
+               "install": "npm install -g @larksuite/cli（需要 Node.js）",
+               "login": "lark-cli auth login"},
+    "notion": {"name": "Notion", "cli": "ntn",
+               "install": "macOS / Linux：curl -fsSL https://ntn.dev | NTN_INSTALL_DIR=$HOME/.local/bin bash；Windows：winget install Notion.ntn；或 npm install -g ntn（Node 22+）",
+               "login": "ntn login（把链接和验证码给用户在浏览器确认）→ ntn login poll；ntn whoami 检查"},
+    "dingtalk": {"name": "钉钉", "cli": "dws",
+                 "install": "按官方仓库 github.com/DingTalk-Real-AI/dingtalk-workspace-cli 的 README 安装 dws",
+                 "login": "运行 dws --help 查看登录命令；访问企业数据需要组织管理员授权"},
+    "local": {"name": "只留本地", "cli": "", "install": "", "login": ""},
+}
 LEDGER = "运行总账.jsonl"
 CACHE_DAYS = 30
 
@@ -244,7 +262,7 @@ GUIDE = """# dei 工作区使用说明
 | `02_采集/` | YouTube 搜索清单、频道、逐字稿；抖音博主、关键词巡检；音视频转写 | dei-capture |
 | `03_日报/` | 综合日报（按年分）、政策与商机、AI情报、知乎热榜 | dei-daily-report |
 | `04_知识库/` | 一个主题一个文件夹：问答、学习路线、产物 | dei-notebook |
-| `05_成品/` | 准备对外发布的文章、图卡、脚本 | 输出层 |
+| `05_成品/` | 准备对外发布的文章、图卡、脚本；`课程/<课程名>/` 放课程手册、物料包和发布记录；`朋友圈/` 放风格提示词、素材库和每期发售方案 | 输出层 |
 | `99_系统/` | 运行总账、日志、状态、备份、测试、缓存。平时不用看 | 所有 Skill |
 
 ## 命名规则
@@ -307,6 +325,46 @@ def _copy_list_templates(lists: Path) -> list[str]:
     return copied
 
 
+def _read_shared() -> dict:
+    if SHARED_CONFIG.is_file():
+        try:
+            return json.loads(SHARED_CONFIG.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+    return {}
+
+
+def publish_status() -> dict:
+    """用户设定的发布平台，以及该平台的官方命令行是否可用。不检查登录（各命令行自己报）。"""
+    platform = _read_shared().get("publish_platform", "") or ""
+    info = PUBLISH_PLATFORMS.get(platform)
+    if not info:
+        return {"command": "publish", "platform": "", "ready": False,
+                "next": "还没设定：问用户平时用哪个在线工具分享文档（飞书 / Notion / 钉钉 / 只留本地），"
+                        "然后运行 python3 scripts/dei_workspace.py publish set <feishu|notion|dingtalk|local>",
+                "choices": {k: v["name"] for k, v in PUBLISH_PLATFORMS.items()}}
+    out = {"command": "publish", "platform": platform, "name": info["name"]}
+    if platform == "local":
+        return {**out, "ready": True, "next": "不发布，只交本地文件"}
+    path = shutil.which(info["cli"])
+    out.update({"cli": info["cli"], "cli_path": path or "", "ready": bool(path), "login": info["login"]})
+    if not path:
+        out["install"] = info["install"]
+        out["next"] = f"没找到 {info['cli']}：当前 Agent 若已接好{info['name']}连接器可直接用；否则征得用户同意后安装"
+    return out
+
+
+def set_publish(platform: str) -> dict:
+    platform = platform.strip().lower()
+    if platform not in PUBLISH_PLATFORMS:
+        raise WorkspaceError(f"不认识的平台：{platform}。可选：{' / '.join(PUBLISH_PLATFORMS)}")
+    cfg = _read_shared()
+    cfg["publish_platform"] = platform
+    SHARED_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    SHARED_CONFIG.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {**publish_status(), "saved": str(SHARED_CONFIG)}
+
+
 def where() -> dict:
     base = root()
     return {"workspace": str(base), "trial": trial(),
@@ -331,6 +389,10 @@ def main(argv: list[str]) -> int:
         out = {"command": "latest", "runs": latest(*(argv[1:3]), n=5)}
     elif cmd == "clean":
         out = {"command": "clean", "removed": clean()}
+    elif cmd == "publish" and len(argv) >= 3 and argv[1] == "set":
+        out = set_publish(argv[2])
+    elif cmd == "publish":
+        out = publish_status()
     else:
         print(__doc__)
         return 2

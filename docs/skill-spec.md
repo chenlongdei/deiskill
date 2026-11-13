@@ -115,6 +115,15 @@ Skill 之间的关系只由 `dei` 掌握。叶子 Skill 结尾使用固定句：
 - 音视频原文件不落地：下载、转写用临时目录，用完即删，只留逐字稿和原链接。
 - 改结构（改名、改编号、改子目录）时同时更新 `scripts/migrate_workspace.py` 的映射，让已有用户能一条命令迁过去。
 
+## 6b. 发布平台（用户常用的在线文档工具）
+
+- 用户平时用哪个在线工具分享文档，是全体 Skill 共用的设置：`~/.deiskill/config.json` 的 `publish_platform`，取值 `feishu` / `notion` / `dingtalk` / `local`。
+- 安装器问一次（`install.py --publish` 可直接指定）；没问到的，第一次要发布时由 Skill 问一次，用 `dei_workspace.py publish set <平台>` 记下。读取用 `dei_workspace.py publish`，它同时报告该平台的官方命令行是否已安装、怎么装和登录。
+- 每个平台优先用官方命令行：飞书 `lark-cli`、Notion `ntn`、钉钉 `dws`；当前 Agent 已接好同平台连接器时也可以用。命令参数以命令行自带的 `--help` 和内置说明为准，不凭记忆写。
+- 用户设定哪个就发哪个；没接好就停下说明缺什么，不改用别的平台。用户这次点名别的平台时按这次做，不改设置。
+- 要发布的 Skill 把每个平台的做法分开写在 references 里（如 `publish-feishu.md`），通用规则单独一份；发布到哪里记在产出文件夹的 `发布记录.json`（只有链接和 ID，不放令牌）。
+- 默认不开公开分享。
+
 ## 7. 第三方内容
 
 - 许可证允许再分发（如 MIT）的，保留原 LICENSE 一起提交。

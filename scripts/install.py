@@ -186,6 +186,55 @@ def place(name: str, source: Path, target_dir: Path, stamp: str, vendors: list[d
             say(f"  ! 缺少 {item['name']}：{item['instructions']}")
 
 
+SHARED_CONFIG = Path.home() / ".deiskill" / "config.json"
+# 与各 Skill 的 scripts/dei_workspace.py 里 PUBLISH_PLATFORMS 保持一致
+PUBLISH_CHOICES = [
+    ("feishu", "飞书", "lark-cli", "npm install -g @larksuite/cli（需要 Node.js），装好后 lark-cli auth login"),
+    ("notion", "Notion", "ntn", "curl -fsSL https://ntn.dev | bash（Windows：winget install Notion.ntn），装好后 ntn login"),
+    ("dingtalk", "钉钉", "dws", "按 github.com/DingTalk-Real-AI/dingtalk-workspace-cli 安装 dws；企业数据需管理员授权"),
+    ("local", "只留本地", "", ""),
+]
+
+
+def setup_publish(choice: str | None) -> None:
+    """问一次用户平时用哪个在线工具分享文档，记进 ~/.deiskill/config.json，所有 Skill 共用。"""
+    cfg = {}
+    if SHARED_CONFIG.is_file():
+        try:
+            cfg = json.loads(SHARED_CONFIG.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            cfg = {}
+    keys = [c[0] for c in PUBLISH_CHOICES]
+    if choice is None:
+        if cfg.get("publish_platform"):
+            return
+        if not sys.stdin.isatty():
+            say("提示：还没设定常用的文档平台，第一次要发布时 Skill 会问你（也可以用 --publish feishu|notion|dingtalk|local）。")
+            return
+        say("")
+        say("你平时用哪个在线工具分享文档？以后手册、学习计划、研究综述要发出去时就用它。")
+        for i, (_, name, _, _) in enumerate(PUBLISH_CHOICES, 1):
+            say(f"  {i}. {name}")
+        answer = input("输入编号，回车 = 以后再说：").strip()
+        if not answer:
+            return
+        if answer not in {str(i) for i in range(1, len(keys) + 1)}:
+            say("编号无效，跳过。第一次要发布时 Skill 会再问。")
+            return
+        choice = keys[int(answer) - 1]
+    if choice not in keys:
+        sys.exit(f"--publish 只能是：{' / '.join(keys)}")
+    cfg["publish_platform"] = choice
+    SHARED_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    SHARED_CONFIG.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _, name, cli, hint = PUBLISH_CHOICES[keys.index(choice)]
+    say(f"已记下常用平台：{name}")
+    if cli and shutil.which(cli) is None:
+        say(f"  ! 还没装 {name} 的命令行 {cli}：{hint}")
+    elif cli:
+        say(f"  {cli} 已安装")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="安装 deiskill")
     parser.add_argument("names", nargs="*", help="只安装这些 Skill（自有或上游）")
@@ -193,6 +242,8 @@ def main() -> int:
     parser.add_argument("--all", action="store_true", help="安装 default 与 optional 级别")
     parser.add_argument("--target", action="append", type=Path, help="安装到这个 skills 目录，可重复；不指定时检测本机已有的 Agent")
     parser.add_argument("--no-external", action="store_true", help="不安装上游 Skill")
+    parser.add_argument("--publish", choices=[c[0] for c in PUBLISH_CHOICES],
+                        help="常用的在线文档平台（不指定时交互询问一次，已设定则跳过）")
     args = parser.parse_args()
 
     catalog, external = load("catalog.json"), load("external.json")["externals"]
@@ -238,6 +289,7 @@ def main() -> int:
                     say(f"! 拉取上游 {name} 失败：{exc}")
                     continue
                 place(name, source, target_dir, stamp, [], [])
+    setup_publish(args.publish)
     say("完成。重启或刷新 Agent，让它重新发现 Skills。")
     return 0
 

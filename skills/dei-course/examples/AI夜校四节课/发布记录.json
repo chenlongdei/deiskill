@@ -1,0 +1,11 @@
+{
+  "platform": "notion",
+  "parent": "Notion 里的一个课程数据库（示例：data-source:00000000-0000-0000-0000-000000000000，属性含 任务 / 优先级 / 状态 / 计划日期）",
+  "lessons": {
+    "第1节": {"title": "AI 夜校之 Word 办公", "url": "https://www.notion.so/<示例页面链接-1>", "id": "<示例页面ID-1>", "icon": "📄"},
+    "第2节": {"title": "AI 夜校之 Excel 办公", "url": "https://www.notion.so/<示例页面链接-2>", "id": "<示例页面ID-2>", "icon": "📊"},
+    "第3节": {"title": "AI 夜校之 PPT 办公", "url": "https://www.notion.so/<示例页面链接-3>", "id": "<示例页面ID-3>", "icon": "🎨", "source_doc": "<原稿链接，如飞书文档>", "attachments": ["…-Win版.zip", "…-Mac版.zip"]},
+    "第4节": {"title": "AI 夜校之飞书办公系统", "url": "https://www.notion.so/<示例页面链接-4>", "id": "<示例页面ID-4>", "icon": "🤖", "attachments": ["…-Win版.zip", "…-Mac版.zip"]}
+  },
+  "note": "参考案例：一门四节课推到同一个 Notion 数据库后的发布记录结构。链接和 ID 是示例值，真实记录放在你自己的课程文件夹里。"
+}

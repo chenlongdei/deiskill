@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-moments 朋友圈经营"
+  short_description: "反推像你的风格提示词，诊断没回响的朋友圈，按浪潮式发售排好整个发售期"
+  default_prompt: "使用 $dei-moments 帮我排这次课程发售的朋友圈：先看我的风格提示词和素材库，再给排期和前几天的文案。"
+policy:
+  allow_implicit_invocation: true

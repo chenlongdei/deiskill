@@ -23,7 +23,7 @@
 | router | 总入口 `dei` | 🔧 最小版：配方 A「YouTube 教程 → 学习路线」、配方 B「多渠道资料 → 主题研究」 |
 | input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
-| output | 把结论变成成品 | 计划；已有模板 `templates/dei-选题表.xlsx` |
+| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；已有模板 `templates/dei-选题表.xlsx` |
 
 ## 必须遵守的原则（用户已明确）
 
@@ -45,7 +45,7 @@
 | 2 | 旧 `yt-research` 并入 `dei-capture` 的 YouTube 模块；旧 `notebooklm-kb` 升级为 `dei-notebook`（导入任意文档资料并提问，不只服务视频） | ✅ 2026-11-11 已安装并端到端实测：搜索 → 逐字稿 → 导入 NotebookLM（本地文件 + YouTube 链接）→ 带引用提问 → 思维导图 |
 | 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ✅ 2026-11-12 content-toolkit 已并入（`scripts/douyin/`，保留 LICENSE 和署名），统一转写入口 `scripts/transcribe.py` + `scripts/asr.py`；链接出稿实测通过。旧 douyin-paraformer-transcriber 在本机已找不到，功能已被覆盖。日报抖音模块尚未改接 |
 | 4 | 总入口 `dei`：按 handoff 从最终交付倒推组合 | 🔧 2026-11-11 先做最小版（用户要求），配方 A 实测进行中 |
-| 5 | 输出层 Skill | 规划中 |
+| 5 | 输出层 Skill | 🔧 2026-11-13 第一个：`dei-course`（由用户的 course-handbook-creator 并入），发布线按用户设定的平台分飞书 / Notion / 钉钉 |
 | 6 | dei 工作区：所有 Skill 共用一个数据根目录（01_我的清单 / 02_采集 / 03_日报 / 04_知识库 / 05_成品 / 99_系统），中文子目录、北京时间批次名、运行总账、外置盘检查、试跑隔离；`scripts/migrate_workspace.py` 迁移旧数据 | ✅ 2026-11-13 本机 1577 个文件迁入并实测（政策抓取、AI 采集、YouTube 试跑搜索、NotebookLM 自检、关键词巡检自检） |
 
 旧仓库其余 Skill（topic-extraction、content-writing-system、course-poster-review-safe、bluebook-factory、daily-notes-sync、hunan-etax-invoice）是否迁移，用户还没决定。
@@ -107,7 +107,7 @@
 - 贯穿框架：**道法术器用**；实操手册和综述以 Markdown 形式存进知识库
 - 方法写在 `dei-notebook/references/learning-path.md`、`topic-research.md`，串联写在 `dei`
 
-- **文档同步给两个选项：飞书或 Notion**（用户 2026-11-12 要求）：目前写在 `dei` 的收尾步骤里，借用 Agent 已接好的连接器；以后做输出层 Skill 时再固化成脚本
+- **发布平台是共用设置**（用户 2026-11-13 要求，取代 11-12 的「飞书或 Notion 每次问」）：安装 deiskill 时先问用户常用哪个在线分享工具，记在 `~/.deiskill/config.json` 的 `publish_platform`（feishu / notion / dingtalk / local）；是飞书就接 `lark-cli`，Notion 接 `ntn` 或连接器，钉钉接 `dws`。读写用 `dei_workspace.py publish [set]`，安装器 `--publish`。规则见 `docs/skill-spec.md` §6b
 - **7 问封顶**（用户 2026-11-12 要求）：盘点、道+法、器+术、用（案例）、计划×2、手册。不写没有答案的问题清单；加问要先告诉用户
 - **问答存档只放问题和回答**（用户 2026-11-12 要求）：[n] 编号和引用列表对读者没用，脚本已去掉；出处要求 NotebookLM 写视频或文档名
 - **实操手册是教人用的**（用户 2026-11-12 要求）：读者默认不懂技术；AI 能自己生成的东西（配置、技能、Hook、权限）只教「怎么跟它说」，不贴代码；要有「看看别人怎么玩」案例。写法参考用户自己的 handbook-writing 仓库（三段式指令、结果先行、比喻、不编数）
@@ -136,6 +136,20 @@
 ## 跨平台（2026-11-12）
 
 目标是学员在任何电脑、任何 Agent 上装好就能用。规则见 [docs/skill-spec.md](docs/skill-spec.md)「跨平台」。已做：Windows 一键安装 `scripts/bootstrap.ps1`；全部入口脚本强制 UTF-8；外部命令按 UTF-8 解码；北京时间用固定 +8；社媒助手 Chrome 在三个系统都能拉起；`dei-capture/references/setup.md` 给出三个系统的安装命令；学习路线案例移到 `dei-notebook/examples/`，抖音监控工作簿模板在 `dei-capture/templates/`，都随 Skill 安装。未在真实 Windows 机器上实测。
+
+### dei-course（2026-11-13 加入）
+
+- 来源：用户自己的 course-handbook-creator（创作线八步 + 13 章模板 + Win/Mac 双 zip 打包器，原样保留）；发布线从「只推 Notion」改为按平台分 `publish.md`（通用）+ `publish-feishu|notion|dingtalk.md`
+- 案例：`examples/AI夜校四节课/`（用户 2026-11-13 要求放入，四节主手册 + 讲师卡 + Win/Mac 物料包 + Notion 发布记录，约 1MB；课程方案原文含商业打法，没放）
+- 课程文件夹默认 `05_成品/课程/<课程名>/`，用户指定了就用指定的；每门课一份 `发布记录.json`（原 Skill 里写死的 Notion page_id 档案已移到用户自己的课程文件夹，不进仓库）
+- 实测状态：打包脚本未在本仓库重新跑；飞书发布线未实测（本机 lark-cli 1.0.82 已装）；Notion 线：本机 2026-11-13 装好 `ntn` 0.23.30 并登录，读课程页实测通过，新建/附件未实测；钉钉线未实测（本机没有 dws）
+
+### dei-moments（2026-11-13 加入）
+
+- 来源：和用户一起为一次真实课程发售做的诊断、改写、排期，以及一份 10 张运营表融合成的朋友圈方法论（七模块）；用户反馈过的写法规则写进 `references/copy-rules.md`（干货要有分量、开头两行、主角是自己、不被原文框住、产品用「以前 → 之后」讲）
+- 用户的私人素材（风格提示词、素材库、每期发售方案和数据）只放工作区 `05_成品/朋友圈/`，不进仓库
+- 方法论里的模板框架是对通用运营方法的重述，没有照搬原表格；浪潮式发售概念出自杰夫·沃克《浪潮式发售》
+- 实测状态：方法和文案在一次真实发售里用过；Skill 本身的流程还没有端到端跑过
 
 ## 下一步从这里开始
 

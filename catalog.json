@@ -52,6 +52,25 @@
         "notebooklm-py 0.8.5+（含 playwright chromium）",
         "Google 账号"
       ]
+    },
+    {
+      "name": "dei-course",
+      "layer": "output",
+      "summary": "AI 办公实操课：学员手册（13 章）、Win/Mac 双版本物料包、讲师练习卡，发布到用户常用的飞书、Notion 或钉钉",
+      "install": "default",
+      "requires": [
+        "Python 3.9+",
+        "发布时：飞书 lark-cli / Notion ntn 或连接器 / 钉钉 dws（三选一，按用户设定）"
+      ]
+    },
+    {
+      "name": "dei-moments",
+      "layer": "output",
+      "summary": "朋友圈私域经营：从语料反推风格提示词、诊断没回响的朋友圈、浪潮式发售排期与文案、选题矩阵、复盘与素材库",
+      "install": "default",
+      "requires": [
+        "Python 3.9+（只用于定位 dei 工作区）"
+      ]
     }
   ]
 }

@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-course 课程手册"
+  short_description: "做学员手册、Win/Mac 物料包和讲师卡，发布到飞书、Notion 或钉钉"
+  default_prompt: "使用 $dei-course 按这份课程方案写第 1 节课手册和物料包，做完发布到我常用的文档平台。"
+policy:
+  allow_implicit_invocation: true
