@@ -107,6 +107,15 @@ def main() -> int:
         elif f"${name}" not in ui.read_text(encoding="utf-8"):
             errors.append(f"{name}: agents/openai.yaml 的 default_prompt 须包含 ${name}")
 
+    # 工作区模块在每个自有 Skill 里各有一份（Skill 分别安装、互相看不到），内容必须完全一致
+    copies = {name: SKILLS / name / "scripts" / "dei_workspace.py" for name in names
+              if (SKILLS / name / "scripts").is_dir()}
+    texts = {name: p.read_text(encoding="utf-8") for name, p in copies.items() if p.is_file()}
+    for name in sorted(set(copies) - set(texts)):
+        errors.append(f"{name}: 缺少 scripts/dei_workspace.py（从 dei-capture 复制）")
+    if len(set(texts.values())) > 1:
+        errors.append("各 Skill 的 scripts/dei_workspace.py 不一致：改一份后复制到所有 Skill")
+
     for item in externals:
         if item["kind"] in {"vendor", "manual"}:
             if item["owner"] not in names:

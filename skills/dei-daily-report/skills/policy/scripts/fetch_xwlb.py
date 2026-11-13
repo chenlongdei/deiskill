@@ -130,7 +130,7 @@ def available_dates(required):
 
 
 def existing_days(root):
-    directory = os.path.join(root, "transcripts")
+    directory = os.path.join(root, "逐字稿")
     result = set()
     if not os.path.isdir(directory):
         return result
@@ -144,7 +144,7 @@ def existing_days(root):
 def save_day(root, day, items):
     if not items:
         return False
-    output_dir = os.path.join(root, "transcripts", day[:4], day[4:6])
+    output_dir = os.path.join(root, "逐字稿", day[:4], day[4:6])
     os.makedirs(output_dir, exist_ok=True)
     date_text = f"{day[:4]}-{day[4:6]}-{day[6:]}"
     lines = [f"# 新闻联播 {date_text} 逐字稿", ""]
@@ -157,8 +157,19 @@ def save_day(root, day, items):
     return True
 
 
+def _log_dir(root):
+    """默认数据目录的日志在 99_系统/日志/政策与商机/；--root 指到别处时放在 <root>/日志/。"""
+    try:
+        paths = _paths()
+        if Path(root).resolve() == paths.data_dir("policy").resolve():
+            return str(paths.log_dir("policy"))
+    except SystemExit:
+        pass
+    return os.path.join(root, "日志")
+
+
 def log(root, message):
-    log_dir = os.path.join(root, "logs")
+    log_dir = _log_dir(root)
     os.makedirs(log_dir, exist_ok=True)
     line = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}"
     print(line, flush=True)
@@ -167,15 +178,16 @@ def log(root, message):
 
 
 
-def _data_dir(module):
-    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+def _paths():
+    """数据目录与子目录名：见 dei-daily-report/scripts/dei_paths.py。"""
     import sys as _sys
-    env = os.environ.get('DEI_DAILY_DATA_DIR')
-    if env:
-        return Path(env).expanduser()
     _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
-    from dei_paths import data_dir
-    return data_dir(module)
+    import dei_paths
+    return dei_paths
+
+
+def _data_dir(module):
+    return _paths().data_dir(module)
 
 def main():
     parser = argparse.ArgumentParser()

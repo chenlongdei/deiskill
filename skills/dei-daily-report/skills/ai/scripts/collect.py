@@ -12,16 +12,14 @@ for _s in (_sys.stdout, _sys.stderr):
     except Exception:
         pass
 ROOT=Path(__file__).resolve().parents[1]
-def _data_dir(module):
-    """数据目录：见 dei-daily-report/scripts/dei_paths.py。"""
+def _paths():
+    """数据目录与子目录名：见 dei-daily-report/scripts/dei_paths.py。"""
     import sys as _sys
-    env = os.environ.get('DEI_DAILY_DATA_DIR')
-    if env:
-        return Path(env).expanduser()
     _sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'scripts'))
-    from dei_paths import data_dir
-    return data_dir(module)
-BASE=_data_dir('ai')
+    import dei_paths
+    return dei_paths
+PATHS=_paths()
+BASE=PATHS.data_dir('ai')
 CST=timezone(timedelta(hours=8))
 parser=argparse.ArgumentParser()
 parser.add_argument('--date',help='北京时间日期 YYYY-MM-DD，查询过去七天内的一天')
@@ -91,7 +89,9 @@ if args.date and 'aihot_selected' in out['sources']:
  pool=[i for p in out['sources']['aihot_selected'].get('pages',[]) for i in (p.get('items') or [])]
  out['sources']['aihot_selected_in_window']=[i for i in pool if _in_window(i)]
 out['historicalCoverageNote']='Builders 已查询 GitHub 历史快照；覆盖仅限中心源曾采集内容，当前热点不是历史热点快照。' if args.date else None
-raw=BASE/'sources'/start.strftime('%Y-%m-%d'); raw.mkdir(parents=True,exist_ok=True)
+raw=PATHS.sources_dir('ai',start.strftime('%Y-%m-%d')); raw.mkdir(parents=True,exist_ok=True)
 path=raw/(now.strftime('%Y-%m-%d_%H%M%S')+'.json')
 path.write_text(json.dumps(out,ensure_ascii=False,indent=2), encoding="utf-8")
+import dei_workspace
+dei_workspace.log_run('dei-daily-report','ai-collect','partial' if out['errors'] else 'completed',[path])
 print(json.dumps({'path':str(path),'window':out['window'],'available_sources':list(out['sources']),'errors':out['errors']},ensure_ascii=False))

@@ -36,7 +36,7 @@ API_BASE = "https://knowledge-api.trytalks.com"
 BIJI_HOME = "https://www.biji.com/"
 REQUEST_TIMEOUT = 30
 CRED_CACHE = Path.home() / ".biji_exporter" / "skill_credentials.json"
-DEFAULT_BASE = None  # 由 dei-capture 配置决定：douyin.biji_export_base，默认 <output_root>/抖音/Get笔记导出
+DEFAULT_BASE = None  # 由 dei-capture 配置决定：douyin.biji_export_base，默认 02_采集/抖音/博主（每个博主导出到 <博主名>/逐字稿/）
 
 
 def _apply_base_override():
@@ -441,9 +441,9 @@ def find_existing_output_dir(base_dir, url):
     base = Path(base_dir)
     if not base.is_dir():
         return None
-    for d in sorted(base.iterdir()):
-        if not d.is_dir():
-            continue
+    cands = [d for d in sorted(base.iterdir()) if d.is_dir()]
+    cands = [d / "逐字稿" for d in cands if (d / "逐字稿").is_dir()] + cands  # 新版 <博主>/逐字稿/，旧版 <博主>_<id>/
+    for d in cands:
         meta = read_export_meta(d)
         if meta.get("url") == url:
             return d
@@ -476,7 +476,7 @@ def resolve_output_dir(url, output_dir, output_is_base):
     if hit:
         return Path(hit), True
     _, follow_id, follow_name = build_export_identity(url)
-    return base / f"{sanitize_filename(follow_name)}_{follow_id}", False
+    return base / sanitize_filename(follow_name, 40) / "逐字稿", False
 
 
 def list_exported_post_indexes(output_dir):

@@ -102,9 +102,9 @@ def cmd_export_data(args):
 
 
 def latest_xlsx(name):
-    # 先找自动导出的位置（<output_root>/抖音/社媒数据），再找手动导出常落的下载文件夹
+    # 先找自动导出的位置（博主/<名>/作品数据，旧版 抖音/社媒数据），再找手动导出常落的下载文件夹
     root = douyin_root()
-    dirs = ([str(root / "社媒数据")] if root else []) + [os.path.expanduser("~/Downloads")]
+    dirs = ([str(root / "博主" / name / "作品数据"), str(root / "社媒数据")] if root else []) + [os.path.expanduser("~/Downloads")]
     files = sorted(sum((glob.glob(os.path.join(d, f"{name}_作品数据_*.xlsx")) for d in dirs), []),
                    key=os.path.getmtime)
     if not files and name:  # 兜底：按达人名模糊找
@@ -119,9 +119,10 @@ def cmd_export_merge(args):
     if tdir is None:
         import biji_export
         base = Path(biji_export.default_export_base_dir())
-        cands = sorted(base.glob(f"{args.name}_*"), key=lambda p: p.stat().st_mtime if p.exists() else 0)
+        cands = [base / args.name / "逐字稿"] if (base / args.name / "逐字稿").is_dir() else \
+            sorted(base.glob(f"{args.name}_*"), key=lambda p: p.stat().st_mtime if p.exists() else 0)
         if not cands:
-            print(f"没找到 {base}/{args.name}_* 目录；先跑 export-biji，或用 --transcript-dir 指定。")
+            print(f"没找到 {base}/{args.name}/逐字稿 目录；先跑 export-biji，或用 --transcript-dir 指定。")
             sys.exit(2)
         tdir = cands[-1]
     stats = args.stats

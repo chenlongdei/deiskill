@@ -20,7 +20,8 @@
   5. 出当天汇总表 + 逐字稿；更新跨期总表（首次出现、最近出现、上榜次数）
 
 配置：dei-capture config.json 的 douyin.keyword_watch（见 config.example.json）。
-产出：<output_root>/抖音/关键词/关键词总表.xlsx，以及 YYYY-MM-DD/汇总.xlsx、逐字稿/<关键词>/*.md、运行记录.json
+产出：02_采集/抖音/关键词/关键词总表.xlsx，以及每次一个批次文件夹 YYYY-MM-DD_HHMM/（北京时间）：
+汇总.xlsx、逐字稿/<关键词>/*.md、_原始数据/运行记录.json。试跑写到 99_系统/测试/抖音关键词巡检/。
 """
 from __future__ import annotations
 
@@ -129,6 +130,7 @@ def load_json(path: Path, default):
 
 
 def save_json(path: Path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
@@ -503,7 +505,7 @@ def write_xlsx(rows, columns, path: Path, sheet):
     wb.save(path)
 
 
-def update_master(base: Path, day: str, recs, shown_by_word):
+def update_master(base: Path, day: str, recs, shown_by_word, folder: str = ""):
     """跨期总表：新采的视频补全资料；本次又出现在前几页的旧视频，上榜次数 +1、更新最新视频指数。"""
     store_path = base / ".master.json"
     store = load_json(store_path, {})
@@ -522,7 +524,7 @@ def update_master(base: Path, day: str, recs, shown_by_word):
         m = store.get(r["视频ID"])
         keep = {k: r.get(k, "") for k in MASTER_COLUMNS if k in r}
         if r.get("逐字稿"):
-            keep["逐字稿"] = f"{day}/逐字稿/{r['逐字稿']}"
+            keep["逐字稿"] = f"{folder or day}/逐字稿/{r['逐字稿']}"
         if m is None:
             store[r["视频ID"]] = {**keep, "首次出现": day, "最近出现": day, "上榜次数": 1}
         else:
@@ -569,8 +571,15 @@ def cmd_run(args):
     seen = load_json(seen_file, {})
     values = load_json(values_file, {})
     today = f"{now_bj():%Y-%m-%d}"
-    day = base / (today + ("_试跑" if trial else ""))
-    day.mkdir(exist_ok=True)
+    import dei_workspace
+    if trial:
+        try:
+            trial_base = dei_workspace.system("测试") / "抖音关键词巡检"
+        except SystemExit:
+            trial_base = base / "_试跑"
+        day = dei_workspace.batch_dir(trial_base, "试跑")
+    else:
+        day = dei_workspace.batch_dir(base)
     run = {"开始": now_bj().isoformat(timespec="seconds"), "设置": {k: v for k, v in kw.items() if k != "keywords"},
            "关键词": {}, "状态": "ok"}
     rows, shown_by_word = [], {}
@@ -637,11 +646,13 @@ def cmd_run(args):
         if rows:
             write_xlsx(rows, DAY_COLUMNS, day / "汇总.xlsx", "汇总")
             if not trial:
-                run["总表条数"] = update_master(base, today, rows, shown_by_word)
+                run["总表条数"] = update_master(base, today, rows, shown_by_word, day.name)
         run["结束"] = now_bj().isoformat(timespec="seconds")
         run["条数"] = len(rows)
-        save_json(day / "运行记录.json", run)
+        save_json(day / "_原始数据" / "运行记录.json", run)
         lock.unlink(missing_ok=True)
+        dei_workspace.log_run("dei-capture", "douyin-keyword-watch",
+                              {"ok": "completed"}.get(run["状态"], run["状态"]), [day])
 
     if run["状态"] in ("ok", "partial") and rows and not trial and not args.only:
         last_file.write_text(now_bj().isoformat(timespec="seconds"))

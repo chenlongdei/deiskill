@@ -10,13 +10,14 @@
 用法：
   python3 shejiao_export.py "https://www.douyin.com/user/MS4wLj..." [--count 100] [--timeout 1800]
 
-输出：{outdir}/{达人昵称}_作品数据_YYYYMMDD.xlsx（默认 <output_root>/抖音/社媒数据）
+输出：默认 02_采集/抖音/博主/{达人昵称}/作品数据/{达人昵称}_作品数据_YYYYMMDD.xlsx；指定 --outdir 时放在该目录
 """
 import argparse
 import glob
 import json
 import os
 import re
+import shutil
 import sys
 import time
 
@@ -60,13 +61,17 @@ def wait_new_xlsx(before, timeout_s=60, DL=None):
 
 
 def default_outdir():
-    """默认放在 <output_root>/抖音/社媒数据；没配置保存位置时停下，由 Agent 先问用户。"""
+    """浏览器先下载到 99_系统/缓存/社媒助手下载，导出后再移到博主文件夹；没配置工作区时停下，由 Agent 先问用户。"""
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from common import douyin_root
     root = douyin_root()
     if root is None:
         raise SystemExit("未配置采集结果保存位置：先按 dei-capture 的 SKILL.md「首次配置」写入 output_root，或用 --outdir 指定")
-    return str(root / "社媒数据")
+    try:
+        import dei_workspace
+        return str(dei_workspace.system("缓存") / "社媒助手下载")
+    except SystemExit:
+        return str(root / "社媒数据")
 
 
 def launch_instance():
@@ -95,7 +100,7 @@ def main():
     ap.add_argument("url", help="抖音达人主页 URL")
     ap.add_argument("--count", type=int, default=0, help="导出数量，0=全部")
     ap.add_argument("--timeout", type=int, default=1800, help="采集最长等待秒数")
-    ap.add_argument("--outdir", default=None, help="xlsx 落盘目录（默认 <output_root>/抖音/社媒数据）")
+    ap.add_argument("--outdir", default=None, help="xlsx 落盘目录（默认放进 博主/<昵称>/作品数据/）")
     args = ap.parse_args()
     DL = args.outdir or default_outdir()
     os.makedirs(DL, exist_ok=True)
@@ -194,7 +199,12 @@ def main():
         nick = (re.search(r"^(.+?)的抖音", dy.title()).group(1)
                 if re.search(r"的抖音", dy.title()) else "达人")
         out = os.path.join(DL, f"{nick}_作品数据_{time.strftime('%Y%m%d')}.xlsx")
-        os.rename(f, out)
+        if not args.outdir:  # 默认归到博主文件夹
+            from common import douyin_root
+            final = douyin_root() / "博主" / nick / "作品数据"
+            final.mkdir(parents=True, exist_ok=True)
+            out = str(final / os.path.basename(out))
+        shutil.move(f, out)
         print(json.dumps({"ok": True, "file": out, "rows": total,
                           "size": os.path.getsize(out)}, ensure_ascii=False))
         browser.close()

@@ -2,7 +2,12 @@
 """抖音模块公共工具：配置加载、状态存取(videos.json)、HTTP、字段映射。仅用标准库，Python 3.9+。
 
 源自 content-toolkit（chenlongdei，CC BY-NC-SA 4.0，见同目录 LICENSE），并入 dei-capture 时改了配置读取：
-配置在 dei-capture 的 config.json 里（douyin 段 + 顶层共用的 dashscope 段），数据默认放在 <output_root>/抖音/ 下。
+配置在 dei-capture 的 config.json 里（douyin 段 + 顶层共用的 dashscope 段），数据默认放在 dei 工作区的 02_采集/抖音/ 下：
+  博主/<博主名>/逐字稿/      Get笔记全量导出（biji_export_base 默认指向 博主/）
+  博主/<博主名>/作品数据/    社媒助手导出的 xlsx
+  博主/<博主名>/文案与数据/  逐字稿 + 数据合并稿（merge_export）
+  博主/<博主名>/监控更新/    盯博主、链接出稿的合并稿（merge_output）
+  _原始数据/                 盯博主流水线的 workspace：videos.json、逐字稿/、.raw 等机器数据
 """
 import json
 import os
@@ -106,7 +111,7 @@ def read_full_config(path=None):
 
 
 def douyin_root():
-    """<output_root>/抖音；没配置保存位置时返回 None。"""
+    """02_采集/抖音；没配置保存位置时返回 None。"""
     try:
         from capture_paths import data_dir
         return data_dir("douyin")
@@ -127,7 +132,7 @@ def load_config(path=None, need_dirs=True):
     cfg["tikhub_token"] = tk
     cfg.setdefault("dasheng", {})
     root = douyin_root()
-    for key, sub in (("workspace", "监控"), ("biji_export_base", "Get笔记导出")):
+    for key, sub in (("workspace", "_原始数据"), ("biji_export_base", "博主")):
         if cfg.get(key):
             cfg[key] = str(Path(cfg[key]).expanduser())
         elif root is not None:
@@ -137,7 +142,15 @@ def load_config(path=None, need_dirs=True):
                              f"把 output_root 写入 {CONFIG_PATH}")
         else:
             cfg[key] = ""
+    cfg["bloggers_dir"] = str(Path(cfg["biji_export_base"])) if cfg.get("biji_export_base") else ""
     return cfg
+
+
+def blogger_dir(cfg, name, sub=""):
+    """博主文件夹：<博主>/<子目录>。名字里的非法字符会被替换。"""
+    base = Path(cfg.get("bloggers_dir") or Path(cfg["workspace"]).parent / "博主")
+    path = base / sanitize_filename(name or "未知博主", 40)
+    return path / sub if sub else path
 
 
 def data_provider(cfg):

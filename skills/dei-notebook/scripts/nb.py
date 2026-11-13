@@ -60,8 +60,10 @@ def data_root() -> Path:
     if override:
         return Path(override).expanduser()
     root = load_config().get("output_root", "")
-    if not root:
-        sys.exit(f"未配置知识库存档位置：请先按 SKILL.md「首次配置」询问用户，把 output_root 写入 {CONFIG}")
+    if not root:  # 默认放 dei 工作区的 04_知识库/
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import dei_workspace
+        return dei_workspace.stage("notebook")
     path = Path(root).expanduser()
     if not path.is_dir():
         sys.exit(f"存档位置不存在：{path}。请用户确认是新建、改路径，还是本次跳过（不静默新建）。")
@@ -130,7 +132,7 @@ def auth_stop(exc: NbError) -> int:
 
 def record_path(nb_id: str, title: str) -> Path:
     root = data_root()
-    for p in root.glob("*/notebook.json"):
+    for p in [*root.glob("*/_原始数据/notebook.json"), *root.glob("*/notebook.json")]:
         try:
             if json.loads(p.read_text(encoding="utf-8")).get("id") == nb_id:
                 return p
@@ -139,8 +141,19 @@ def record_path(nb_id: str, title: str) -> Path:
     d = root / slug(title)
     if d.exists():
         d = root / f"{slug(title)}-{nb_id[:6]}"
-    d.mkdir(parents=True, exist_ok=True)
-    return d / "notebook.json"
+    (d / "_原始数据").mkdir(parents=True, exist_ok=True)
+    return d / "_原始数据" / "notebook.json"
+
+
+def nb_dir(rpath: Path) -> Path:
+    """笔记本文件夹：notebook.json 在 _原始数据/ 里（旧版在第一层）。"""
+    return rpath.parent.parent if rpath.parent.name == "_原始数据" else rpath.parent
+
+
+def ledger(task: str, status: str, outputs) -> None:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import dei_workspace
+    dei_workspace.log_run("dei-notebook", task, status, outputs)
 
 
 def load_record(path: Path, nb_id: str, title: str) -> dict:
@@ -334,6 +347,7 @@ def cmd_import(a) -> int:
         print(f"[{status}] {src.get('title') or src['key']}", file=sys.stderr)
     save_record(rpath, rec)
     ok = [r for r in results if r["status"] in ("ready", "exists")]
+    ledger("import", "completed" if ok else "failed", [nb_dir(rpath)])
     emit({"command": "import", "notebook_id": nb_id, "title": title, "record": str(rpath),
           "ok": len(ok), "pending": sum(r["status"] == "timeout" for r in results),
           "failed": [r for r in results if r["status"] not in ("ready", "exists", "timeout")], "skipped": skipped})
@@ -378,7 +392,7 @@ def ask_one(nb_id: str, title: str, rpath: Path, rec: dict, question: str,
     refs = data.get("references") or []
     rec["asks"] = int(rec.get("asks", 0)) + 1
     rec["conversation_id"] = data.get("conversation_id") or rec.get("conversation_id")
-    qdir = rpath.parent / (subdir or "问答")
+    qdir = nb_dir(rpath) / (subdir or "问答")
     qdir.mkdir(parents=True, exist_ok=True)
     first_line = re.sub(r"^#+\s*", "", question.strip().splitlines()[0])
     path = qdir / f"{rec['asks']:03d}_{slug(first_line, 30)}.md"
@@ -429,7 +443,8 @@ def cmd_ask(a) -> int:
     ok = [r for r in results if "file" in r and not r["empty"]]
     uncited = [r["file"] for r in results if r.get("uncited")]
     summary = {"command": "ask", "notebook_id": nb_id, "asked": len(results), "ok": len(ok),
-               "dir": str(rpath.parent / (a.dir or "问答")), "results": results}
+               "dir": str(nb_dir(rpath) / (a.dir or "问答")), "results": results}
+    ledger("ask", "completed" if len(ok) == len(results) else ("partial" if ok else "failed"), [nb_dir(rpath) / (a.dir or "问答")])
     if uncited:
         summary["uncited"] = uncited
         summary["hint"] = ("这些回答没有引用（多见于接续对话）。需要出处时用 --fresh 开新对话重问"
@@ -443,7 +458,7 @@ def cmd_make(a) -> int:
     try:
         nb_id, title = resolve_notebook(a.notebook)
         rpath = record_path(nb_id, title)
-        outdir = rpath.parent / "产物"
+        outdir = nb_dir(rpath) / "产物"
         art_id = a.artifact
         if not art_id:
             submitted = nb(["generate", a.kind, "-n", nb_id] + a.extra, timeout=300)
@@ -475,6 +490,7 @@ def cmd_make(a) -> int:
     if a.kind == "mind-map" and saved.suffix == ".json" and saved.is_file():
         outline = saved.with_suffix(".md")
         outline.write_text(mindmap_markdown(json.loads(saved.read_text(encoding="utf-8"))), encoding="utf-8")
+    ledger("make-" + a.kind, "completed", [saved])
     emit({"command": "make", "status": "completed", "notebook_id": nb_id, "kind": a.kind, "artifact_id": art_id,
           "file": str(saved) if str(saved) not in ("", ".") else None, "outline": str(outline) if outline else None})
     return 0

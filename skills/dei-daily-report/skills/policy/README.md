@@ -38,7 +38,7 @@ bash scripts/install.sh dei-daily-report
 
 给agent的任务：
 
-> 读取 dei-daily-report/skills/policy/SKILL.md，按完整方法生成昨天的政策与商机日报。全文拆快讯、核验公开文件、回溯历史、提出并检验假设。边际变化用表格，其他文字展开。将报告写入data/reports并给链接。
+> 读取 dei-daily-report/skills/policy/SKILL.md，按完整方法生成昨天的政策与商机日报。全文拆快讯、核验公开文件、回溯历史、提出并检验假设。边际变化用表格，其他文字展开。将报告写入data/报告并给链接。
 
 需要文件读写、Python 3.9+、curl，以及联网检索、网页/PDF读取能力。网络工具由目标agent提供，不绑定某个MCP。没有检索能力时只能输出明确标注限制的分析，不能声称已外部核验。Python需可用Asia/Shanghai时区数据；最小Linux环境按系统方式安装时区数据库。
 
@@ -98,7 +98,7 @@ agent.conf.example             命令配置示例
 data/                          运行生成，Git忽略
 ```
 
-逐字稿`data/transcripts/YYYY/MM/YYYYMMDD.md`，报告`data/reports/YYYY-MM-DD_分析报告.md`，原件`data/sources/播出日/`，主题`data/topics.json`，修订`data/revisions/`，日志`data/logs/`。升级复制代码方法模板，保留已有data和agent.conf；跨设备迁移需要另行复制运行数据并检查自己的调度配置。
+data 指 dei 工作区的 `03_日报/政策与商机/`。逐字稿`data/逐字稿/YYYY/MM/YYYYMMDD.md`，报告`data/报告/YYYY/YYYY-MM-DD_分析报告.md`，原件`data/原件/YYYY/播出日/`，主题`data/主题状态.json`，修订`data/修订/`，日志在工作区`99_系统/日志/政策与商机/`。升级复制代码方法模板，保留已有data和agent.conf；跨设备迁移需要另行复制运行数据并检查自己的调度配置。
 
 本包不包含私人日报、完整课程逐字稿、密钥或任务ID。来源为第三方文字稿，关键事实须主动回到原始发布核验。方法形成的商业判断是假设，不保证付费需求或回报。
 

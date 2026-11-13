@@ -50,7 +50,7 @@ python3 scripts/douyin/run.py export-merge 博主名               # 单独合�
 一张 Excel 表盯一组对标博主：第一页「相似博主总表」列出博主，后面每个博主一页，记录他近 7 天的视频（客观数据 + 逐字稿），右边留给用户写自己的创作与复盘。日报的抖音部分读的就是它。
 
 ```bash
-python3 scripts/douyin/workbook.py init        # 第一次：从模板生成 <output_root>/抖音/监控工作簿/抖音监控工作簿.xlsx
+python3 scripts/douyin/workbook.py init        # 第一次：从模板生成 01_我的清单/抖音监控工作簿.xlsx
 python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-sheets 页签1,页签2] [--replace-sheets 页签1]
 ```
 
@@ -58,7 +58,7 @@ python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-s
 - 模板在本 Skill 的 `templates/抖音监控工作簿模板.xlsx`，由 `scripts/douyin/make_template.py` 生成。
 - 数据来源跟 `douyin.provider`：Monid 没有 BGM 和粉丝量（这两列留空，赞粉比也就空着）；TikHub 都有。去水印用大圣，没配置大圣时用 Monid。时间一律按北京时间写。
 
-默认**直接更新原表**：写入前先备份到同目录 `备份/`（保留最近 10 份），失败清单写在同目录 `运行记录/<表名>_<时间>.report.json`；要另存时加 `--output`。账号覆盖表在 `<output_root>/抖音/监控工作簿/account_overrides.json`（或 `--overrides` 指定），优先级高于总表；转写任务记录在同目录 `asr_tasks.json`，重跑不重复转写。
+默认**直接更新原表**：写入前先备份到 `99_系统/备份/抖音监控工作簿/`（保留最近 10 份），失败清单写在 `99_系统/日志/抖音监控工作簿/<表名>_<时间>.report.json`；要另存时加 `--output`。账号覆盖表是 `01_我的清单/抖音账号覆盖表.json`（或 `--overrides` 指定），优先级高于总表；转写任务记录在 `99_系统/状态/抖音监控工作簿/asr_tasks.json`，重跑不重复转写。
 
 固定规则：
 
@@ -79,7 +79,7 @@ python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7] [--only-s
 ```bash
 python3 scripts/douyin/keyword_watch.py doctor        # 逐项自检，✗ 的按提示补
 python3 scripts/douyin/keyword_watch.py login         # 弹出专用 Chrome，用抖音 App 扫码
-python3 scripts/douyin/keyword_watch.py run --only <一个词> --per-keyword 2 --fast   # 试跑，结果进 *_试跑 文件夹
+python3 scripts/douyin/keyword_watch.py run --only <一个词> --per-keyword 2 --fast   # 试跑，结果进 99_系统/测试/抖音关键词巡检/
 python3 scripts/douyin/keyword_watch.py schedule --every-days 3 --at 02:00 [--run-now]
 ```
 
@@ -102,11 +102,12 @@ python3 scripts/douyin/keyword_watch.py unschedule          # 取消定时
 **产出**
 
 ```text
-<抖音>/关键词/
-├── 关键词总表.xlsx            跨期：首次出现、最近出现、上榜次数、最新视频指数、逐字稿路径
-├── YYYY-MM-DD/汇总.xlsx       当次：数据、标签、大家都在搜、逐字稿开头、转写来源和备注
-├── YYYY-MM-DD/逐字稿/<关键词>/NN_标题.md
-└── YYYY-MM-DD/运行记录.json
+02_采集/抖音/关键词/
+├── 关键词总表.xlsx                 跨期：首次出现、最近出现、上榜次数、最新视频指数、逐字稿路径
+└── YYYY-MM-DD_HHMM/                每次一个批次（北京时间）
+    ├── 汇总.xlsx                   当次：数据、标签、大家都在搜、逐字稿开头、转写来源和备注
+    ├── 逐字稿/<关键词>/NN_标题.md
+    └── _原始数据/运行记录.json
 ```
 
 **已验证的事实与解决办法**（2026-11-12 至 11-13）
@@ -138,7 +139,7 @@ open -na "Google Chrome" --args --user-data-dir="$HOME/.shejiao_automation" \
 # 在这个实例里：装「社媒助手」插件 + 登录抖音 + 登录插件账号
 ```
 
-**社媒助手（手动）**：在 Chrome 达人主页用插件「批量导出视频数据」，字段勾选标题、发布时间、点赞、评论、收藏、转发、视频链接；告诉 Agent 文件位置，或放进 `<抖音>/社媒数据/`。
+**社媒助手（手动）**：在 Chrome 达人主页用插件「批量导出视频数据」，字段勾选标题、发布时间、点赞、评论、收藏、转发、视频链接；告诉 Agent 文件位置，或放进 `博主/<博主名>/作品数据/`。
 
 **合并**：先按视频链接 ID 精确匹配，再按标题归一化、相似度 ≥ 0.75、包含关系；匹配不到的标 ❌ 并列在 INDEX 末尾（多数是已删稿）。
 
@@ -162,12 +163,19 @@ open -na "Google Chrome" --args --user-data-dir="$HOME/.shejiao_automation" \
 
 ## 输出
 
+一个博主一个文件夹，不带日期，内容往里累加：
+
 ```text
-<output_root>/抖音/
-├── 监控/            videos.json（状态库）、transcripts/、<博主>/<日期>-<标题>.md、INDEX.md、.cost_log.json
-├── 监控工作簿/      account_overrides.json、asr_tasks.json（更新后的工作簿在输入文件旁）
-├── Get笔记导出/     <博主>_<id>/ 逐字稿；merged/<博主>/ 合并了数据的版本
-└── 社媒数据/        <博主>_作品数据_YYYYMMDD.xlsx
+02_采集/抖音/
+├── 博主/
+│   ├── <博主名>/
+│   │   ├── 逐字稿/        Get笔记全量导出：NNN_<作品ID>_<标题>.md、links.json
+│   │   ├── 作品数据/      社媒助手导出：<博主>_作品数据_YYYYMMDD.xlsx
+│   │   ├── 文案与数据/    逐字稿 + 数据合并稿、INDEX.md
+│   │   └── 监控更新/      盯博主、链接出稿的合并稿：<日期>-<标题>.md
+│   └── 监控索引.md        盯博主和链接出稿的全部视频索引
+├── 关键词/                见上文「关键词巡检」
+└── _原始数据/             盯博主流水线的状态库：videos.json、逐字稿/、.cost_log.json 等
 ```
 
 ## 监控工作簿：已验证的问题与解决办法

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """步骤4：合并「视频数据 + 逐字稿」→ 博主目录 Markdown + INDEX.md 索引
 
-- 目录结构：workspace/<博主名>/<发布日期>-<标题>.md
+- 目录结构：博主/<博主名>/监控更新/<发布日期>-<标题>.md
 - 每篇 md：YAML frontmatter（数据：点赞/评论/收藏/转发、链接、时长等）+ 逐字稿正文
-- workspace/INDEX.md：全部视频总索引表（每次重建）
+- 博主/监控索引.md：全部视频总索引表（每次重建）
 - 已合并条目默认跳过，--force 可重出（例如数据更新后重新合并）
 """
 import argparse
@@ -20,7 +20,7 @@ for _s in (_sys.stdout, _sys.stderr):
         pass
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import (now_str, sanitize_filename, store_load, store_save,
+from common import (blogger_dir, now_str, sanitize_filename, store_load, store_save,
                     load_config, yaml_str)
 
 STATS_LABELS = [("likes", "点赞"), ("comments", "评论"), ("collects", "收藏"), ("shares", "转发")]
@@ -33,11 +33,10 @@ def paragraphs(text, per=3):
     return "\n\n".join("".join(sentences[i:i + per]) for i in range(0, len(sentences), per))
 
 
-def write_one(ws, v):
-    author = sanitize_filename(v.get("author_name") or "未知博主", 40)
+def write_one(cfg, v):
     date = (v.get("publish_time") or "未知日期")[:10]
     title = v.get("title") or v.get("video_id")
-    out_dir = ws / author
+    out_dir = blogger_dir(cfg, v.get("author_name"), "监控更新")
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{date}-{sanitize_filename(title)}.md"
 
@@ -104,7 +103,8 @@ def rebuild_index(ws, vids):
             f"| {stats.get('likes', '-')} | {stats.get('comments', '-')} "
             f"| {stats.get('collects', '-')} | {stats.get('shares', '-')} "
             f"| {stage} | {rel} |")
-    (ws / "INDEX.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    ws.mkdir(parents=True, exist_ok=True)
+    (ws / "监控索引.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main():
@@ -114,7 +114,7 @@ def main():
     args = ap.parse_args()
 
     cfg = load_config(args.config)
-    ws = Path(cfg["workspace"])
+    ws = blogger_dir(cfg, "x").parent  # 博主/
     store = store_load(cfg)
     vids = store["videos"]
 
@@ -125,7 +125,7 @@ def main():
         if v.get("merged") and not args.force:
             skipped += 1
             continue
-        path = write_one(ws, v)
+        path = write_one(cfg, v)
         v["merged"] = True
         v["stage"] = "merged"
         v["merged_file"] = str(path.relative_to(ws))
@@ -134,7 +134,7 @@ def main():
 
     rebuild_index(ws, vids)
     store_save(cfg, store)
-    print(f"[完成] 本次合并 {merged} 篇，跳过已合并 {skipped} 篇。索引：{ws / 'INDEX.md'}")
+    print(f"[完成] 本次合并 {merged} 篇，跳过已合并 {skipped} 篇。索引：{ws / '监控索引.md'}")
 
 
 if __name__ == "__main__":

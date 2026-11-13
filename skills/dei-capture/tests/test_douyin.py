@@ -49,8 +49,8 @@ class DouyinTests(Base):
                  "c['dashscope']['model'], c['monid']['token']], ensure_ascii=False))")
         self.assertEqual(r.returncode, 0, r.stderr)
         ws, biji, key, model, token = json.loads(r.stdout)
-        self.assertEqual(Path(ws), e.out / "抖音" / "监控")
-        self.assertEqual(Path(biji), e.out / "抖音" / "Get笔记导出")
+        self.assertEqual(Path(ws), e.out / "抖音" / "_原始数据")
+        self.assertEqual(Path(biji), e.out / "抖音" / "博主")
         self.assertEqual((key, model, token), ("sk-test", "paraformer-v2", "x"))
 
     def test_missing_output_root_stops(self):
@@ -70,7 +70,7 @@ class DouyinTests(Base):
 
     def test_merge_output_writes_markdown_and_index(self):
         e = self.make_env()
-        ws = e.out / "抖音" / "监控"
+        ws = e.out / "抖音" / "_原始数据"
         ws.mkdir(parents=True)
         store = {"videos": {"7300000000000000001": {
             "video_id": "7300000000000000001", "title": "测试视频", "author_name": "测试博主",
@@ -80,12 +80,13 @@ class DouyinTests(Base):
         (ws / "videos.json").write_text(json.dumps(store, ensure_ascii=False), encoding="utf-8")
         r = e.run("scripts/douyin/merge_output.py")
         self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
-        files = list((ws / "测试博主").glob("*.md"))
+        bloggers = e.out / "抖音" / "博主"
+        files = list((bloggers / "测试博主" / "监控更新").glob("*.md"))
         self.assertEqual(len(files), 1)
         text = files[0].read_text(encoding="utf-8")
         self.assertIn("第一句。", text)
         self.assertIn("120", text)
-        self.assertTrue((ws / "INDEX.md").exists())
+        self.assertTrue((bloggers / "监控索引.md").exists())
 
     def test_social_stats_csv(self):
         e = self.make_env()

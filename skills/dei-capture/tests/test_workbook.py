@@ -11,7 +11,11 @@ try:
 except ImportError:  # 监控工作簿依赖 openpyxl；没装时跳过整组测试
     raise unittest.SkipTest("需要 openpyxl：python3 -m pip install openpyxl")
 ROOT = Path(__file__).resolve().parents[1]
+import os
 import sys
+# 隔离真实的 dei 工作区：设了旧式数据目录变量，dei_workspace 就不会去读 ~/.deiskill/config.json
+_ISOLATED = tempfile.TemporaryDirectory()
+os.environ["DEI_CAPTURE_DATA_DIR"] = _ISOLATED.name
 sys.path.insert(0, str(ROOT / "scripts/douyin"))
 import tikhub  # noqa: E402
 spec = importlib.util.spec_from_file_location("pipeline", ROOT / "scripts/douyin/workbook.py")
@@ -115,6 +119,6 @@ class BackupTests(unittest.TestCase):
             d.mkdir()
             for i in range(12):
                 (d / f"表_20260101_0000{i:02d}.xlsx").write_bytes(b"old")
-            dst = pipeline.backup_copy(src, keep=10)
+            dst = pipeline.backup_copy(src, keep=10, dest=d)
             self.assertTrue(dst.exists())
             self.assertEqual(len(list(d.glob("表_*.xlsx"))), 10)

@@ -30,7 +30,7 @@ class FetchTests(unittest.TestCase):
         fetch = module('fetch_xwlb')
         with tempfile.TemporaryDirectory() as temp, patch('sys.argv', ['fetch', '--root', temp, '--date', '20260913']), patch.object(fetch, 'available_dates', side_effect=AssertionError('index called')), patch.object(fetch, 'fetch_html', return_value='<article class="content-section"><h2>Title</h2><div class="content-body">Body</div></article>'), patch.object(fetch.time, 'sleep'):
             self.assertEqual(fetch.main(), 0)
-            self.assertTrue((Path(temp) / 'transcripts/2026/09/20260913.md').exists())
+            self.assertTrue((Path(temp) / '逐字稿/2026/09/20260913.md').exists())
 
     def test_missing_content_returns_failure(self):
         fetch = module('fetch_xwlb')
@@ -53,10 +53,10 @@ class DailyTests(unittest.TestCase):
             (root / 'SKILL.md').write_text('version: "3.3.0"')
             day = date(2026, 9, 13)
             for i in range(31):
-                p = root / 'data/transcripts' / (day - timedelta(days=i)).strftime('%Y/%m/%Y%m%d.md')
+                p = root / 'data/逐字稿' / (day - timedelta(days=i)).strftime('%Y/%m/%Y%m%d.md')
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text('Transcript')
-            report = root / 'data/reports/2026-09-13_分析报告.md'
+            report = root / 'data/报告/2026/2026-09-13_分析报告.md'
             def agent(args, **kwargs):
                 self.assertIn('broadcast date 2026-09-13', kwargs['input'])
                 report.write_text('<!-- method-version: 3.3.0 -->\nComplete report')
@@ -67,7 +67,7 @@ class DailyTests(unittest.TestCase):
                 self.assertEqual(run.call_count, 1)
             with patch.object(daily, 'ROOT', root), patch.dict('os.environ', {'DEI_DAILY_DATA_DIR': str(root / 'data')}), patch('sys.argv', ['daily', '--date', '2026-09-13', '--force']), patch.object(daily.subprocess, 'run', side_effect=agent):
                 self.assertEqual(daily.main(), 0)
-                self.assertEqual(len(list((root / 'data/revisions').glob('*/2026-09-13_分析报告.md'))), 1)
+                self.assertEqual(len(list((root / 'data/修订').glob('*/2026-09-13_分析报告.md'))), 1)
 
     def test_missing_target_does_not_call_agent(self):
         daily = module('run_daily')

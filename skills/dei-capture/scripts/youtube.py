@@ -282,18 +282,28 @@ def video_id(text: str) -> str | None:
     return m.group(1) if m else None
 
 
+def ledger(task: str, status: str, outputs) -> None:
+    import dei_workspace
+    dei_workspace.log_run("dei-capture", f"youtube-{task}", status, outputs)
+
+
+def log_file(name: str, fallback_dir: Path) -> Path:
+    """日志放 99_系统/日志/；工作区不可用（测试或旧版单独配置）时放回数据目录。"""
+    import dei_workspace
+    try:
+        return dei_workspace.system("日志") / name
+    except SystemExit:
+        return fallback_dir / "_log.jsonl"
+
+
 def run_dir(base: Path, name: str) -> Path:
-    stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    path = base / f"{stamp}_{slug(name)}"
-    n = 1
-    while path.exists():
-        n += 1
-        path = base / f"{stamp}_{slug(name)}-{n}"
-    path.mkdir(parents=True)
-    return path
+    """批次文件夹：YYYY-MM-DD_HHMM_关键词（北京时间），重名加 -2。"""
+    import dei_workspace
+    return dei_workspace.batch_dir(base, name)
 
 
 def write_json(path: Path, data) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
@@ -425,7 +435,7 @@ def cmd_search(a) -> int:
         "filters": {"min_views": min_views, "per_channel": per_channel},
         "notes": notes, "recommended": [v["id"] for v in picked], "videos": ranked,
     }
-    write_json(out / "results.json", result)
+    write_json(out / "_原始数据" / "results.json", result)
     (out / "urls.txt").write_text("".join(v["url"] + "\n" for v in picked), encoding="utf-8")
     md = [f"# YouTube 搜索：{' / '.join(a.queries)}", "",
           f"> 采集时间：{result['captured_at']} · 时间范围：{a.within} · 去重后 {len(ranked)} 条，按播放量排序",
@@ -442,6 +452,7 @@ def cmd_search(a) -> int:
             title = v["title"].replace("|", "｜")
             md.append(f"| {i} | {title} | {v['channel']} | {fmt_views(v.get('views'))} | {fmt_duration(v.get('duration'))} | {v['url']} |")
     (out / "清单.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+    ledger("search", "completed", [out])
     emit({"command": "search", "dir": str(out), "total": len(ranked), "recommended": len(picked), "notes": notes})
     return 0 if ranked else 2
 
@@ -511,7 +522,11 @@ def cmd_channel(a) -> int:
     name = meta.get("channel") or base.rsplit("/", 1)[-1]
     out = data_dir("youtube") / "频道" / slug(name)
     out.mkdir(parents=True, exist_ok=True)
-    store = out / "videos.json"
+    store = out / "_原始数据" / "videos.json"
+    legacy = out / "videos.json"
+    if not store.is_file() and legacy.is_file():  # 旧版放在频道文件夹第一层
+        store.parent.mkdir(parents=True, exist_ok=True)
+        legacy.replace(store)
     old = json.loads(store.read_text(encoding="utf-8")) if store.is_file() else {"videos": {}}
     stamp = now()
     new_ids = []
@@ -544,6 +559,7 @@ def cmd_channel(a) -> int:
         md.append(f"| {i} | {v['title'].replace('|', '｜')} | {v.get('tab', '')} | {fmt_views(v.get('views'))} | {fmt_duration(v.get('duration'))} | {v['url']} |")
     (out / "清单.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     (out / "urls.txt").write_text("".join(v["url"] + "\n" for v in allv), encoding="utf-8")
+    ledger("channel", "completed", [out])
     emit({"command": "channel", "dir": str(out), "channel": name, "fetched": len(videos), "total": len(allv),
           "new": len(new_ids), "errors": errors})
     return 0
@@ -747,11 +763,13 @@ def cmd_transcript(a) -> int:
         r = transcript_one(item, outdir, prefs, a.force)
         print(f"[{r.get('id', item)}] {r['status']} {r.get('file') or r.get('error', '')}", file=sys.stderr)
         results.append(r)
-    log = outdir / "_log.jsonl"
+    log = log_file("YouTube逐字稿.jsonl", outdir)
     with log.open("a", encoding="utf-8") as f:
         for r in results:
             f.write(json.dumps(dict(r, at=now()), ensure_ascii=False) + "\n")
     ok = [r for r in results if r["status"] in ("completed", "reused")]
+    ledger("transcript", "completed" if len(ok) == len(results) else ("partial" if ok else "failed"),
+           [r.get("file") for r in ok])
     emit({"command": "transcript", "dir": str(outdir), "ok": len(ok), "failed": len(results) - len(ok),
           "notes": COOKIE_NOTES, "results": results})
     return 0 if ok else 2

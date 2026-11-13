@@ -3,7 +3,7 @@
 
 - 输入：videos.json 中有 video_file_url 且未转写的条目（mp4 视频文件可直接提交，无需提取音频）
 - 提交异步任务（X-DashScope-Async）→ 轮询 → 下载结果 JSON（结果链接 24 小时有效，即时落盘）
-- 产出：workspace/transcripts/<video_id>.md（逐字稿）+ .raw_asr/<video_id>.json（原始分句/时间戳）
+- 产出：workspace/逐字稿/<video_id>.md（逐字稿）+ .raw_asr/<video_id>.json（原始分句/时间戳）
 - 可重复执行：task_id 持久化在 videos.json，中断后重跑会接着轮询，不会重复提交计费
 
 鉴权：百炼 DashScope API Key（sk- 开头，百炼控制台创建），填在 config.json 的
@@ -80,7 +80,7 @@ def save_result(cfg, v, result_json):
     except (KeyError, IndexError, TypeError):
         pass
 
-    t_dir = ws / "transcripts"
+    t_dir = ws / "逐字稿"
     t_dir.mkdir(parents=True, exist_ok=True)
     title = v.get("title") or vid
     md = t_dir / f"{vid}.md"
@@ -97,7 +97,7 @@ def save_result(cfg, v, result_json):
 
 def reuse_library_transcripts(cfg, vids):
     """config.transcript_library 指向导出线素材库根目录时，按 aweme_id 复用已有逐字稿。"""
-    lib = (cfg.get("transcript_library") or "").strip()
+    lib = (cfg.get("transcript_library") or cfg.get("bloggers_dir") or "").strip()
     if not lib:
         return 0
     lib = Path(lib).expanduser()
@@ -106,7 +106,7 @@ def reuse_library_transcripts(cfg, vids):
         return 0
     # 索引：博主目录/links.json → {aweme_id: (博主目录, post_id)}
     vid_index = {}
-    for links_file in lib.glob("*/links.json"):
+    for links_file in [*lib.glob("*/links.json"), *lib.glob("*/逐字稿/links.json")]:
         try:
             links = json.loads(links_file.read_text(encoding="utf-8"))
         except Exception:

@@ -6,8 +6,12 @@
 
 数据：Monid 或 TikHub（douyin.provider）；去水印：大圣（没配置时用 Monid）；转写：阿里云百炼 paraformer-v2。凭证都在 dei-capture 的 config.json。
 用法（在 dei-capture 目录下）：
-  python3 scripts/douyin/workbook.py init                      # 把模板复制到 <output_root>/抖音/监控工作簿/
-  python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7]   # 直接更新原表，先自动备份到 备份/；--output 另存
+  python3 scripts/douyin/workbook.py init                      # 把模板复制到 01_我的清单/抖音监控工作簿.xlsx
+  python3 scripts/douyin/workbook.py --input <工作簿.xlsx> [--days 7]   # 直接更新原表，先自动备份；--output 另存
+
+位置（dei 工作区）：工作簿和账号覆盖表在 01_我的清单/（用户维护）；更新前的备份在 99_系统/备份/抖音监控工作簿/；
+每次运行的失败清单在 99_系统/日志/抖音监控工作簿/；转写断点在 99_系统/状态/抖音监控工作簿/。
+没有工作区、只配置了旧版 output_root 时，全部放在 <output_root>/抖音/监控工作簿/ 下（旧布局）。
 """
 from __future__ import annotations
 import argparse, copy, json, os, re, shutil, sys, time
@@ -31,13 +35,30 @@ DS = "https://dashscope.aliyuncs.com/api/v1"
 
 
 def work_dir():
+    """旧布局：<output_root>/抖音/监控工作簿/。"""
     root = douyin_root()
     if root is None:
         raise SystemExit("未配置采集结果保存位置：先按 dei-capture 的 SKILL.md「首次配置」写入 output_root")
     return root / "监控工作簿"
 
 
-ASR_JOURNAL = None  # main() 里设为 <output_root>/抖音/监控工作簿/asr_tasks.json
+def place(kind):
+    """kind = lists / backup / log / state。有 dei 工作区时按工作区分开放，否则都放旧布局目录。"""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    import dei_workspace
+    try:
+        if kind == "lists":
+            return dei_workspace.stage("lists")
+        sub = {"backup": "备份", "log": "日志", "state": "状态"}[kind]
+        path = dei_workspace.system(sub) / "抖音监控工作簿"
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+    except SystemExit:
+        legacy = work_dir()
+        return legacy if kind in ("lists", "state") else legacy / {"backup": "备份", "log": "运行记录"}[kind]
+
+
+ASR_JOURNAL = None  # main() 里设为 99_系统/状态/抖音监控工作簿/asr_tasks.json
 
 
 def media(url, uid, key):
@@ -219,10 +240,15 @@ def blogger_sheets(wb):
     return [n for n in wb.sheetnames[1:] if not n.startswith("_") and wb[n].sheet_state == "visible"]
 
 
-def backup_copy(src, keep=10):
-    """直接更新前先备份到同目录「备份/」，只保留最近 keep 份。"""
-    d = src.parent / "备份"
-    d.mkdir(exist_ok=True)
+def backup_copy(src, keep=10, dest=None):
+    """直接更新前先备份（默认 99_系统/备份/抖音监控工作簿/），只保留最近 keep 份。"""
+    d = dest
+    if d is None:
+        try:
+            d = place("backup")
+        except SystemExit:  # 没有工作区也没有 output_root：放在工作簿同目录
+            d = src.parent / "备份"
+    d.mkdir(parents=True, exist_ok=True)
     dst = d / f"{src.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}{src.suffix}"
     shutil.copyfile(src, dst)
     olds = sorted(d.glob(f"{src.stem}_*{src.suffix}"))
@@ -232,7 +258,7 @@ def backup_copy(src, keep=10):
 
 
 def cmd_init(args):
-    target = Path(args.output).expanduser() if args.output else work_dir() / "抖音监控工作簿.xlsx"
+    target = Path(args.output).expanduser() if args.output else place("lists") / "抖音监控工作簿.xlsx"
     if target.exists():
         print(json.dumps({"command": "init", "file": str(target), "created": False, "note": "已存在，未覆盖"}, ensure_ascii=False))
         return
@@ -248,8 +274,8 @@ def main():
         ip = argparse.ArgumentParser(prog="workbook.py init"); ip.add_argument("init"); ip.add_argument("--output")
         return cmd_init(ip.parse_args())
     ap=argparse.ArgumentParser(); ap.add_argument("--input",required=True); ap.add_argument("--output"); ap.add_argument("--days",type=int,default=7); ap.add_argument("--only-sheets",default=""); ap.add_argument("--replace-sheets",default="")
-    ap.add_argument("--overrides",help="账号覆盖表 JSON（默认 <output_root>/抖音/监控工作簿/account_overrides.json）"); a=ap.parse_args()
-    wd=work_dir(); ASR_JOURNAL=wd/"asr_tasks.json"
+    ap.add_argument("--overrides",help="账号覆盖表 JSON（默认 01_我的清单/抖音账号覆盖表.json）"); a=ap.parse_args()
+    ASR_JOURNAL=place("state")/"asr_tasks.json"
     c=load_config(); provider=data_provider(c); ds=c.get("dasheng") or {}
     dash_key=os.getenv("DASHSCOPE_API_KEY") or (c.get("dashscope") or {}).get("api_key") or ""
     if not dash_key: ap.error("config.json 缺少 dashscope.api_key（阿里云百炼，转写用）")
@@ -262,7 +288,8 @@ def main():
         run=monid_run(c,"anyapi","/douyin.video",{"url":url}); m=((run.get("output") or {}).get("data") or {}).get("videoUrl")
         if not m: raise RuntimeError("Monid 无直链")
         return m
-    ov_path=Path(a.overrides).expanduser() if a.overrides else wd/"account_overrides.json"
+    lists=place("lists")
+    ov_path=Path(a.overrides).expanduser() if a.overrides else next((p for p in (lists/"抖音账号覆盖表.json", lists/"account_overrides.json") if p.exists()), lists/"抖音账号覆盖表.json")
     ov=json.loads(ov_path.read_text(encoding="utf-8")) if ov_path.exists() else {}
     src0=Path(a.input).resolve()
     if not src0.exists(): ap.error(f"工作簿不存在：{src0}")
@@ -326,7 +353,9 @@ def main():
             if not v.get("transcript") and not v.get("media_error") and not v.get("asr_error"):
                 failures.append({"sheet":r["sheet"],"video_id":v["id"],"error":"未取得逐字稿"})
     fetched=datetime.now(TZ).replace(tzinfo=None); write_book(src,out,records,fetched,replace)
-    logs=out.parent/"运行记录"; logs.mkdir(exist_ok=True)
+    logs=place("log"); logs.mkdir(parents=True,exist_ok=True)
     report=logs/f"{out.stem}_{datetime.now(TZ).strftime('%Y%m%d_%H%M%S')}.report.json"; report.write_text(json.dumps({"output":str(out),"provider":provider,"created_sheets":created,"accounts":len(records),"videos":sum(len(x["videos"]) for x in records),"failures":failures},ensure_ascii=False,indent=2), encoding="utf-8")
+    import dei_workspace
+    dei_workspace.log_run("dei-capture","douyin-workbook","partial" if failures else "completed",[out,report])
     print(json.dumps({"output":str(out),"report":str(report),"provider":provider,"failures":len(failures)},ensure_ascii=False))
 if __name__=="__main__": main()

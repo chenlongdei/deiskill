@@ -27,6 +27,12 @@ metadata:
 
 读本 SKILL.md 所在目录的上一级目录（即当前 Agent 的 skills 目录），对每个子目录读 `SKILL.md` 的 frontmatter：`name`、`description`、`metadata.dei-handoff`。用 description 初筛，用 dei-handoff 的「接手 → 交出」决定能不能接上。不要一次读完各 Skill 的正文，轮到哪一步再读哪一个。
 
+## 找已有产出：工作区和运行总账
+
+所有 dei Skill 共用一个 dei 工作区（路径在 `~/.deiskill/config.json` 的 `workspace_root`），一级目录是 `01_我的清单 / 02_采集 / 03_日报 / 04_知识库 / 05_成品 / 99_系统`，每个目录放什么见工作区根目录的 `使用说明.md`。
+
+用户问「最近一次日报在哪」「上周扒的逐字稿呢」、或者某一步要接手已有产出时，先读 `99_系统/运行总账.jsonl`（每行一次运行：时间、Skill、任务、状态、产出路径），不要在磁盘上到处搜。任何已安装的自有 Skill 目录里都有 `scripts/dei_workspace.py`，可以用 `python3 <那个 Skill 目录>/scripts/dei_workspace.py latest [skill] [任务]` 查。
+
 ## Step 1 先找配方
 
 | 用户的目标 | 配方 |

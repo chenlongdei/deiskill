@@ -1,6 +1,6 @@
 # deiskill · 目标、进度与管理约定
 
-> 最后更新：2026-11-11。新开窗口先读这份文件，再继续任务。
+> 最后更新：2026-11-13。新开窗口先读这份文件，再继续任务。
 > 这是公开仓库：本文件不写本机绝对路径、凭证和个人草稿（校验器会检查）。
 
 这个文件夹是 deiskill 的唯一维护位置（GitHub：chenlongdei/deiskill）。新增、修改、删除 Skill 都在这里做，改完再安装到 Agent。
@@ -28,7 +28,7 @@
 ## 必须遵守的原则（用户已明确）
 
 1. **不写死任何 Agent**：Skill 要能装在 Claude Code、Codex、WorkBuddy 等任意支持 Skills 的 Agent 上。安装目录、定时工具、命令都用用户实际使用的或指定的；安装器检测到多个 Agent 时询问。
-2. **不假设用户有任何文件夹**：首次运行询问保存位置或输入文件，给 2—3 个建议，确认后再创建并写入该 Skill 的 `config.json`。
+2. **不假设用户有任何文件夹**：首次运行询问 dei 工作区放在哪（所有 Skill 共用一个，记在 `~/.deiskill/config.json`），给 2—3 个建议，确认后再创建；输入文件同样先问。结构和命名见 `docs/skill-spec.md` §6a。
 3. **报告和数据不放进 Agent 的 skills 安装目录**，放在用户确认的位置。
 4. **日报每个渠道至少回补近 7 天**，报告必须有「近 N 天变化」；token 和预算允许时可到 30 天以上（`history_days`）。
 5. **上游内容不提交进仓库**（dbskill 禁止再分发；follow-builders、知乎官方工具同理），登记在 `external.json`，安装时拉取。
@@ -46,6 +46,7 @@
 | 3 | `dei-capture`：合并旧 `douyin-paraformer-transcriber` 与 chenlongdei/content-toolkit。子模块：抖音博主全量、抖音监控/链接转写、第三方渠道（小红书、YouTube、抖音；TikHub 与 Monid 按渠道选）。之后日报的抖音模块改为调用它 | ✅ 2026-11-12 content-toolkit 已并入（`scripts/douyin/`，保留 LICENSE 和署名），统一转写入口 `scripts/transcribe.py` + `scripts/asr.py`；链接出稿实测通过。旧 douyin-paraformer-transcriber 在本机已找不到，功能已被覆盖。日报抖音模块尚未改接 |
 | 4 | 总入口 `dei`：按 handoff 从最终交付倒推组合 | 🔧 2026-11-11 先做最小版（用户要求），配方 A 实测进行中 |
 | 5 | 输出层 Skill | 规划中 |
+| 6 | dei 工作区：所有 Skill 共用一个数据根目录（01_我的清单 / 02_采集 / 03_日报 / 04_知识库 / 05_成品 / 99_系统），中文子目录、北京时间批次名、运行总账、外置盘检查、试跑隔离；`scripts/migrate_workspace.py` 迁移旧数据 | ✅ 2026-11-13 本机 1577 个文件迁入并实测（政策抓取、AI 采集、YouTube 试跑搜索、NotebookLM 自检、关键词巡检自检） |
 
 旧仓库其余 Skill（topic-extraction、content-writing-system、course-poster-review-safe、bluebook-factory、daily-notes-sync、hunan-etax-invoice）是否迁移，用户还没决定。
 
@@ -61,7 +62,7 @@
 | 抖音 | ⛔ 本机未配置 | 2026-11-12 起只读工作簿写摘要，抓取改由 dei-capture `douyin/workbook.py` 负责；仍缺监控工作簿（`douyin_default_input`）；TikHub Token 已失效（401） |
 | 对外成品 | ✅ | 渲染依赖 playwright；成品只交给用户，不自动发布 |
 
-本机安装位置和日报保存位置以 Skill 的 `config.json` 为准（不进 Git）。日报保存文件夹里另有一份 `CLAUDE.md`，记录日报的运行情况和数据结构。
+本机安装位置以 Agent 的 skills 目录为准，数据在 dei 工作区（`~/.deiskill/config.json` 的 `workspace_root`，不进 Git）。工作区根目录另有一份 `CLAUDE.md`，记录本机运行情况。
 
 ### dei-capture
 
@@ -79,9 +80,9 @@
 | --- | --- | --- |
 | 链接出稿（Monid → 去水印 → Paraformer → 合并） | ✅ 实测 | 1 条约 25 秒；Monid 余额 2026-11-12 为 $0.90 |
 | 盯博主（监控列表） | 未实测 | 与链接出稿共用后三步 |
-| Get笔记全量导出 + 社媒助手数据合并 | ✅ 导出实测 | 2026-11-12 用户已登录；旧导出已挪到 `内容采集/抖音/Get笔记导出/`，谢胜子增量导出 13 篇、跳过 695 篇。社媒助手合并未测 |
+| Get笔记全量导出 + 社媒助手数据合并 | ✅ 导出实测 | 2026-11-12 用户已登录；导出现在在工作区 `02_采集/抖音/博主/<博主>/逐字稿/`，谢胜子增量导出 13 篇、跳过 695 篇。社媒助手合并未测 |
 | 统一转写 `transcribe.py` | ✅ 直链实测 | 本地文件走 whisper，模型未配置 |
-| 监控工作簿 `workbook.py`（原日报抖音模块） | ✅ 2026-11-12 Monid 实测 | 支持 Monid / TikHub（`douyin.provider`，本机设为 monid，TikHub 无余额）；模板 `templates/抖音监控工作簿模板.xlsx`，`workbook.py init` 生成，用户只填总表（名称 + 主页链接），分页自动建；时间按北京时间。本机工作簿在 `内容采集/抖音/监控工作簿/`，已写入日报的 `douyin_default_input` |
+| 监控工作簿 `workbook.py`（原日报抖音模块） | ✅ 2026-11-12 Monid 实测 | 支持 Monid / TikHub（`douyin.provider`，本机设为 monid，TikHub 无余额）；模板 `templates/抖音监控工作簿模板.xlsx`，`workbook.py init` 生成，用户只填总表（名称 + 主页链接），分页自动建；时间按北京时间。本机工作簿在工作区 `01_我的清单/抖音监控工作簿.xlsx`，已写入日报的 `douyin_default_input` |
 | 大圣去水印 | ✅ 实测 | 返回直链和标题，没有作者和数据 |
 | 关键词巡检 `keyword_watch.py`（抖音指数视频搜索） | ✅ 2026-11-13 五个词完整实测 98 条；doctor / login / schedule 命令化，新电脑模拟安装通过 | 用户定：5 个关键词、近 3 天、页面选「大于180秒」、女性成长和女性情感限垂类「情感」、每页看完再翻下一页、固定抓前 2 页全部 20 条（2026-11-13 改：平台时长筛选不生效，用户决定不再按时长筛，`min_duration` 设 0）、模拟真人停留、每 3 天跑一次；纯字幕配乐视频标「无口播」。边看边转写；页面点不动时直接调接口；跨期总表；`fix_words` 固定替换。定时由 `scripts/scheduler.py` 登记（macOS launchd / Windows 任务计划 / Linux cron），本机已登记 02:00 检查、满 3 天才跑；外接盘的权限坑见 douyin.md |
 
@@ -120,7 +121,7 @@
 
 ### 待办与已知问题
 
-- [x] 配方 A 实测 ①NotebookLM 本身（20 个来源，做到学习计划）②Claude Code（29 个来源，端到端：知识地图、学习计划、实操手册，在知识库 `Claude-Code-学习路线-2026-11-11/学习路线/`）
+- [x] 配方 A 实测 ①NotebookLM 本身（20 个来源，做到学习计划）②Claude Code（29 个来源，端到端：知识地图、学习计划、实操手册，在工作区 `04_知识库/Claude-Code-学习路线-2026-11-11/学习路线/`）
 - [ ] 配方 B（主题研究）尚未实测
 - [ ] 本轮所有改动尚未 commit
 
@@ -152,7 +153,7 @@ bash scripts/install.sh --target <目录>  # 指定装到哪个 Agent 的 skills
 
 ## 管理规则
 
-- 写或改 Skill 前先读 [docs/skill-spec.md](docs/skill-spec.md)：命名（自有 `dei-` 前缀，dbs 保持原名）、`dei-handoff`、正文骨架、叶子不点名、首次运行询问保存位置。
+- 写或改 Skill 前先读 [docs/skill-spec.md](docs/skill-spec.md)：命名（自有 `dei-` 前缀，dbs 保持原名）、`dei-handoff`、正文骨架、叶子不点名、dei 工作区的结构与命名（§6a）。改结构时同步 `scripts/migrate_workspace.py`。
 - 自有 Skill 放 `skills/<name>/` 并登记 `catalog.json`；上游内容登记 `external.json`，不把文件提交进来。
 - 需要本机路径的写进 Skill 的 `config.json`（不进 Git），仓库里只放 `config.example.json`。
 - commit 前跑校验；推到公开仓库前确认没有本机路径、凭证和个人草稿。

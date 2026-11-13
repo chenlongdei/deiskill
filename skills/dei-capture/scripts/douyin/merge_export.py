@@ -5,9 +5,9 @@
   python3 merge_export.py --transcripts-dir <biji导出目录> --stats <social_stats.py输出的.json> \
       [-o 输出目录] [--pretty]
 
-- 逐字稿目录：biji_export.py export 产出的 {博主名}_{follow_id}/，文件名 {序号}_{post_id}_{标题}.md
+- 逐字稿目录：biji_export.py export 产出的 博主/{博主名}/逐字稿/（旧版 {博主名}_{follow_id}/），文件名 {序号}_{post_id}_{标题}.md
 - 匹配策略（2026-11-06 升级）：**① 抖音视频ID精确匹配**（逐字稿 md 里的 douyin/iesdouyin 链接 ↔ 数据表视频链接；同视频多稿共享同一行数据）→ ② 标题归一化精确 → ③ difflib 相似度 ≥0.75 → ④ 包含关系；都不中算未匹配（如实报告）
-- 输出：<输出目录>/merged/ 下同名 md（YAML frontmatter 数据 + 原正文）+ INDEX.md 总表
+- 输出：博主/{博主名}/文案与数据/ 下同名 md（YAML frontmatter 数据 + 原正文）+ INDEX.md 总表（旧版目录输出到同级 merged/）
 """
 import argparse
 import difflib
@@ -117,7 +117,7 @@ def main():
     ap = argparse.ArgumentParser(description="合并逐字稿与社媒数据")
     ap.add_argument("--transcripts-dir", required=True, help="biji 导出目录")
     ap.add_argument("--stats", required=True, help="social_stats.py 输出的 JSON")
-    ap.add_argument("-o", "--output", help="输出目录（默认 transcripts-dir 同级的 merged/）")
+    ap.add_argument("-o", "--output", help="输出目录（默认：新版 博主/<名>/文案与数据/；旧版 transcripts-dir 同级的 merged/）")
     ap.add_argument("--pretty", action="store_true")
     args = ap.parse_args()
 
@@ -129,7 +129,12 @@ def main():
     if not transcripts:
         raise SystemExit(f"[错误] {tdir} 里没有逐字稿 md")
 
-    out_dir = Path(args.output).expanduser() if args.output else tdir.parent / "merged" / tdir.name
+    if args.output:
+        out_dir = Path(args.output).expanduser()
+    elif tdir.name == "逐字稿":
+        out_dir = tdir.parent / "文案与数据"
+    else:
+        out_dir = tdir.parent / "merged" / tdir.name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     results, unmatched_idx = match_stats(transcripts, stats_items)

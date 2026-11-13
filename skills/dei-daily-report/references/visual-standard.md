@@ -13,7 +13,7 @@
 
 ## 期号
 
-第一次对外发布为第 001 期，之后每个新的报告日加 1，同一天重跑沿用同一期号。用 `publish/issue.py <output_root> <YYYY-MM-DD>` 取号，记录在 `<output_root>/对外日报期号.json`。不要用日期当期号。
+第一次对外发布为第 001 期，之后每个新的报告日加 1，同一天重跑沿用同一期号。用 `publish/issue.py <YYYY-MM-DD>` 取号，记录在工作区 `03_日报/对外日报期号.json`。不要用日期当期号。
 
 ## 封面规则
 
@@ -97,4 +97,4 @@ python3 publish/check_report.py <文字版.md> <data.json>
 python3 publish/render.py <data.json> --out <输出目录>
 ```
 
-输出目录放在 `output_root` 下当天的运行目录里，不放进 Skill 安装目录。渲染需要 playwright 和联网加载字体；没有本机 Chrome 时自动改用 playwright 自带的 Chromium。网页内导出会丢字体，所以图片统一由 render.py 生成。
+输出目录放在本次运行目录（`03_日报/综合/YYYY/YYYY-MM-DD_HHMM/成品/`）里，不放进 Skill 安装目录。渲染需要 playwright 和联网加载字体；没有本机 Chrome 时自动改用 playwright 自带的 Chromium。网页内导出会丢字体，所以图片统一由 render.py 生成。

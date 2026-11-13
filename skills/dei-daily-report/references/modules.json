@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "timezone": "Asia/Shanghai",
-  "config": "保存位置、抖音工作簿和回补天数在本 Skill 目录的 config.json 中配置（首次运行时询问）；各模块数据目录见 scripts/dei_paths.py：政策与商机、AI情报、抖音监控、知乎热榜表达空间",
+  "config": "数据放在 dei 工作区的 03_日报/（首次运行时确认工作区）；抖音工作簿和回补天数在本 Skill 目录的 config.json；各模块目录见 scripts/dei_paths.py：综合、政策与商机、AI情报、知乎热榜",
   "default_modules": [
     "policy",
     "ai",
@@ -16,7 +16,7 @@
       "default_window": "昨日播出日",
       "historical": "指定播出日，按真实源覆盖",
       "dependencies": [],
-      "output": "<output_root>/政策与商机/reports/YYYY-MM-DD_分析报告.md"
+      "output": "03_日报/政策与商机/报告/YYYY/YYYY-MM-DD_分析报告.md"
     },
     {
       "id": "ai",
@@ -28,7 +28,7 @@
         "模块内 sources/aihot/guide.md",
         "模块内 sources/follow-builders/guide.md"
       ],
-      "output": "<output_root>/AI情报/reports/YYYY-MM-DD_分析报告.md"
+      "output": "03_日报/AI情报/报告/YYYY/YYYY-MM-DD_分析报告.md"
     },
     {
       "id": "zhihu",
@@ -39,7 +39,7 @@
       "dependencies": [
         "模块内 tools/zhihu/guide.md"
       ],
-      "output": "项目/知乎热榜表达空间/YYYY-MM-DD/HHMMSS/报告.md"
+      "output": "03_日报/知乎热榜/YYYY/YYYY-MM-DD_HHMM/报告.md"
     },
     {
       "id": "douyin",
@@ -51,7 +51,7 @@
       "dependencies": [
         "已安装的内容采集能力：接手抖音监控工作簿 → 交出更新后的工作簿（TikHub、大圣、阿里云百炼由它负责）"
       ],
-      "output": "客观更新摘要；工作簿由采集能力直接更新（备份在同目录 备份/，失败清单在 运行记录/）"
+      "output": "客观更新摘要；工作簿由采集能力直接更新（备份在 99_系统/备份/抖音监控工作簿/，失败清单在 99_系统/日志/抖音监控工作簿/）"
     }
   ]
 }

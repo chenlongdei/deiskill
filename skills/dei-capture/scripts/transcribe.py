@@ -110,6 +110,9 @@ def main() -> int:
     for r in results:
         print(("✓ " if r["ok"] else "✗ ") + r["source"] + ("  → " + r["file"] if r.get("file") else "  " + r.get("error", "")))
     ok = sum(r["ok"] for r in results)
+    import dei_workspace
+    dei_workspace.log_run("dei-capture", "transcribe", "completed" if ok == len(results) else ("partial" if ok else "failed"),
+                          [r.get("file") for r in results if r["ok"]])
     print(json.dumps({"command": "transcribe", "ok": ok, "failed": len(results) - ok, "dir": str(outdir),
                       "results": results}, ensure_ascii=False))
     return 0 if ok == len(results) else 1
