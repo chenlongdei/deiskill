@@ -101,6 +101,22 @@ def main() -> int:
             for other in sorted(others):
                 if re.search(rf"(?<![\w-]){re.escape(other)}(?![\w-])", text.split("\n---\n", 1)[1]):
                     errors.append(f"{name}: 叶子 Skill 正文点名了 {other}（工具依赖请登记 NAMING_ALLOWLIST）")
+        # 子 Skill 可以单独安装（给学员文件夹链接），需要自己的说明页
+        if item.get("layer") != "router":
+            sub_readme = skill_dir / "README.md"
+            if not sub_readme.is_file():
+                errors.append(f"{name}: 缺少 skills/{name}/README.md（单独安装时的首页）")
+            else:
+                sub_text = sub_readme.read_text(encoding="utf-8")
+                for cmd in (f"--skill {name}", f"bash -s -- {name}", f'DEISKILL_ONLY="{name}"'):
+                    if cmd not in sub_text:
+                        errors.append(f"{name}: README.md 安装段缺少只装 {name} 的命令（{cmd}）")
+                for link in re.findall(r"\]\(((?!https?://|#|mailto:)[^)\s]+)\)", sub_text):
+                    if not (skill_dir / link).exists():
+                        errors.append(f"{name}: README.md 链接指向 Skill 目录外或不存在的文件：{link}")
+            for key in ("first_prompt", "quick_needs"):
+                if not item.get(key):
+                    errors.append(f"{name}: catalog.json 缺少 {key}（安装完提示第一句话用）")
         ui = skill_dir / "agents" / "openai.yaml"
         if not ui.is_file():
             errors.append(f"{name}: 缺少 agents/openai.yaml")

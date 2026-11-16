@@ -41,7 +41,7 @@ metadata:
 
 **参考案例**：`examples/AI夜校四节课/` 是四节真实上过的课（Word 周报、Excel 乱数据、PPT、飞书办公系统），每节有主手册、讲师卡、Win/Mac 物料包，另有推到 Notion 后的 `发布记录.json`。写新手册前读一节对齐结构、语气和颗粒度；不要照抄它的场景和数字。
 
-**课程文件夹**：用户指定了就用指定的；没指定就放 dei 工作区 `05_成品/课程/<课程名>/`。先运行 `python3 scripts/dei_workspace.py where` 确认工作区；报「还没有 dei 工作区」时，问用户放在哪里（给 2—3 个建议），确认后 `python3 scripts/dei_workspace.py init <路径>`；报「找不到」时说明哪个路径失效，不新建。Windows 上 `python3` 通常换成 `python`。
+**课程文件夹**：用户指定了就用指定的；没指定就放 `python3 scripts/dei_workspace.py where` 打印的 `course` 目录下的 `<课程名>/`（默认是工作区 `05_成品/课程/`，用户可能在 config 的 `stages` 里改到了别处）。先运行 `python3 scripts/dei_workspace.py where` 确认工作区；报「还没有 dei 工作区」时，问用户放在哪里（给 2—3 个建议），确认后 `python3 scripts/dei_workspace.py init <路径>`；报「找不到」时说明哪个路径失效，不新建。Windows 上 `python3` 通常换成 `python`。
 
 ### 创作线（八步，细节见 handbook-writing.md）
 
@@ -83,7 +83,7 @@ python3 scripts/pack_materials.py <物料目录> <输出前缀> --root <解压�
 ## 输出
 
 ```text
-<课程文件夹>/                         默认 05_成品/课程/<课程名>/
+<课程文件夹>/                         默认 <where 的 course>/<课程名>/
 ├── 第N节课手册｜<本节钩子标题>.md     学员版主手册（13 章）
 ├── 讲师练习卡｜第N节练习.md           内部资料，默认不发布
 ├── 物料包/

@@ -138,3 +138,12 @@ Skill 之间的关系只由 `dei` 掌握。叶子 Skill 结尾使用固定句：
 - **不用系统专属命令**：需要 `open`、`launchctl` 之类时按 `sys.platform` 分支，并给出 Windows 和 Linux 的做法；时区用固定偏移（北京时间 = UTC+8），不依赖 Windows 默认没有的时区数据库。
 - **依赖按需安装**：每个 Skill 有自检命令，缺依赖时按用户系统给出一条安装命令（macOS 用 brew、Windows 用 winget、Linux 用 apt 或 pip），用户同意后再执行。安装说明写在 Skill 自己的 references 里，因为装好的 Skill 看不到仓库根目录。
 - **模板、案例放在 Skill 目录里**（`templates/`、`examples/`），会随 Skill 一起安装；SKILL.md 或 references 要写明何时去看它们。
+
+## 8. 单独安装
+
+大多数用户装整套，只跟 `dei` 说话；但一节课可能只讲一个 Skill，所以**每个子 Skill 必须能单独装、单独用、单独拿到结果**。不为单个 Skill 建独立仓库：给学员 `https://github.com/chenlongdei/deiskill/tree/main/skills/<name>` 这个文件夹链接即可。
+
+- **自给自足**：只依赖自己目录里的东西（`scripts/dei_workspace.py`、`templates/`、`examples/`、references），不读仓库根目录，不要求先装别的 Skill。依赖别的 Skill 产出的部分（如日报的抖音模块）缺了就跳过，不报错。
+- **三种装法都要能用**：`npx -y skills add chenlongdei/deiskill --skill <name>`（Skills CLI 只认 `skills/*/SKILL.md` 一层，2026-11-14 实测列出 6 个，嵌套模块没被误认；它只复制文件夹，不拉 external.json 里的上游内容）；`bootstrap.sh | bash -s -- <name>`；Windows `$env:DEISKILL_ONLY="<name>"` + `bootstrap.ps1`。
+- **说明页**：每个子 Skill 有 `skills/<name>/README.md`（学员打开文件夹链接看到的首页），顺序是：一句话价值 → 最快拿到第一个结果（不用账号或最少配置的那条路）→ 安装 → 能做什么 → 用的是什么方法 → 成品示例 → 准备什么、花多少钱 → 结果存在哪里 → 许可。相对链接只能指向 Skill 目录里的文件；不点名其他子 Skill（同第 5 节），要提整套就链接 deiskill 仓库。
+- **catalog.json**：每个 Skill 写 `first_prompt`（装完第一句可以说什么）和 `quick_needs`（最少要准备什么），安装器装完会打印出来；会发布到文档平台的写 `"publishes": true`，只有装到它们时安装器才问常用平台。

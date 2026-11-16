@@ -3,12 +3,13 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash
 #   curl -fsSL https://raw.githubusercontent.com/chenlongdei/deiskill/main/scripts/bootstrap.sh | bash -s -- dei-capture
+#   DEISKILL_ONLY="dei-capture dei-notebook" bash bootstrap.sh     # 与上一行等价：只装这几个
 #
 # "bash -s --" 后面的参数原样交给安装器（见 bash scripts/install.sh --help）。
 set -euo pipefail
 
 REPO_URL="${DEISKILL_REPO:-https://github.com/chenlongdei/deiskill.git}"
-DEST="${DEISKILL_HOME:-$HOME/.deiskill}/repo"
+DEST="${DEISKILL_REPO_DIR:-${DEISKILL_HOME:-$HOME/.deiskill}/repo}"
 
 for cmd in git python3; do
   command -v "$cmd" >/dev/null 2>&1 || { echo "缺少 $cmd，请先安装后再运行。" >&2; exit 1; }
@@ -21,6 +22,12 @@ else
   echo "下载到 $DEST"
   mkdir -p "$(dirname "$DEST")"
   git clone --depth 1 --quiet "$REPO_URL" "$DEST"
+fi
+
+# 没有参数时，DEISKILL_ONLY（空格分隔的 Skill 名）指定只装哪几个
+if [ "$#" -eq 0 ] && [ -n "${DEISKILL_ONLY:-}" ]; then
+  # shellcheck disable=SC2086
+  set -- $DEISKILL_ONLY
 fi
 
 # 通过管道运行时标准输入是脚本本身；有终端时把它接回来，安装器才能询问装到哪个 Agent。

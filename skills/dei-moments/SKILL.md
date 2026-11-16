@@ -35,7 +35,7 @@ metadata:
 
 不假设用户有任何文件。先运行 `python3 scripts/dei_workspace.py where` 确认 dei 工作区（Windows 上通常换成 `python`）。报「还没有 dei 工作区」时，问用户放在哪里（给 2—3 个建议），确认后 `python3 scripts/dei_workspace.py init <路径>`；报「找不到」时说明哪个路径失效，不新建。
 
-然后看工作区 `05_成品/朋友圈/` 下有没有：
+然后看 `python3 scripts/dei_workspace.py where` 打印的 `moments` 目录（默认工作区 `<moments>/`，下面简写为 `<moments>/`）下有没有：
 
 | 文件 | 是什么 | 有的话 |
 | --- | --- | --- |
@@ -72,10 +72,10 @@ metadata:
 
 | 产出 | 存到 |
 | --- | --- |
-| 风格提示词 | `05_成品/朋友圈/风格提示词.md`（覆盖前把旧版本留在文件末尾） |
-| 发售方案、私下记录表 | `05_成品/朋友圈/发售/YYYY-MM-DD_HHMM_<产品>/`（批次名用 `dei_workspace.py` 生成的北京时间） |
-| 诊断、复盘 | 同上批次文件夹，或 `05_成品/朋友圈/诊断/` |
-| 真实案例、学员原话、数据好的朋友圈 | 追加进 `05_成品/朋友圈/素材库.md`，写明来源和是否已获本人同意 |
+| 风格提示词 | `<moments>/风格提示词.md`（覆盖前把旧版本留在文件末尾） |
+| 发售方案、私下记录表 | `<moments>/发售/YYYY-MM-DD_HHMM_<产品>/`（批次名用 `dei_workspace.py` 生成的北京时间） |
+| 诊断、复盘 | 同上批次文件夹，或 `<moments>/诊断/` |
+| 真实案例、学员原话、数据好的朋友圈 | 追加进 `<moments>/素材库.md`，写明来源和是否已获本人同意 |
 
 结束时运行 `python3 scripts/dei_workspace.py log dei-moments <任务> <ok|partial|failed> <产出路径>`。
 

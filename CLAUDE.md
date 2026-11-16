@@ -1,6 +1,6 @@
 # deiskill · 目标、进度与管理约定
 
-> 最后更新：2026-11-13。新开窗口先读这份文件，再继续任务。
+> 最后更新：2026-11-14。新开窗口先读这份文件，再继续任务。
 > 这是公开仓库：本文件不写本机绝对路径、凭证和个人草稿（校验器会检查）。
 
 这个文件夹是 deiskill 的唯一维护位置（GitHub：chenlongdei/deiskill）。新增、修改、删除 Skill 都在这里做，改完再安装到 Agent。
@@ -20,10 +20,10 @@
 
 | 层 | 职责 | 现有 / 计划 |
 | --- | --- | --- |
-| router | 总入口 `dei` | 🔧 最小版：配方 A「YouTube 教程 → 学习路线」、配方 B「多渠道资料 → 主题研究」 |
+| router | 总入口 `dei` | 🔧 2026-11-14 升级为路由：全部请求先到它，按意图交给子 Skill（先轻后重）；配方 A 学习路线、B 主题研究、C 做课、D 朋友圈发售、E 找选题 |
 | input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
-| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；已有模板 `templates/dei-选题表.xlsx` |
+| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；已有模板 `templates/dei-选题表.xlsx` |
 
 ## 必须遵守的原则（用户已明确）
 
@@ -151,6 +151,22 @@
 - 方法论里的模板框架是对通用运营方法的重述，没有照搬原表格；浪潮式发售概念出自杰夫·沃克《浪潮式发售》
 - 实测状态：方法和文案在一次真实发售里用过；Skill 本身的流程还没有端到端跑过
 
+### dei-profile（2026-11-14 加入）
+
+- 来源：和用户一起做的一次个人定位梳理（去粗取精、去伪存真 → 三层证据 → 按读者分版本 → 客户视角三轮优化 → 课程命名 → 政企社区版 → 四类对象 × 1/3/10 分钟话术 → PPT 人物页 → PDF 排版 → Notion 同步）。用户的定位：介绍和案例本质上是个人的 RAG / 知识库，讲课、见人时按主题筛案例
+- 介绍库位置：Skill 自己的 `config.json` 的 `library_root`（用户已有文件夹时直接用，不搬动）；没有时默认工作区 `05_成品/个人介绍/`。用户的介绍、案例卡片、PDF 都不进仓库
+- 脚本 `scripts/profile_lib.py`：where / init / cases（按关键词、读者、谁做的给卡片打分）/ index（重建案例索引）/ pdf（白底墨黑荧光绿版式，品牌读介绍库 `profile.json`，附录不进 PDF，自动找 Chrome / Chromium / Edge）
+- `dei` 路由表已加一行，配方 C、D 补了取案例的衔接（2026-11-14，随本轮其他 `dei` 改动一起未安装）
+- 实测状态：本机用作者的介绍库跑过 where / cases / index / pdf；Windows 未测；新建库（init）流程未端到端跑过
+
+## 单独安装与总入口（2026-11-14 用户要求）
+
+- 用户判断：大多数人装整套，只跟 `dei` 说话，所以 `dei` 要做真正的路由——任何请求先到它，交给对的子 Skill，读子 Skill 的 SKILL.md 后按它的规则执行；先走不用账号、不花钱的路。
+- 同时，一节课可能只讲一个子 Skill：给学员一个子 Skill 的仓库或链接，只装它、只用它就能拿到结果。规则见 `docs/skill-spec.md` §8。
+- 用户 2026-11-14 定：**不建独立仓库**，像 dbskill 一样给文件夹链接就能装。`npx skills add chenlongdei/deiskill --list` 实测识别 6 个 Skill，嵌套模块没被误认；`--skill <name>` 单装未实测。
+- 已做：每个子 Skill 有自己的 README（最快结果、三种装法、方法、费用）；catalog 加 `first_prompt` / `quick_needs` / `publishes`；安装器装完打印第一句话，只装不发布的 Skill 时不问文档平台；Windows 用 `DEISKILL_ONLY` 也能只装一个。
+- 未做：`dei` 新路由和配方 C/D/E 还没在真实对话里跑过。
+
 ## 下一步从这里开始
 
 第 3 步收尾：用户更新 TikHub Token、提供监控工作簿后实测 `workbook.py` 和日报抖音模块；Get笔记导出线实测（需用户扫码登录）。之后是第 5 步输出层。日报抖音模块已改为只读工作簿（不点名采集 Skill，按 handoff 找「接手监控工作簿」的能力），由 `dei` 串联。
@@ -172,6 +188,6 @@ bash scripts/install.sh --target <目录>  # 指定装到哪个 Agent 的 skills
 - 需要本机路径的写进 Skill 的 `config.json`（不进 Git），仓库里只放 `config.example.json`。
 - commit 前跑校验；推到公开仓库前确认没有本机路径、凭证和个人草稿。
 - 进度变化后更新本文件的「迁移进度」「当前状态」「下一步」。
-- **README 是给人看的落地页**（2026-11-12 按用户要求重写）：开头是场景故事（用户说一句话 → 拿到什么），然后是成品展示、5 分钟尝鲜、Skill 表（「你可以这样说 / 你会拿到」）、依赖与成本总表、许可、安装、更新记录。不写分层架构，不放「规划中」的半成品；新增或改动 Skill 时同步 Skill 表、成本表和更新记录。校验器会检查 README 写到了每个可安装的 Skill，且相对链接有效。
+- **README 是给人看的落地页**（2026-11-14 按用户要求改为价值先行）：一句话定位 + 「找机会 → 学透 → 做产品 → 卖出去」循环图 → 为什么不直接问 AI（方法与来源、不编、越用越积累、说结果就行）→ 一条完整的链 → 按四环分组的场景 → 成品展示 → 两种装法（全套 / 只装一个）→ Skill 表 → 依赖成本许可 → 安装细节 → 工作区 → 更新记录。循环图讲的是用户的生意怎么走，不是技术分层；不放「规划中」的半成品。新增或改动 Skill 时同步：所属环节的场景、「只装一个」表、Skill 表、成本表、更新记录，以及该 Skill 自己的 README。校验器会检查 README 写到每个 Skill、子 Skill 有自己的说明页，且相对链接有效。
 - 成品示例放 `examples/`（只放基于公开资料、不含个人信息的真实产出）和 `docs/images/`；日报图卡用 `publish/render.py` 渲染 `publish/example/data.json` 得到。
 - 许可：仓库根目录 MIT；`skills/dei-capture/scripts/douyin/` 例外（CC BY-NC-SA 4.0），`aihot/` 保留自带的 MIT。新增第三方代码时在根目录 LICENSE 的 Exceptions 里登记。

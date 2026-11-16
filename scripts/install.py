@@ -289,8 +289,18 @@ def main() -> int:
                     say(f"! 拉取上游 {name} 失败：{exc}")
                     continue
                 place(name, source, target_dir, stamp, [], [])
-    setup_publish(args.publish)
+    # 只有会发布到文档平台的 Skill 才需要问常用平台；只装采集、朋友圈等时不打扰
+    if args.publish or any(local.get(n, {}).get("publishes") for n in selected):
+        setup_publish(args.publish)
     say("完成。重启或刷新 Agent，让它重新发现 Skills。")
+    firsts = [(n, local[n]) for n in selected if n in local and local[n].get("first_prompt")]
+    if "dei" in selected:
+        firsts = [(n, item) for n, item in firsts if n == "dei"]
+    if firsts:
+        say("")
+        say("重启后试着对它说：")
+        for name, item in firsts:
+            say(f"  「{item['first_prompt']}」  （{name}；最少要准备：{item.get('quick_needs', '见 README')}）")
     return 0
 
 

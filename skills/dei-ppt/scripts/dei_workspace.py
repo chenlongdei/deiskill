@@ -25,6 +25,14 @@
 工作区位置记在 ~/.deiskill/config.json 的 workspace_root（与 Agent 无关）。
 环境变量 DEI_WORKSPACE 可临时指定（测试用）。
 
+各阶段默认在工作区根目录下按上面的结构放；用户想把内容并进自己已有的文件夹时，在同一个 config.json
+里写 stages，把某个阶段指到别处（相对路径按 workspace_root 解析，也可写绝对路径），没写的阶段仍用默认位置：
+
+    "stages": {"daily": "20_创作中枢/日报", "course": "10_观自行深/课程", "system": "App 数据/deiskill"}
+
+course、moments、profile 是 05_成品 下的三个常用子目录（课程、朋友圈、个人介绍），也可以单独指定。
+以 `where` 打印的路径为准，不要自己拼 05_成品/… 这类默认路径。
+
 命令行：
     python3 scripts/dei_workspace.py where                 打印工作区和各阶段目录（JSON）
     python3 scripts/dei_workspace.py init <路径>           新建或接管工作区，写入共享配置
@@ -60,6 +68,12 @@ STAGES = {
     "notebook": "04_知识库",
     "output": "05_成品",
     "system": "99_系统",
+}
+# 05_成品 下的常用子目录，可以在 stages 里单独指到别处
+OUTPUT_DIRS = {
+    "course": "05_成品/课程",
+    "moments": "05_成品/朋友圈",
+    "profile": "05_成品/个人介绍",
 }
 SYSTEM_DIRS = ("日志", "状态", "备份", "测试", "缓存")
 
@@ -123,6 +137,22 @@ def root() -> Path:
     return path
 
 
+def _stage_overrides() -> dict:
+    if os.environ.get("DEI_WORKSPACE"):
+        return {}
+    value = _read_shared().get("stages") or {}
+    return value if isinstance(value, dict) else {}
+
+
+def _stage_path(base: Path, key: str) -> Path:
+    """阶段的真实位置：config.json 的 stages 里指定了就用指定的，否则用工作区下的默认目录。"""
+    override = _stage_overrides().get(key)
+    if override:
+        path = Path(str(override)).expanduser()
+        return path if path.is_absolute() else base / path
+    return base / (STAGES.get(key) or OUTPUT_DIRS[key])
+
+
 def trial() -> bool:
     return os.environ.get("DEI_TRIAL", "").strip() not in ("", "0", "false", "no")
 
@@ -130,8 +160,10 @@ def trial() -> bool:
 def stage(key: str, create: bool = True) -> Path:
     """某个阶段的目录。DEI_TRIAL=1 时改写到 99_系统/测试/<阶段>/。"""
     base = root()
-    name = STAGES[key]
-    path = base / STAGES["system"] / "测试" / name if trial() and key not in ("system", "lists") else base / name
+    if trial() and key not in ("system", "lists"):
+        path = _stage_path(base, "system") / "测试" / (STAGES.get(key) or OUTPUT_DIRS[key])
+    else:
+        path = _stage_path(base, key)
     if create:
         path.mkdir(parents=True, exist_ok=True)
     return path
@@ -139,7 +171,7 @@ def stage(key: str, create: bool = True) -> Path:
 
 def system(sub: str = "", create: bool = True) -> Path:
     """99_系统/ 下的子目录：日志、状态、备份、测试、缓存。"""
-    path = root() / STAGES["system"]
+    path = _stage_path(root(), "system")
     if sub:
         path = path / sub
     if create:
@@ -292,14 +324,16 @@ def init(path: str) -> dict:
     if not marker.exists():
         marker.write_text(json.dumps({"version": VERSION, "created_at": now().isoformat(timespec="seconds")},
                                      ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    for name in STAGES.values():
-        (target / name).mkdir(exist_ok=True)
+    # 指定了 stages 的阶段建在指定位置，其余建在工作区下的默认位置
+    for key in STAGES:
+        _stage_path(target, key).mkdir(parents=True, exist_ok=True)
+    sysdir = _stage_path(target, "system")
     for sub in SYSTEM_DIRS:
-        (target / STAGES["system"] / sub).mkdir(exist_ok=True)
-    guide = target / "使用说明.md"
+        (sysdir / sub).mkdir(exist_ok=True)
+    guide = (sysdir if _stage_overrides() else target) / "使用说明.md"
     if not guide.exists():
         guide.write_text(GUIDE, encoding="utf-8")
-    copied = _copy_list_templates(target / STAGES["lists"])
+    copied = _copy_list_templates(_stage_path(target, "lists"))
     SHARED_CONFIG.parent.mkdir(parents=True, exist_ok=True)
     cfg = {}
     if SHARED_CONFIG.is_file():
@@ -367,8 +401,9 @@ def set_publish(platform: str) -> dict:
 
 def where() -> dict:
     base = root()
+    keys = list(STAGES) + list(OUTPUT_DIRS)
     return {"workspace": str(base), "trial": trial(),
-            **{k: str(stage(k, create=False)) for k in STAGES}, "ledger": str(base / STAGES["system"] / LEDGER)}
+            **{k: str(stage(k, create=False)) for k in keys}, "ledger": str(system(create=False) / LEDGER)}
 
 
 def main(argv: list[str]) -> int:

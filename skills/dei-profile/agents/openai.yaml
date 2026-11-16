@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-profile 个人介绍与案例库"
+  short_description: "把经历和案例建成案例库，按主题和对象筛案例，定制自我介绍话术、PPT 页和介绍 PDF"
+  default_prompt: "使用 $dei-profile：我明天要去给一群做餐饮的老板讲课，帮我从案例库里挑 3 个最合适的案例，再给我一段 3 分钟的开场自我介绍。"
+policy:
+  allow_implicit_invocation: true

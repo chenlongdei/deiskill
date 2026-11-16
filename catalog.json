@@ -13,7 +13,10 @@
       "layer": "router",
       "summary": "总入口：从最终交付倒推，串联已安装的 Skill；内置「YouTube 教程 → 学习路线」「多渠道资料 → 主题研究」两条配方",
       "install": "default",
-      "requires": []
+      "requires": [],
+      "publishes": true,
+      "first_prompt": "你能帮我做什么？推荐一件现在就能拿到结果的事",
+      "quick_needs": "无（它会按你的需求调用已安装的其他 Skill）"
     },
     {
       "name": "dei-daily-report",
@@ -27,7 +30,9 @@
       ],
       "local_only": [
         "skills/policy/references/examples"
-      ]
+      ],
+      "first_prompt": "给我今天的政策与商机日报",
+      "quick_needs": "Python 3.10+；政策模块不用任何账号"
     },
     {
       "name": "dei-capture",
@@ -40,7 +45,9 @@
         "可选：TikHub Token、浏览器 cookies、whisper.cpp + ffmpeg",
         "抖音：阿里云百炼 Key + Monid Key（监控线），或 Get笔记订阅 + playwright（导出线）",
         "抖音关键词巡检：Google Chrome + 抖音账号 + playwright + openpyxl + 阿里云百炼 Key"
-      ]
+      ],
+      "first_prompt": "搜一下 YouTube 上关于 Claude Code 的入门教程",
+      "quick_needs": "Python 3.9+、yt-dlp；不用账号"
     },
     {
       "name": "dei-notebook",
@@ -51,7 +58,9 @@
         "Python 3.9+",
         "notebooklm-py 0.8.5+（含 playwright chromium）",
         "Google 账号"
-      ]
+      ],
+      "first_prompt": "把这几个 YouTube 视频建成知识库，告诉我它们分别讲了什么：<链接>",
+      "quick_needs": "Python 3.9+、notebooklm-py、Google 账号（浏览器登录一次）"
     },
     {
       "name": "dei-course",
@@ -61,7 +70,10 @@
       "requires": [
         "Python 3.9+",
         "发布时：飞书 lark-cli / Notion ntn 或连接器 / 钉钉 dws（三选一，按用户设定）"
-      ]
+      ],
+      "publishes": true,
+      "first_prompt": "我想做一节教大家用 AI 写周报的课，帮我写第 1 节课手册",
+      "quick_needs": "Python 3.9+；发布时才需要文档平台的命令行"
     },
     {
       "name": "dei-moments",
@@ -70,7 +82,23 @@
       "install": "default",
       "requires": [
         "Python 3.9+（只用于定位 dei 工作区）"
-      ]
+      ],
+      "first_prompt": "这是我最近发的 3 条朋友圈，帮我做一份风格提示词：<粘贴>",
+      "quick_needs": "无"
+    },
+    {
+      "name": "dei-profile",
+      "layer": "output",
+      "summary": "个人介绍与案例库：经历和案例建成一案一卡的案例库；按主题、对象、场合筛案例，定制自我介绍话术（1/3/10 分钟）、PPT 人物页和案例页、分读者的介绍文档与 PDF；新案例算账入库",
+      "install": "default",
+      "requires": [
+        "Python 3.9+",
+        "出 PDF 时：markdown 包 + Chrome / Chromium / Edge",
+        "同步时：飞书 lark-cli / Notion ntn 或连接器 / 钉钉 dws（按用户设定）"
+      ],
+      "publishes": true,
+      "first_prompt": "我出门跟人介绍自己总说不清楚，这是我的素材，帮我梳理到底该呈现什么：<粘贴>",
+      "quick_needs": "无；出 PDF 时需要 markdown 包和 Chrome"
     },
     {
       "name": "dei-ppt",
