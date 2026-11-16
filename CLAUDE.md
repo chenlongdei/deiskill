@@ -1,6 +1,6 @@
 # deiskill · 目标、进度与管理约定
 
-> 最后更新：2026-11-14。新开窗口先读这份文件，再继续任务。
+> 最后更新：2026-11-16。新开窗口先读这份文件，再继续任务。
 > 这是公开仓库：本文件不写本机绝对路径、凭证和个人草稿（校验器会检查）。
 
 这个文件夹是 deiskill 的唯一维护位置（GitHub：chenlongdei/deiskill）。新增、修改、删除 Skill 都在这里做，改完再安装到 Agent。
@@ -23,7 +23,7 @@
 | router | 总入口 `dei` | 🔧 2026-11-14 升级为路由：全部请求先到它，按意图交给子 Skill（先轻后重）；配方 A 学习路线、B 主题研究、C 做课、D 朋友圈发售、E 找选题 |
 | input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
-| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；已有模板 `templates/dei-选题表.xlsx` |
+| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；`dei-ppt` 🔧（讲课 PPT）；已有模板 `templates/dei-选题表.xlsx` |
 
 ## 必须遵守的原则（用户已明确）
 
@@ -159,6 +159,14 @@
 - `dei` 路由表已加一行，配方 C、D 补了取案例的衔接（2026-11-14，随本轮其他 `dei` 改动一起未安装）
 - 实测状态：本机用作者的介绍库跑过 where / cases / index / pdf；Windows 未测；新建库（init）流程未端到端跑过
 
+### dei-ppt（2026-11-16 加入）
+
+- 来源：两次真实交付——一场政务单位专场（白底版，Python 引擎）和一场创业者沙龙（主题版，`deck_engine.js`）。沙龙那版生成第 2 版后，讲者在 Keynote 里只改了字、数字、照片和动画，版式没动，定为主题版标杆
+- 铁律：内容只从学员手册来（指令逐字照抄、动手页标手册章节，`build.py --handbook` 自动核对）；主题图只管样子；一页一个重点
+- `scripts/build.py`：生成 → 自查 → 预览（Keynote 优先，含隐藏页）→ 逐页讲稿；`--doctor` 自检依赖。`poster_theme.py` 从海报取色、生成背景、抠 logo；`keynote_diff.py` 比对讲者改稿
+- 示例 `examples/` 含讲者个人信息和报价，本机私有（.gitignore），不进仓库；公开的是 `templates/theme_deck_template.js`
+- 实测状态：两场真实交付跑通；Windows 未测（LibreOffice 渲染分支在 macOS 上测过）
+
 ## 单独安装与总入口（2026-11-14 用户要求）
 
 - 用户判断：大多数人装整套，只跟 `dei` 说话，所以 `dei` 要做真正的路由——任何请求先到它，交给对的子 Skill，读子 Skill 的 SKILL.md 后按它的规则执行；先走不用账号、不花钱的路。
@@ -182,6 +190,8 @@ bash scripts/install.sh --target <目录>  # 指定装到哪个 Agent 的 skills
 ```
 
 ## 管理规则
+
+- **只在仓库里改 Skill，不直接改安装目录。** 2026-11-16 复盘发现：dei-daily-report 的配色、模块、写法调整（11-13—11-15）只改在了本机安装版里，三天没回到仓库；dei 的路由升级反过来只在仓库里、没装到本机。改完一律：仓库改 → `validate_repo.py` → 提交推送 → 安装到 Agent。收尾时用 `diff -rq skills/<名> <安装目录>/<名>` 对一遍。
 
 - 写或改 Skill 前先读 [docs/skill-spec.md](docs/skill-spec.md)：命名（自有 `dei-` 前缀，dbs 保持原名）、`dei-handoff`、正文骨架、叶子不点名、dei 工作区的结构与命名（§6a）。改结构时同步 `scripts/migrate_workspace.py`。
 - 自有 Skill 放 `skills/<name>/` 并登记 `catalog.json`；上游内容登记 `external.json`，不把文件提交进来。
