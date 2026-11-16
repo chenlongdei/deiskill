@@ -1,0 +1,6 @@
+{
+  "name": "dei-ppt-engine",
+  "private": true,
+  "description": "dei-ppt 主题版引擎依赖：在本目录运行 npm install",
+  "dependencies": { "pptxgenjs": "3.12.0" }
+}

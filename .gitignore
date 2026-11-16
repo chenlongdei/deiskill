@@ -18,6 +18,7 @@ skills/dei-daily-report/skills/zhihu/tools/zhihu/
 **/.DS_Store
 
 # 本机私有样例
+skills/dei-ppt/examples/
 skills/dei-daily-report/skills/policy/references/examples/
 
 # 模板例外

@@ -71,6 +71,23 @@
       "requires": [
         "Python 3.9+（只用于定位 dei 工作区）"
       ]
+    },
+    {
+      "name": "dei-ppt",
+      "layer": "output",
+      "summary": "讲课 PPT：按学员手册逐页出可编辑 PPTX（讲稿、分组、入场动画）、签到轮播、逐页讲稿、预览图和课前准备清单；白底版或按海报配色的主题版；比对讲者的 Keynote 改稿、学偏好",
+      "install": "default",
+      "requires": [
+        "Python 3.9+（python-pptx、pillow、pymupdf、numpy）",
+        "Node.js（主题版：在 scripts/ 下 npm install）",
+        "Keynote 或 LibreOffice（预览图）",
+        "思源黑体"
+      ],
+      "local_only": [
+        "skills/dei-ppt/examples"
+      ],
+      "first_prompt": "这是我的课程手册和活动海报，按海报的风格给我出一套讲课 PPT：<手册> <海报>",
+      "quick_needs": "你的手册；Node.js + Python；Keynote 或 LibreOffice"
     }
   ]
 }

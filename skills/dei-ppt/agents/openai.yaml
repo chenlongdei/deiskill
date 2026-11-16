@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-ppt 讲课 PPT"
+  short_description: "把学员手册做成讲课 PPT：每页一个重点、带讲稿和动画；给海报就按海报配色；学讲者的 Keynote 改稿"
+  default_prompt: "使用 $dei-ppt 按这份课程手册和这张活动海报，给我出一套讲课 PPT。"
+policy:
+  allow_implicit_invocation: true
