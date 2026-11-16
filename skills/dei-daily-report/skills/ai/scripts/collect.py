@@ -29,7 +29,7 @@ if args.date:
  start=datetime.strptime(args.date,'%Y-%m-%d').replace(tzinfo=CST)
  end=start+timedelta(days=1)
  if start < now-timedelta(days=7) or end > now: parser.error('日期必须是最近七天内已结束的一天')
-ua='aihot-skill/1.7.0 (+https://aihot.news/aihot-skill/)'
+ua='aihot-api/2.0.0 (+https://aihot.news/aihot-skill/)'
 try:
  actor=(ROOT/'sources/aihot/.aihot-actor-id').read_text(encoding="utf-8").strip()
  parsed=uuid.UUID(actor)

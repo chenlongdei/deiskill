@@ -20,7 +20,7 @@
 [data-theme=yellow]{--accent:#E8E23A;--on-accent:#141414;--accent-text:#8A7F00;--accent-dark:#E8E23A}
 [data-theme=blue]  {--accent:#2340D8;--on-accent:#F2EDE2;--accent-text:#2340D8;--accent-dark:#7F93FF}
 [data-theme=green] {--accent:#3DE35C;--on-accent:#141414;--accent-text:#12943A;--accent-dark:#3DE35C}
-[data-theme=pink]  {--accent:#EC3F8C;--on-accent:#141414;--accent-text:#D92B78;--accent-dark:#FF6FAE}
+[data-theme=cyan]  {--accent:#2ED6E8;--on-accent:#141414;--accent-text:#0B8A9C;--accent-dark:#2ED6E8}
 [data-theme=mint]  {--accent:#A6D7BF;--on-accent:#141414;--accent-text:#1E7A55;--accent-dark:#A6D7BF}
 
 *{box-sizing:border-box}
@@ -175,8 +175,8 @@ body.export .toolbar{display:none}
 const R = window.REPORT;
 if (R) document.title = (R.brand||"")+"日报 · 速览";
 if (!R){ document.getElementById("deck").innerHTML = '<p style="color:#eee;padding:80px;font-size:22px">这是空模板，请打开 output/期号/速览.html 查看成品。</p>'; return; }
-const THEMES = {red:"#E43A2A",orange:"#F26A24",yellow:"#E8E23A",blue:"#2340D8",green:"#3DE35C",pink:"#EC3F8C",mint:"#A6D7BF"};
-const WEEK = ["red","orange","yellow","blue","green","pink","mint"];
+const THEMES = {red:"#E43A2A",orange:"#F26A24",yellow:"#E8E23A",blue:"#2340D8",green:"#3DE35C",cyan:"#2ED6E8",mint:"#A6D7BF"};
+const WEEK = ["red","orange","yellow","blue","green","cyan","mint"];
 const qs = new URLSearchParams(location.search);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const total = R.cards.length + 1;

@@ -23,7 +23,7 @@ for _s in (_sys.stdout, _sys.stderr):
         pass
 
 HERE = pathlib.Path(__file__).resolve().parent
-THEMES = ["red", "orange", "yellow", "blue", "green", "pink", "mint"]
+THEMES = ["red", "orange", "yellow", "blue", "green", "cyan", "mint"]
 
 
 def inject(tpl, data, md=None):

@@ -75,7 +75,7 @@
   "issue": 1,
   "date": "2026 年 11 月 12 日",
   "weekday": "星期四",
-  "theme": "auto 或 red/orange/yellow/blue/green/pink/mint",
+  "theme": "auto 或 red/orange/yellow/blue/green/cyan/mint",
   "read": "全文约 5000 字 · 12 分钟读完",
   "article": "文字版 Markdown，相对本文件的路径",
   "headline": ["第一行", "第二行"],

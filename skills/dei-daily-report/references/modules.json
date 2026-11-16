@@ -5,8 +5,7 @@
   "default_modules": [
     "policy",
     "ai",
-    "zhihu",
-    "douyin"
+    "zhihu"
   ],
   "modules": [
     {
