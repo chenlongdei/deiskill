@@ -13,6 +13,7 @@
 | 字体（推荐） | 字幕、标题、数字 | 阿里巴巴普惠体 3.0 Bold / Black（免费商用）、抖音美好体（免费商用）。文件路径写进 config.json 的 `font_bold` / `font_black` / `font_number` |
 | ElevenLabs key（可选） | 生成音效 | elevenlabs.io → API Keys，勾 Sound Effects |
 | Antigravity CLI `agy`（可选） | Gemini 听审 | 按 Google Antigravity 官方说明安装并登录 Google 账号 |
+| pyJianYingDraft（可选） | 生成剪映多轨草稿（Apache-2.0） | `python3 -m pip install pyJianYingDraft`；没有它也能出字幕.srt 和透明图层.mov，在剪映里手动拼 |
 
 ## 配置
 
@@ -31,6 +32,7 @@
 - 中文字幕断句必须先分词（jieba），否则会切成「找不 / 到」。
 - ffmpeg 9 去掉了 `-filter_complex_script`，`cut.py` 两种写法都试。
 - 字体用 `@font-face` 引工程里的文件；没有字体文件时退回系统字体，换电脑会变样。
+- 剪映草稿是按 pyJianYingDraft 支持的格式写的，新版剪映可能打不开（作者这台机器没装剪映，草稿还没在剪映里实际打开过）；打不开就用 `交接/` 里的人物、图层、字幕手动拼。草稿里素材是绝对路径，工程文件夹不要挪。
 
 ## 费用
 

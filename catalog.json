@@ -129,7 +129,8 @@
         "Node.js 18+（HyperFrames 渲染）",
         "Chrome",
         "ElevenLabs key（可选，生成音效）",
-        "Antigravity CLI（可选，Gemini 听审）"
+        "Antigravity CLI（可选，Gemini 听审）",
+        "pyJianYingDraft（可选，剪映草稿）"
       ],
       "first_prompt": "这是我录的口播原片，帮我剪成能发抖音的竖屏成片，先给我看删改清单",
       "quick_needs": "Python 3.9+（jieba、numpy、soundfile）、ffmpeg、whisper.cpp 和模型、Node.js、Chrome；可选 ElevenLabs key、Antigravity CLI"

@@ -28,7 +28,7 @@ v_rms = np.sqrt(np.mean(voice[np.abs(voice) > 1e-3] ** 2))
 
 N = int(DUR * SR)
 out = np.zeros((N + SR * 3, 2), np.float32)
-used, missing = {}, set()
+used, missing, scaled = {}, set(), {}
 for e in ev["ev"]:
     k = e["kind"]
     f = d / "work/sfx" / f"{k}.wav"
@@ -40,7 +40,9 @@ for e in ev["ev"]:
     if x.shape[1] == 1:
         x = np.repeat(x, 2, 1)
     m = x.mean(1); act = m[np.abs(m) > np.abs(m).max() * .05]
-    x = (x * (v_rms * 10 ** (LEVEL.get(k, -20) / 20) / max(np.sqrt(np.mean(act ** 2)), 1e-6) * e.get("v", 1.0))).astype(np.float32)
+    base = (x * (v_rms * 10 ** (LEVEL.get(k, -20) / 20) / max(np.sqrt(np.mean(act ** 2)), 1e-6))).astype(np.float32)
+    scaled[k] = base
+    x = base * e.get("v", 1.0)
     i = int(e["t"] * SR)
     out[i:i + len(x)] += x[:len(out) - i]
     used[k] = used.get(k, 0) + 1
@@ -72,10 +74,15 @@ if bgm:
     db = np.convolve(np.pad(db, 10, mode='edge'), np.ones(21) / 21, 'valid')
     g = np.interp(np.arange(N) / SR, tc, v_rms * 10 ** (db / 20) / m_rms, right=v_rms * 10 ** (db[-1] / 20) / m_rms).astype(np.float32)
     fade = np.clip(np.arange(N) / (SR * 1.5), 0, 1) * np.clip((DUR - np.arange(N) / SR) / 1.2, 0, 1)
-    out += m * (g * fade)[:, None]
+    track = m * (g * fade)[:, None]
+    sf.write(str(d / "work/bgm_track.wav"), track, SR, subtype="PCM_16")   # 已闪避的配乐，单独一条给剪映草稿
+    out += track
 else:
     print("⚠ plan.json 没有 bgm：这一版没有配乐")
 
+(d / "work/sfx_scaled").mkdir(exist_ok=True)
+for k, x in scaled.items():   # 每种音效按成片音量存一份，给剪映草稿逐个摆
+    sf.write(str(d / "work/sfx_scaled" / f"{k}.wav"), x, SR, subtype="PCM_16")
 peak = float(np.abs(out).max())
 if peak > .5:
     out *= .5 / peak

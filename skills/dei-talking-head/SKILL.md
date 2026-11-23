@@ -7,6 +7,7 @@ metadata:
     - 用户确认的删改清单 → 剪辑工程（plan.json + scenes.py + HyperFrames）和竖屏成片 MP4，-14 LUFS，附刀口核对
     - 成片 + 看片意见（哪里卡、哪里太冲、哪里看不懂）→ 只改对应的刀口 / 画面 / 音效后的新版本，旧版保留
     - 成片 → 审片意见.md（Gemini 按 30 秒一段听审）和逐条核实后的修改
+    - 工程 → 交接件：字幕.srt、透明图层.mov、分开的人声配乐音效、剪映多轨草稿（用户在剪映里手改）
     - 不交出：拍摄和录音；发布到平台；替用户买音乐、字体或会员；未经用户同意把出镜视频上传给第三方模型
 ---
 
@@ -37,6 +38,7 @@ metadata:
 ### Step 0 准备
 
 - `python3 scripts/doctor.py`，缺什么按 `references/setup.md` 给安装命令，**用户同意后再装**。
+- 用户还没录的，先讲录的规矩（method.md 第 0 节：说错停 2 秒、从句首重说；演示时嘴上说一句「看这里」）。
 - 一次问清：原片在哪；工程放哪（这件事已有项目文件夹就放它下面；没有就 `python3 scripts/dei_workspace.py where` 的 `output` 下 `口播剪辑/YYYY-MM-DD_HHMM_主题/`）；口播里有哪些专有名词（产品名、英文词）。
 - 读 `references/method.md`。用户给了对标视频的，先看它的节奏、字幕和图解。
 
@@ -57,7 +59,7 @@ metadata:
 ### Step 4 画面
 
 1. 复制 `scenes_example.py` 为 `scenes.py`，按 `references/scenes.md` 写这条视频的图解和贴纸：讲结构（模型、步骤、对比、流程）的地方切整屏图解，讲观点的地方回人脸、只放左侧小贴纸。时间优先用 `W("口播里的字")`。
-2. 用到的品牌 logo 放 `hf/assets/logos/`（官方素材或 theSVG）。
+2. 用到的品牌 logo 放 `hf/assets/logos/`（官方素材或 theSVG）；升华的句子要垫空镜的，从 Mixkit 下可商用的竖版素材放 `hf/assets/broll/`，在 scenes.py 里用 `broll()`。
 3. `python3 scripts/build.py <工程> --snap 3,36,82,...` 出关键帧，逐张看：字有没有挡脸、出画、挤在一起，对比看不看得懂。改到满意。
 
 ### Step 5 声音、出片
@@ -66,6 +68,7 @@ metadata:
 2. `python3 scripts/sfx.py <工程>`（补齐音效）→ `python3 scripts/mix.py <工程>`。
 3. 渲染前用 `npx --yes hyperframes@<版本> preview` 开预览，告诉用户可以在浏览器里看、拖时间轴。
 4. `python3 scripts/render.py <工程> --name 口播_v1 --open`。
+5. 用户要在剪映里手改时：`python3 scripts/export.py <工程> --name 口播_v1` → `交接/`（字幕.srt、图层.mov、分开的素材、剪映草稿）。草稿打不开就用前三样手动拼。
 
 ### Step 6 听审、核实、修改
 
@@ -99,6 +102,7 @@ metadata:
 ├── source/原片.*                  不动
 ├── work/                          edl、字幕、音效、转写等中间文件
 ├── hf/                            HyperFrames 工程（build.py 生成，不手改）
+├── 交接/                           字幕.srt、图层.mov、素材/、剪映草稿/（export.py）
 └── 成片/口播_vN.mp4               1080×1920，-14 LUFS
 ```
 

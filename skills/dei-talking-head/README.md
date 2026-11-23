@@ -37,6 +37,7 @@ $env:DEISKILL_ONLY="dei-talking-head"; irm https://raw.githubusercontent.com/che
 - 原片 → 逐字稿 + 删改清单（你确认）→ 剪辑工程 + 成片 MP4（1080×1920，-14 LUFS）+ 刀口核对
 - 看完片说「这里卡了」「这个音效太冲」「这个对比看不懂」→ 只改那一处，出新版本，旧版保留
 - 剪完让 Gemini 按 30 秒一段听审 → 每条回原片核实 → 改
+- 想自己在剪映里拖：导出字幕.srt、透明图层.mov 和剪映多轨草稿
 
 ## 用的是什么方法
 

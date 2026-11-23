@@ -38,6 +38,7 @@
 | `settext(t, 元素id, 文字)` | 到点换字（计数器 ×1 → ×4） |
 | `A(t, 选择器, 从, 到, 时长, 缓动)` / `T(t, 选择器, 到, 时长, 缓动)` | 直接写 GSAP fromTo / to |
 | `S(t, 音效名, 音量倍数)` | 音效：whoosh pop tap ding strike sparkle text_slam riser impact typing |
+| `broll(t_in, t_out, 文件名, 素材内起点)` | 空镜：这段时间整屏换成空镜（口播继续），淡入、轻推近、淡出；文件放 `hf/assets/broll/`，用 Mixkit 等可商用竖版素材，垫在升华的句子上 |
 | `raw_js(代码)` | 其他 GSAP；代码里的秒数用 `{R(秒数)}` 换算 |
 | `EXTRA_CSS.append(css)` | 这条视频自己的样式 |
 

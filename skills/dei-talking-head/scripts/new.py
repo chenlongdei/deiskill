@@ -22,7 +22,7 @@ if not src.is_file():
     die(f"找不到原片 {src}")
 if (d / "plan.json").exists():
     die(f"{d} 已经是工程了（有 plan.json）。要重来就换个目录")
-for sub in ["source", "work", "成片", "hf/compositions", "hf/assets/icons", "hf/assets/logos", "hf/assets/fonts", "hf/assets/music"]:
+for sub in ["source", "work", "成片", "hf/compositions", "hf/assets/icons", "hf/assets/logos", "hf/assets/fonts", "hf/assets/music", "hf/assets/broll"]:
     (d / sub).mkdir(parents=True, exist_ok=True)
 
 dst = d / "source" / ("原片" + src.suffix.lower())

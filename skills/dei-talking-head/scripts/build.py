@@ -4,6 +4,7 @@
 用法：
   python3 scripts/build.py <工程>                    生成 + check
   python3 scripts/build.py <工程> --snap 3,36,82     另外在这些成片秒数截图（拼图在 work/snap/）
+  python3 scripts/build.py <工程> --overlay          另外生成 hf_overlay/（只有图解、贴纸、标题的透明层，给剪映草稿用，export.py 会调）
 画面系统（references/scenes.md）：全屏人像 + 跳切交替推近（两次至少隔 2 秒）+ 常驻标题和进度条 + 大粗字幕
 + 讲结构时整屏切图解（墨黑 + 荧光绿）。scenes.py 里能用的函数见 scenes.md，例子见 templates/scenes_example.py。
 """
@@ -13,6 +14,7 @@ from common import project, hf, die
 ap = argparse.ArgumentParser()
 ap.add_argument("project")
 ap.add_argument("--snap", default="")
+ap.add_argument("--overlay", action="store_true")
 args = ap.parse_args()
 D, PLAN = project(args.project)
 HF = D / "hf"
@@ -168,6 +170,12 @@ def typewrite(t, el_id, text, dur=2.5):
 def settext(t, el_id, text):
     """t 秒把元素文字换成 text（往回拖也对）"""
     js.append(f'tl.call(()=>{{const e=document.getElementById("{el_id}");if(e)e.textContent={json.dumps(text)}}},null,{_t(t):.2f});')
+BROLL = []
+def broll(t_in, t_out, file, media_start=0.0):
+    """空镜：t_in–t_out 整屏换成空镜画面（口播继续），文件放 hf/assets/broll/（Mixkit 等可商用素材）。淡入、轻推近、淡出"""
+    if not (HF / "assets/broll" / file).is_file():
+        die(f"没有空镜 {file}：放进 hf/assets/broll/")
+    BROLL.append((_t(t_in), _t(t_out), file, media_start))
 def raw_js(code):
     """直接写 GSAP（tl 是时间轴）；里面的时间用 {R(秒数)} 换算"""
     js.append(code)
@@ -254,6 +262,12 @@ for t in sorted([t for t in JUMPS if not hidden(t + .05)] + [b - .05 for a, b in
 if PLAN.get("hook_push", 4.4):
     pj.append(f'tl.fromTo("#cam",{{scale:1.0}},{{scale:1.1,duration:{PLAN.get("hook_push", 4.4)},ease:"power1.inOut"}},0);')
 FY = PLAN.get("face_y", 760)
+br_tags, br_js = "", []
+for k, (a, b, f, ms) in enumerate(BROLL):
+    br_tags += (f'<video id="br{k}" class="clip broll" src="assets/broll/{f}" muted playsinline data-start="{a - .3:.2f}" data-duration="{b - a + .6:.2f}" '
+                f'data-media-start="{max(0, ms - .3):.2f}" data-track-index="5"></video>')
+    br_js += [f'tl.fromTo("#br{k}",{{opacity:0,scale:1.08}},{{opacity:1,scale:1.0,duration:.35,ease:"power2.out"}},{a - .3:.2f});',
+              f'tl.to("#br{k}",{{opacity:0,duration:.3,ease:"power2.in"}},{b:.2f});']
 (HF / "index.html").write_text(f'''<!doctype html>
 <html lang="zh-CN" data-resolution="portrait">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=1080, height=1920" />
@@ -261,9 +275,11 @@ FY = PLAN.get("face_y", 760)
 <style>*{{margin:0;padding:0;box-sizing:border-box}}
 html,body{{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}}
 #cam{{position:absolute;inset:0;transform-origin:540px {FY}px}}
-#aroll{{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover}}</style></head>
+#aroll{{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover}}
+.broll{{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover;z-index:2}}</style></head>
 <body><div id="root" data-composition-id="main" data-start="0" data-duration="{TOTAL}" data-width="1080" data-height="1920">
 <div id="cam"><video id="aroll" class="clip" src="assets/aroll.mp4" muted playsinline data-start="0" data-duration="{AROLL}" data-track-index="0"></video></div>
+{br_tags}
 <div id="ui" data-composition-id="ui" data-composition-src="compositions/ui.html" class="clip" data-start="0" data-duration="{TOTAL}" data-track-index="1" data-track-kind="graphics" data-width="1080" data-height="1920" style="position:absolute;inset:0;z-index:5"></div>
 <div id="captions" data-composition-id="captions" data-composition-src="compositions/captions.html" class="clip" data-start="0" data-duration="{AROLL}" data-track-index="2" data-track-kind="captions" data-width="1080" data-height="1920" style="position:absolute;inset:0;z-index:6"></div>
 <audio id="voice" class="clip" src="assets/voice.wav" data-start="0" data-duration="{AROLL}" data-track-index="3" data-volume="1"></audio>
@@ -272,11 +288,35 @@ html,body{{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}}
 <script>
 const tl = gsap.timeline({{ paused: true }});
 {chr(10).join(pj)}
+{chr(10).join(br_js)}
 tl.set({{}},{{}},{TOTAL});
 window.__timelines["main"] = tl;
 </script></body></html>
 ''', encoding="utf-8")
 (D / "work/sfx_events.json").write_text(json.dumps(dict(dur=TOTAL, aroll=AROLL, ev=sorted(SFX, key=lambda e: e['t'])), indent=0), encoding="utf-8")
+punch_ev = [(float(x.split(",")[-1].rstrip(");")), float(re.search(r"scale:([\d.]+)", x).group(1))) for x in pj if x.startswith('tl.set("#cam"')]
+(D / "work/layout.json").write_text(json.dumps(dict(aroll=AROLL, total=TOTAL, face_y=FY, punch=sorted(punch_ev), broll=BROLL, caps=CAPS,
+                                                    caption_top=CAP_TOP), ensure_ascii=False), encoding="utf-8")
+if args.overlay:
+    OV = D / "hf_overlay"
+    (OV / "compositions").mkdir(parents=True, exist_ok=True)
+    for f in ("hyperframes.json", "meta.json", "package.json"):
+        shutil.copy2(HF / f, OV / f)
+    shutil.copy2(COMP / "ui.html", OV / "compositions/ui.html")
+    for sub in ("icons", "logos", "fonts"):
+        shutil.rmtree(OV / "assets" / sub, ignore_errors=True)
+        shutil.copytree(HF / "assets" / sub, OV / "assets" / sub)
+    (OV / "index.html").write_text(f'''<!doctype html>
+<html lang="zh-CN" data-resolution="portrait">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=1080, height=1920" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<style>*{{margin:0;padding:0;box-sizing:border-box}} html,body{{margin:0;width:1080px;height:1920px;overflow:hidden;background:transparent}}</style></head>
+<body><div id="root" data-composition-id="main" data-start="0" data-duration="{TOTAL}" data-width="1080" data-height="1920">
+<div id="ui" data-composition-id="ui" data-composition-src="compositions/ui.html" class="clip" data-start="0" data-duration="{TOTAL}" data-track-index="1" data-track-kind="graphics" data-width="1080" data-height="1920" style="position:absolute;inset:0"></div>
+</div>
+<script>const tl = gsap.timeline({{ paused: true }}); tl.set({{}},{{}},{TOTAL}); window.__timelines["main"] = tl;</script></body></html>
+''', encoding="utf-8")
+    print("透明图层工程：", OV)
 if not (HF / "assets/sfx.wav").exists():   # 混音前先放一条静音，check 才过得去
     import subprocess
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo", "-t", str(TOTAL), str(HF / "assets/sfx.wav")], check=True)
