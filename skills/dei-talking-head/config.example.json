@@ -1,0 +1,15 @@
+{
+  "whisper_cli": "",
+  "whisper_model": "~/.cache/whisper-models/ggml-large-v3-turbo.bin",
+  "font_bold": "",
+  "font_black": "",
+  "font_number": "",
+  "elevenlabs_api_key": "",
+  "elevenlabs_key_file": "",
+  "speed": 1.1,
+  "split_gap": 0.45,
+  "loudness_lufs": -14,
+  "hyperframes_version": "0.9.85",
+  "reviewer_cli": "",
+  "reviewer_timeout": "900s"
+}

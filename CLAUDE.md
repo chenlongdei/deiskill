@@ -23,7 +23,7 @@
 | router | 总入口 `dei` | 🔧 2026-11-14 升级为路由：全部请求先到它，按意图交给子 Skill（先轻后重）；配方 A 学习路线、B 主题研究、C 做课、D 朋友圈发售、E 找选题 |
 | input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
-| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；`dei-ppt` 🔧（讲课 PPT）；`dei-shop-video` 🔧（门店引流短视频，2026-11-23 从一次医疗门店 9.9 引流视频实做封装）；已有模板 `templates/dei-选题表.xlsx` |
+| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；`dei-ppt` 🔧（讲课 PPT）；`dei-shop-video` 🔧（门店引流短视频，2026-11-23 从一次医疗门店 9.9 引流视频实做封装）；`dei-talking-head` 🔧（真人口播剪辑，2026-11-23 从一条知识口播 9 版迭代封装）；已有模板 `templates/dei-选题表.xlsx` |
 
 ## 必须遵守的原则（用户已明确）
 
@@ -175,6 +175,14 @@
 - 脚本：doctor / mask（按关键帧给车牌、人脸打马赛克）/ new（复制素材、缩略图拼板、project.json 草稿）/ tts（搜音色、试音、生成 + scribe 语音核对，列出不同处）/ sfx（ElevenLabs 音效生成，提示词在 templates/sfx_prompts.json）/ bgm（测 BPM 对强拍）/ build / finalize（检查、关键帧、渲染、压缩 + 响度、整片核对）
 - 实测：2026-11-23 本机从零跑通全流程（新工程 → 配音核对 → 14 个音效 → BGM → 渲染 -11.3 LUFS → 整片核对 97%，差异只有店名同音字）；装到 Claude Code、Codex、WorkBuddy、通用 Agents 四个目录。Windows 未测
 - 已知：安装器在 Skill 仓库目录里有 config.json 时，会在 Codex 目录里多嵌一层；仓库里不要放 config.json（校验器也会拦）
+
+### dei-talking-head（2026-11-23 加入）
+
+- 来源：一条 3 分钟的知识口播（「我离不开的 2 个 AI 工具」），v1 只删口误、3:4 留黑、苹果风卡片 → v6 按市场打法重剪 → v6b / v6c 按用户看片意见和 Gemini 听审修改，共 9 版。用户反馈全部写进铁律和 `references/method.md`：删改清单先确认；刀口落在静音里、被删的词不留尾音、句中 < 0.45 秒停顿不切（切碎了「卡两三下」）；图解画结构不复述口播；对比要同屏、具体、同一组卡片接力（「不要让图标消失那么快」）；跳切换景别两次至少隔 2 秒；音效宁轻勿冲（打字用一段轻键盘声）；配乐明亮大调、说话和停顿只差约 2 dB
+- 方法论：每一步用当下最好用的工具、靠固定交接件串起来（逐字稿 → plan.json 删改清单 → aroll / voice / captions → HyperFrames → 成片），哪一格有更好的只换那一格
+- 引擎：whisper.cpp 本地转写；ffmpeg 剪、提速、人声链、响度；HyperFrames（`npx --yes hyperframes@0.9.85`）画面。一条视频 = `plan.json`（剪什么）+ `scenes.py`（画什么，`build.py` 提供市场版画面系统的函数）；scenes.py 里写死的秒数按第一次剪的 edl_base 自动换算到新剪辑，也可用 `W("口播里的字")` 定位
+- 听审：Agent 只能抽帧和转写、听不到声音；剪完用 Antigravity CLI（`agy`，Gemini）按 30 秒一段审，第一次上传前问用户，每条回原片核实（实测找到了卡顿和「当它是」的残留尾音，也会把切片边界误报成截断）
+- 实测：2026-11-23 本机用 Skill 脚本从零重做那条口播（new → cut → build → mix → render），和手工版 v6c 一致；装到本机 Agent。Windows 未测
 
 ## 单独安装与总入口（2026-11-14 用户要求）
 

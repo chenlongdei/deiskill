@@ -1,0 +1,61 @@
+.el{position:absolute;transform:translate(-50%,-50%);z-index:3}
+.in{display:flex;flex-direction:column;align-items:center;white-space:nowrap}
+.ic{display:inline-flex} .ic svg{width:100%;height:100%}
+.logo{background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,0,0,.35)} .logo img{width:100%;height:100%;object-fit:contain}
+.scene{position:absolute;inset:0;background:{INK};z-index:2;overflow:hidden}
+.glow{position:absolute;left:-200px;top:200px;width:1480px;height:1100px;background:radial-gradient(closest-side,rgba(200,255,46,.10),rgba(200,255,46,0));}
+.scene::after{content:"";position:absolute;inset:0;background-image:linear-gradient({LINE}55 1px,transparent 1px),linear-gradient(90deg,{LINE}55 1px,transparent 1px);background-size:60px 60px;opacity:.5;z-index:0}
+.chap{position:absolute;left:90px;top:430px;font-size:30px;color:{NEON};letter-spacing:.12em;z-index:3}
+.stitle{position:absolute;left:90px;top:470px;font-size:70px;font-weight:900;z-index:3}
+.stk{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(11,12,10,.82);border:3px solid {NEON};border-radius:28px;padding:18px 22px}
+.stk.vs{flex-direction:row;flex-wrap:wrap;justify-content:center;width:250px} .stk.vs .sm{width:100%;text-align:center}
+.stk .big{font-family:"DY";font-size:110px;line-height:1;color:{NEON}} .stk .sm{font-size:32px;font-weight:700}
+.pill{display:flex;align-items:center;gap:10px;font-weight:900;padding:14px 30px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.node{display:flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box}
+.node .L{font-family:"DY";font-size:110px;color:{NEON}} .node .ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.lab{font-weight:700}
+.arrow{position:absolute;height:6px;background:{NEON};transform-origin:0 50%;z-index:3;border-radius:3px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:20px} .tn{font-size:52px;font-weight:900}
+.plus{font-family:"DY";font-size:110px;color:{NEON}}
+.tag{display:flex;align-items:center;gap:8px;background:{NEON};color:{INK};font-size:36px;font-weight:900;padding:10px 24px;border-radius:16px}
+.tag2{font-size:34px;color:{GRAY};font-weight:700}
+.cmp{width:400px;height:420px;border-radius:36px;background:{TILE};border:4px solid {LINE};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.cmp.on{border-color:{NEON};box-shadow:0 0 60px rgba(200,255,46,.25)} .cn{font-size:48px;font-weight:900} .cs{font-size:34px;color:{GRAY}}
+.strike{position:absolute;left:110px;top:795px;width:380px;height:12px;background:{RED};border-radius:6px;transform:rotate(-14deg);transform-origin:0 50%;z-index:4}
+.step{display:flex;align-items:center;gap:22px;width:860px;height:100px;padding:0 30px;border-radius:24px;background:{TILE};font-size:44px;font-weight:700}
+.sn{font-family:"DY";width:60px;height:60px;border-radius:30px;background:{LINE};display:flex;align-items:center;justify-content:center;font-size:38px;color:{NEON}}
+.vcard{width:440px;height:400px;border-radius:36px;background:{TILE};border:4px solid {LINE};box-sizing:border-box}
+.vhead{display:flex;flex-direction:column;align-items:center;gap:12px} .lrow{display:flex;gap:14px} .vn{font-size:40px;font-weight:900}
+.vsb{font-family:"DY";font-size:60px;color:{INK};background:{NEON};width:110px;height:110px;border-radius:55px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px {INK}}
+.ask{display:flex;align-items:center;gap:10px;background:{WHITE};color:{INK};font-size:40px;font-weight:900;padding:14px 30px;border-radius:32px 32px 32px 8px}
+.res{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:330px} .res i{display:block;width:330px;height:16px;border-radius:8px;background:{LINE}} .res i.s{width:200px}
+.res span{font-size:30px;color:{GRAY};font-weight:700;align-self:center}
+.res2{display:flex;align-items:center;gap:16px} .res2 div{display:flex;flex-direction:column} .res2 b{font-size:36px} .res2 span{font-size:30px;color:{NEON};font-weight:900}
+.vl0{font-size:36px;font-weight:900;color:{GRAY};border:3px solid {LINE};padding:6px 22px;border-radius:16px}
+.vl1{display:flex;align-items:center;gap:8px;font-size:36px;font-weight:900;background:{NEON};color:{INK};padding:8px 22px;border-radius:16px}
+.ctr{position:absolute;right:90px;top:478px;font-size:44px;font-weight:900;color:{NEON};border:4px solid {NEON};border-radius:18px;padding:4px 20px;z-index:3}
+.ctr b{font-family:"DY";font-size:56px}
+.bub{position:absolute;left:120px;top:590px;width:840px;min-height:120px;padding:26px 34px;background:{NEON};color:{INK};font-size:44px;font-weight:900;border-radius:40px 40px 40px 10px;z-index:3;white-space:normal;line-height:1.35}
+.caret{display:inline-block;width:4px;height:44px;background:{INK};vertical-align:middle;margin-left:4px}
+.gear{position:relative;display:flex;align-items:center;justify-content:center} .gear .ic{position:absolute;right:-48px;bottom:-30px}
+.desk{width:620px;height:150px;border-radius:28px;border:3px dashed {LINE};display:flex;align-items:flex-start;gap:10px;padding:14px 22px;color:{GRAY};font-size:30px;box-sizing:border-box}
+.wfile{position:relative} .okc{position:absolute;right:-18px;bottom:-14px;width:54px;height:54px;border-radius:27px;background:{NEON};display:flex;align-items:center;justify-content:center}
+.okc.big{position:static;width:70px;height:70px;border-radius:35px}
+.big2{font-size:96px;font-weight:900} .big2 s{color:{GRAY};text-decoration-color:{RED};text-decoration-thickness:10px} .big2 b{color:{NEON}}
+.dash{position:absolute;height:0;border-top:6px dashed {GRAY};transform-origin:0 50%;z-index:3} .dash.g{border-top-color:{NEON}}
+.warn{width:120px;height:120px;border-radius:60px;background:{INK};border:5px solid {RED};display:flex;align-items:center;justify-content:center}
+.prob{display:flex;align-items:center;gap:14px;width:780px;padding:18px 30px;border-radius:22px;background:{TILE};border-left:10px solid {RED};font-size:48px;font-weight:900} .prob b{color:{RED}}
+.md{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:"DY";font-size:30px;color:{GRAY}}
+.shield{display:flex;align-items:center;gap:14px;background:{NEON};color:{INK};font-size:48px;font-weight:900;padding:14px 34px;border-radius:999px}
+.lt{font-size:38px;font-weight:900;color:{WHITE}} .lt.g{color:{NEON}}
+.fly{position:absolute;z-index:4}
+.graph{position:absolute;left:0;top:0;z-index:3;overflow:visible}
+.soon{background:{NEON};color:{INK};font-size:30px;font-weight:900;padding:4px 18px;border-radius:12px}
+#follow{position:relative;width:360px;height:110px;border-radius:55px;background:{NEON};color:{INK};font-size:48px;font-weight:900}
+#follow span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#touch{position:absolute;left:600px;top:1060px;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:45px;border:6px solid #fff;background:rgba(255,255,255,.3);opacity:0;z-index:9}
+#ttl{position:absolute;left:0;right:0;top:292px;display:flex;justify-content:center;z-index:8}
+#ttl span{font-size:62px;font-weight:900;color:{WHITE};background:{INK};padding:10px 34px 14px;border-radius:20px;box-shadow:0 0 0 4px {NEON}}
+#ttl b{font-family:"DY";color:{NEON};font-size:76px;font-weight:400}
+#prog{position:absolute;left:150px;right:150px;top:400px;height:8px;border-radius:4px;background:rgba(255,255,255,.25);z-index:8;overflow:hidden}
+#pbar{position:absolute;inset:0;background:{NEON};transform-origin:0 50%}

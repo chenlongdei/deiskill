@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-talking-head 真人口播剪辑"
+  short_description: "把自己录的口播原片剪成能发的竖屏成片：删停顿口误、提速、大字幕、整屏图解、音效配乐，剪完再让 Gemini 听审"
+  default_prompt: "使用 $dei-talking-head：这是我录的口播原片，帮我剪成能发抖音的竖屏成片，先给我看删改清单。"
+policy:
+  allow_implicit_invocation: true

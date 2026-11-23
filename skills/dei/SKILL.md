@@ -57,6 +57,7 @@ metadata:
 | 让 AI 写得像自己、诊断朋友圈、排发售、复盘 | `dei-moments` | SKILL.md Step 1 | 不用任何配置；要用户自己的语料和真实素材 |
 | 个人介绍、案例库、自我介绍话术、讲课配案例、给某类读者出介绍 PDF、新案例入库 | `dei-profile` | SKILL.md Step 1 | 不用任何配置；出 PDF 要 markdown 包和 Chrome；要用户自己的经历素材 |
 | 把门店素材和口播剪成引流短视频（抖音本地生活 9.9 风格）、改配音音效 BGM 再出一版 | `dei-shop-video` | SKILL.md Step 0 | Python、ffmpeg、Node.js、Chrome；ElevenLabs key（配音、核对、音效）；BGM 要用户自己在 Pixabay 点下载 |
+| 把自己录的真人口播剪成竖屏成片（删停顿口误、字幕、图解、音效配乐）、按看片意见改、剪完听审 | `dei-talking-head` | SKILL.md Step 0 | Python（jieba、numpy、soundfile）、ffmpeg、whisper.cpp 和模型、Node.js、Chrome；可选 ElevenLabs key、Antigravity CLI（Gemini 听审，上传前要问用户） |
 | 一个概念说不清 | `dbs-deconstruct` | — | 不用配置 |
 | 诊断一门生意 | `dbs-diagnosis` | — | 不用配置 |
 | 一篇一篇系统学一个课题 | `dbs-learning` | — | 不用配置 |

@@ -138,6 +138,7 @@ Windows PowerShell：`irm https://raw.githubusercontent.com/chenlongdei/deiskill
 | `dei-moments` | [README](skills/dei-moments/README.md) | 「这是我的 3 条朋友圈，帮我做一份风格提示词」 | 什么都不用 |
 | `dei-profile` | [README](skills/dei-profile/README.md) | 「我出门介绍自己总说不清，这是我的素材，帮我梳理」 | 什么都不用；出 PDF 要 Chrome |
 | `dei-shop-video` | [README](skills/dei-shop-video/README.md) | 「这个文件夹是门店素材，这是文案，剪一条 9.9 引流短视频」 | Python + ffmpeg + Node.js；ElevenLabs key |
+| `dei-talking-head` | [README](skills/dei-talking-head/README.md) | 「这是我录的口播原片，帮我剪成能发抖音的竖屏成片，先给我看删改清单」 | Python + ffmpeg + whisper.cpp + Node.js；可选 ElevenLabs key、Antigravity CLI |
 | `dei-ppt` | [README](skills/dei-ppt/README.md) | 「这是我的课程手册和活动海报，按海报风格出一套讲课 PPT」 | 你的手册；Node.js + Python；Keynote 或 LibreOffice |
 
 只装一个的命令（把 `dei-capture` 换成你要的）。和装 dbs 一样用 Skills CLI（需要 Node.js）：
@@ -170,6 +171,7 @@ $env:DEISKILL_ONLY="dei-capture"; irm https://raw.githubusercontent.com/chenlong
 | `dei-moments` | 「帮我规划微信标签」「让 AI 写得像我」「这条朋友圈为什么没人理」「帮我排这次发售的朋友圈」「这个产品写不出东西了」「发售结束帮我复盘」 | 私域标签体系、带原话证据的风格提示词、诊断、浪潮式发售排期和文案（每条标好给谁看）、私聊话术、选题矩阵、复盘和素材库 |
 | `dei-profile` | 「帮我梳理个人介绍」「这是个新案例，帮我入库」「按这份课程手册配几个案例」「见老板怎么介绍自己」「出一版给政企看的 PDF」 | 一案一卡的案例库和索引、按读者分版本的介绍文档、四种场合的 1 / 3 / 10 分钟话术、PPT 人物页和案例页文案、排好版的 PDF |
 | `dei-shop-video` | 「把这家店的素材剪成引流视频」「换个配音再出一版」「BGM 换成这首」 | 抖音本地生活 9.9 引流风格竖屏成片：首帧钩子、中文母语配音、花字贴纸、逐个动作音效、BGM 卡点、团购卡和左下角箭头；剪辑工程可换门店复用 |
+| `dei-talking-head` | 「把这条口播剪一下」「这里卡了、音效太冲，改一下」「剪完帮我审一遍」 | 竖屏口播成片：删改清单先确认、删停顿口误重录、提速、大粗字幕、整屏图解、音效配乐人声处理；刀口核对；Gemini 听审意见逐条核实后修改 |
 | `dei-ppt` | 「按这份手册出一套 PPT」「按这张海报的风格做」「我改了一版 Keynote，看看我为什么这么改」 | 按手册逐页取材的可编辑 PPTX（讲稿、分组、入场动画）、签到轮播、逐页讲稿、预览图、课前准备清单、改稿分析 |
 
 **一起安装的上游 Skill**（装全套时从 [dbskill](https://github.com/dontbesilent2025/dbskill) 拉取，版权归 dontbesilent 所有）：
@@ -258,6 +260,7 @@ dei工作区/
 
 ## 更新记录
 
+- **2026-11-23**　新增 `dei-talking-head`：真人口播剪辑。删改清单先给你确认；刀口落在静音里、句中小停顿不切；市场版画面（全屏人像 + 跳切推近 + 常驻标题 + 大粗字幕 + 整屏图解）；剪完让 Gemini 按 30 秒一段听审，查出的问题逐条回原片核实再改
 - **2026-11-23**　新增 `dei-shop-video`：门店素材 + 口播文案剪成抖音本地生活 9.9 引流短视频（中文母语配音并自动语音核对、ElevenLabs 音效、BGM 卡点、团购卡），剪辑工程用一份 project.json 描述，换门店只改它
 - **2026-11-17**　`dei-moments` 加入私域标签：按你的产品线和客户类型建一套标签（身份、来源、买过、阶段、例外），每条朋友圈都标好给谁看、不给谁看，低价卖货不让高客单客户和政企看到；发售时按标签筛出 A/B/C 私聊名单，结束后按来源统计渠道、更新标签
 - **2026-11-16**　新增 `dei-ppt`：把学员手册做成讲课 PPT。内容逐页取自手册，指令逐字照抄；每页一个重点；卡片打组、写好入场动画；给一张海报就按海报取色、生成背景；讲者在 Keynote 里改过的版本会比对出规律，下次照着做

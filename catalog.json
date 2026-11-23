@@ -118,6 +118,23 @@
       "quick_needs": "你的手册；Node.js + Python；Keynote 或 LibreOffice"
     },
     {
+      "name": "dei-talking-head",
+      "layer": "output",
+      "summary": "真人口播剪辑：口播原片 → 删改清单（用户确认）→ 竖屏成片（删停顿口误重录、提速、大粗字幕、整屏图解、音效配乐人声处理），剪完 Gemini 听审、逐条核实后修改",
+      "install": "default",
+      "requires": [
+        "Python 3.9+（jieba、numpy、soundfile）",
+        "ffmpeg",
+        "whisper.cpp + ggml-large-v3-turbo 模型",
+        "Node.js 18+（HyperFrames 渲染）",
+        "Chrome",
+        "ElevenLabs key（可选，生成音效）",
+        "Antigravity CLI（可选，Gemini 听审）"
+      ],
+      "first_prompt": "这是我录的口播原片，帮我剪成能发抖音的竖屏成片，先给我看删改清单",
+      "quick_needs": "Python 3.9+（jieba、numpy、soundfile）、ffmpeg、whisper.cpp 和模型、Node.js、Chrome；可选 ElevenLabs key、Antigravity CLI"
+    },
+    {
       "name": "dei-shop-video",
       "layer": "output",
       "summary": "门店引流短视频：门店素材 + 口播文案 → 抖音本地生活 9.9 引流风格竖屏成片（首帧钩子、中文母语配音、花字、逐个动作音效、BGM 卡点、团购卡）",
