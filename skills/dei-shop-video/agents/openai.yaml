@@ -1,0 +1,6 @@
+interface:
+  display_name: "dei-shop-video 门店引流短视频"
+  short_description: "给素材和文案，剪出抖音本地生活 9.9 引流风格的竖屏短视频：中文配音、花字、音效、BGM、团购卡"
+  default_prompt: "使用 $dei-shop-video：这个文件夹是门店的原始素材，这是文案，照着对标视频剪一条 9.9 引流短视频。"
+policy:
+  allow_implicit_invocation: true

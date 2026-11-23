@@ -1,0 +1,365 @@
+{
+  "title": "XX健康馆9.9引流",
+  "size": [
+    1080,
+    1920
+  ],
+  "voice": {
+    "voice_id": "",
+    "model": "eleven_v4",
+    "rate": 1.1,
+    "gap": 0.1,
+    "lead": 0.25,
+    "tail": 1.0,
+    "volume": 1.6
+  },
+  "lines": [
+    "某某城市的朋友们注意了！",
+    "咱们家新店开业，9.9元就能体验一次鼻部护理，一次即可感受到舒缓通畅！",
+    "我们XX健康馆新店开业，环境舒适，服务专业。",
+    "平时一次89元，现在为了庆祝正式入驻抖音，给大家准备了50份9.9元的体验名额！",
+    "点击左下角，9.9元直接团！新店开业福利，快来体验吧！"
+  ],
+  "captions": [
+    [
+      "*某某城市*的朋友们",
+      "#注意了！"
+    ],
+    [
+      "咱们家新店开业",
+      "*9.9元*就能体验一次",
+      "#鼻部护理",
+      "一次即可感受到",
+      "舒缓通畅！"
+    ],
+    [
+      "我们*XX健康馆*",
+      "新店开业",
+      "#环境舒适",
+      "#服务专业"
+    ],
+    [
+      "#平时一次89元",
+      "现在为了庆祝",
+      "正式入驻抖音",
+      "给大家准备了",
+      "#50份9.9元的",
+      "#体验名额！"
+    ],
+    [
+      "点击*左下角*",
+      "*9.9元*直接团！",
+      "新店开业福利",
+      "#快来体验吧！"
+    ]
+  ],
+  "shots": [
+    {
+      "at": 0,
+      "clip": "clip01.mp4",
+      "from": 0.3
+    },
+    {
+      "at": "line:2",
+      "clip": "clip02.mp4",
+      "from": 3.0
+    },
+    {
+      "at": "word:鼻部护理",
+      "clip": "clip01.mp4",
+      "from": 6.0,
+      "snap": true
+    },
+    {
+      "at": "word:一次即可感受",
+      "clip": "clip03.mp4",
+      "from": 0.0,
+      "snap": true
+    },
+    {
+      "at": "line:3",
+      "clip": "clip02.mp4",
+      "from": 14.0
+    },
+    {
+      "at": "word:环境舒适",
+      "clip": "clip04.mp4",
+      "from": 2.0,
+      "snap": true
+    },
+    {
+      "at": "word:服务专业",
+      "clip": "clip01.mp4",
+      "from": 11.0,
+      "snap": true
+    },
+    {
+      "at": "line:4",
+      "clip": "clip05.mp4",
+      "from": 1.5
+    },
+    {
+      "at": "word:给大家准备了",
+      "clip": "clip02.mp4",
+      "from": 9.0,
+      "snap": true
+    },
+    {
+      "at": "line:5",
+      "clip": "clip03.mp4",
+      "from": 2.8
+    },
+    {
+      "at": "word:新店开业福利",
+      "clip": "clip01.mp4",
+      "from": 0.0,
+      "snap": true
+    }
+  ],
+  "overlays": [
+    {
+      "type": "pin",
+      "text": "某某·某某路店",
+      "from": 0,
+      "to": "word:注意了|+0.1",
+      "top": 190
+    },
+    {
+      "type": "speedlines",
+      "from": "word:注意了|-0.02",
+      "to": "line:2",
+      "top": 150
+    },
+    {
+      "type": "impact",
+      "text": "注意了！",
+      "font": "disp",
+      "from": "word:注意了",
+      "to": "line:2",
+      "top": 640,
+      "size": 190,
+      "color": "white-red"
+    },
+    {
+      "type": "flash",
+      "from": "line:2"
+    },
+    {
+      "type": "ribbon",
+      "text": "新店开业",
+      "from": "word:新店开业@2",
+      "to": "line:3",
+      "top": 330
+    },
+    {
+      "type": "burst",
+      "text": "9.9",
+      "from": "word:9.9元就",
+      "to": "word:鼻部护理",
+      "top": 430
+    },
+    {
+      "type": "headline",
+      "big": "9.9<small style='font-size:130px'>元</small>",
+      "small": "鼻部护理体验一次！",
+      "from": "word:鼻部护理",
+      "to": "line:3",
+      "top": 620
+    },
+    {
+      "type": "pop",
+      "text": "环境舒适",
+      "from": "word:环境舒适",
+      "to": "line:4",
+      "top": 470,
+      "size": 160,
+      "color": "white-brand",
+      "rot": -4
+    },
+    {
+      "type": "pop",
+      "text": "服务专业",
+      "from": "word:服务专业",
+      "to": "line:4",
+      "top": 680,
+      "size": 160,
+      "color": "white-brand",
+      "rot": 4
+    },
+    {
+      "type": "strike",
+      "text": "平时 <span class='old'>¥89<i class='strike'></i></span>/次",
+      "from": "line:4",
+      "to": "word:给大家准备了",
+      "strike_at": "line:4|+0.85",
+      "top": 500,
+      "size": 140,
+      "color": "white-black",
+      "rot": -3
+    },
+    {
+      "type": "impact",
+      "text": "限量50份",
+      "sub": "9.9元体验名额",
+      "from": "word:50份",
+      "to": "line:5",
+      "top": 440,
+      "size": 200,
+      "color": "yellow-black"
+    },
+    {
+      "type": "card",
+      "img": "assets/img/groupbuy.jpg",
+      "from": "line:5",
+      "to": "end",
+      "top": 560
+    },
+    {
+      "type": "arrow",
+      "from": "line:5",
+      "to": "end",
+      "top": 1330,
+      "left": 110
+    },
+    {
+      "type": "pop",
+      "text": "快来体验吧！",
+      "from": "word:快来体验吧",
+      "to": "end",
+      "top": 950,
+      "size": 140,
+      "color": "white-red",
+      "rot": -4
+    }
+  ],
+  "sfx_dir": "assets/audio/sfx11",
+  "sfx": [
+    {
+      "name": "pin_drop",
+      "at": 0.18,
+      "volume": 0.6
+    },
+    {
+      "name": "whoosh",
+      "at": "word:注意了|-0.18",
+      "volume": 0.5
+    },
+    {
+      "name": "text_slam",
+      "at": "word:注意了",
+      "volume": 0.7
+    },
+    {
+      "name": "flash",
+      "at": "line:2|-0.06",
+      "volume": 0.7
+    },
+    {
+      "name": "whoosh",
+      "at": "line:2|-0.1",
+      "volume": 0.4
+    },
+    {
+      "name": "ribbon",
+      "at": "word:新店开业@2",
+      "volume": 0.7
+    },
+    {
+      "name": "riser",
+      "at": "word:9.9元就|-1.4",
+      "volume": 0.35
+    },
+    {
+      "name": "kaching",
+      "at": "word:9.9元就",
+      "volume": 0.7
+    },
+    {
+      "name": "coins",
+      "at": "word:9.9元就|+0.1",
+      "volume": 0.5
+    },
+    {
+      "name": "sparkle",
+      "at": "word:9.9元就|+0.35",
+      "volume": 0.3
+    },
+    {
+      "name": "text_slam",
+      "at": "word:鼻部护理",
+      "volume": 0.75
+    },
+    {
+      "name": "whoosh",
+      "at": "line:3|-0.1",
+      "volume": 0.35
+    },
+    {
+      "name": "pop",
+      "at": "word:环境舒适",
+      "volume": 0.75
+    },
+    {
+      "name": "pop",
+      "at": "word:服务专业",
+      "volume": 0.75
+    },
+    {
+      "name": "strike",
+      "at": "line:4|+0.85",
+      "volume": 0.7
+    },
+    {
+      "name": "impact",
+      "at": "word:50份|-0.02",
+      "volume": 0.6
+    },
+    {
+      "name": "ding",
+      "at": "line:5|+0.05",
+      "volume": 0.75
+    },
+    {
+      "name": "tap",
+      "at": "line:5|+0.65",
+      "volume": 0.6
+    },
+    {
+      "name": "sparkle",
+      "at": "word:快来体验吧",
+      "volume": 0.35
+    }
+  ],
+  "bgm": {
+    "file": "",
+    "offset": 0,
+    "bpm": null,
+    "volume": 0.75,
+    "duck": 0.55,
+    "source": ""
+  },
+  "grade": {
+    "adjust": {
+      "exposure": 0.18,
+      "contrast": 0.16,
+      "highlights": -0.22,
+      "shadows": 0.22,
+      "whites": 0.12,
+      "blacks": -0.06,
+      "temperature": -0.12,
+      "vibrance": 0.38,
+      "saturation": 0.08
+    }
+  },
+  "fonts": {
+    "caption": "SourceHanSerifSC-Heavy.otf",
+    "display": "SourceHanSerifSC-Heavy.otf",
+    "number": "DouyinSansBold.ttf"
+  },
+  "colors": {
+    "brand": "#1d5fd1",
+    "accent": "#10b8a6"
+  },
+  "_说明": "这是一套跑通过的 5 句结构（地域钩子 → 低价 → 环境 → 原价对比+限量 → 点左下角）。换门店时改 lines、captions、shots 和 overlays 里的文字；时间点写法见 references/project-json.md。",
+  "masks": []
+}

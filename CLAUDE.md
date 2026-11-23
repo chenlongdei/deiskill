@@ -23,7 +23,7 @@
 | router | 总入口 `dei` | 🔧 2026-11-14 升级为路由：全部请求先到它，按意图交给子 Skill（先轻后重）；配方 A 学习路线、B 主题研究、C 做课、D 朋友圈发售、E 找选题 |
 | input | 采集、转写、检索、日报 | `dei-daily-report` ✅；`dei-capture` ✅（YouTube、抖音、统一转写） |
 | process | 理解、提问、诊断、学习 | dbs-diagnosis / learning / chatroom / deconstruct ✅（上游）；`dei-notebook` ✅ |
-| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；`dei-ppt` 🔧（讲课 PPT）；已有模板 `templates/dei-选题表.xlsx` |
+| output | 把结论变成成品 | `dei-course` 🔧（课程手册 + 发布）；`dei-moments` 🔧（朋友圈风格、诊断、浪潮式发售）；`dei-profile` 🔧（个人介绍与案例库）；`dei-ppt` 🔧（讲课 PPT）；`dei-shop-video` 🔧（门店引流短视频，2026-11-23 从一次医疗门店 9.9 引流视频实做封装）；已有模板 `templates/dei-选题表.xlsx` |
 
 ## 必须遵守的原则（用户已明确）
 
@@ -167,6 +167,14 @@
 - `scripts/build.py`：生成 → 自查 → 预览（Keynote 优先，含隐藏页）→ 逐页讲稿；`--doctor` 自检依赖。`poster_theme.py` 从海报取色、生成背景、抠 logo；`keynote_diff.py` 比对讲者改稿
 - 示例 `examples/` 含讲者个人信息和报价，本机私有（.gitignore），不进仓库；公开的是 `templates/theme_deck_template.js`
 - 实测状态：两场真实交付跑通；Windows 未测（LibreOffice 渲染分支在 macOS 上测过）
+
+### dei-shop-video（2026-11-23 加入）
+
+- 来源：一条健康馆 9.9 新店引流视频，照抖音本地生活爆款复刻，五版迭代。用户反馈全部写进 `references/method.md` 和铁律：中文母语音色 + eleven_v4（multilingual_v2 有外国腔被否）、音效是核心（每个动作一个、名字说不清的不用）、开头 5 秒首帧画面就在动、价格和服务大字跟着口播出（不在第 0 帧摆出来）、有大花字就不出重复字幕、必须有 BGM、成片约 -11 LUFS（-14.7 被嫌小）、别人的车牌和路人脸打码（`mask.py`）、字体照对标用粗宋体 + 圆黑数字（思源宋体 Heavy + 抖音美好体）、Pixabay 有 Cloudflare 验证不绕过
+- 引擎：HyperFrames，全部走 `npx --yes hyperframes@0.9.84`，不依赖任何 Agent 插件；一条视频 = 一份 `project.json`（口播、字幕、镜头、图层、音效、BGM、调色），时间点按「哪个字被说出」定位（ElevenLabs with-timestamps 逐字时间）
+- 脚本：doctor / mask（按关键帧给车牌、人脸打马赛克）/ new（复制素材、缩略图拼板、project.json 草稿）/ tts（搜音色、试音、生成 + scribe 语音核对，列出不同处）/ sfx（ElevenLabs 音效生成，提示词在 templates/sfx_prompts.json）/ bgm（测 BPM 对强拍）/ build / finalize（检查、关键帧、渲染、压缩 + 响度、整片核对）
+- 实测：2026-11-23 本机从零跑通全流程（新工程 → 配音核对 → 14 个音效 → BGM → 渲染 -11.3 LUFS → 整片核对 97%，差异只有店名同音字）；装到 Claude Code、Codex、WorkBuddy、通用 Agents 四个目录。Windows 未测
+- 已知：安装器在 Skill 仓库目录里有 config.json 时，会在 Codex 目录里多嵌一层；仓库里不要放 config.json（校验器也会拦）
 
 ## 单独安装与总入口（2026-11-14 用户要求）
 

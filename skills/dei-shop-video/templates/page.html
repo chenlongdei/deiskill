@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width={{W}}, height={{H}}" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<style>
+{{FONTS}}
+:root { --hl: #ffe600; --hot: #ff2b2b; --ink: #141414; --brand: {{BRAND}}; --teal: {{TEAL}}; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: {{W}}px; height: {{H}}px; overflow: hidden; background: #000; }
+#root { position: relative; width: {{W}}px; height: {{H}}px; overflow: hidden; font-family: "Cap", sans-serif; }
+.shot { position: absolute; left: 0; top: 0; width: {{W}}px; height: {{H}}px; object-fit: cover; }
+.flash { position: absolute; inset: 0; background: #fff; z-index: 20; opacity: 0; }
+
+/* 底部字幕：白字黑描边，*关键词* 标黄 */
+.cap { position: absolute; left: 0; top: 1150px; width: {{W}}px; text-align: center; z-index: 30; }
+.cap span { display: inline-block; font-weight: 900; font-size: 62px; color: #fff; -webkit-text-stroke: 12px #000; paint-order: stroke fill; letter-spacing: 2px; }
+.cap em { font-style: normal; color: var(--hl); }
+
+/* 花字通用 */
+.fx { position: absolute; z-index: 40; left: 0; width: {{W}}px; text-align: center; font-family: "Disp", "Cap", sans-serif; white-space: nowrap; }
+.fx .in { display: inline-block; }
+.f-num { font-family: "Num", "Disp", "Cap", sans-serif; }
+.f-cap { font-family: "Cap", sans-serif; }
+.fx .sub { font-family: "Disp", "Cap", sans-serif; }
+.fx .sub { display: block; margin-top: -10px; font-size: 0.46em; color: #fff; -webkit-text-stroke: 14px var(--hot); }
+.fx .old { position: relative; color: var(--hl); }
+.fx .strike { position: absolute; left: -12px; top: 52%; width: calc(100% + 24px); height: 20px; background: var(--hot); border-radius: 10px; transform-origin: left center; }
+
+/* 首帧大标题 */
+.headline .p { display: block; font-family: "Num", "Disp", sans-serif; font-size: 230px; line-height: 1; color: var(--hl); -webkit-text-stroke: 22px var(--hot); paint-order: stroke fill; text-shadow: 0 14px 0 #7a0000; }
+.headline .s { display: block; margin-top: 6px; font-size: 96px; color: #fff; -webkit-text-stroke: 16px var(--ink); paint-order: stroke fill; }
+
+/* 定位钉 */
+.pin .pill { display: inline-flex; align-items: center; gap: 14px; padding: 14px 40px 14px 22px; background: #fff; border: 6px solid var(--brand);
+  border-radius: 80px; box-shadow: 0 14px 30px rgba(0,0,0,.3); font-family: "Num", "Cap", sans-serif; font-weight: 900; font-size: 54px; color: var(--brand); }
+.pin svg { width: 64px; height: 80px; }
+.pin .ch { display: inline-block; }
+
+/* 彩带 */
+.ribbon .in { padding: 16px 60px 16px 70px; background: linear-gradient(180deg,#ff4b3a,#d8121b); color: #ffe7a0; font-family: "Disp", sans-serif;
+  font-size: 76px; letter-spacing: 6px; border-radius: 0 60px 60px 0; box-shadow: 0 12px 24px rgba(0,0,0,.35); border: 5px solid #ffd76a; border-left: none; }
+
+/* 价格爆炸贴 + 光芒 + 金币 */
+.sun .in, .sun svg { width: 1400px; height: 1400px; }
+.burst .in { position: relative; width: 540px; height: 540px; }
+.burst svg { position: absolute; inset: 0; }
+.burst .price { position: absolute; left: 0; top: 150px; width: 540px; text-align: center; font-family: "Num", "Disp", sans-serif; font-size: 200px; color: #fff;
+  -webkit-text-stroke: 16px var(--hot); paint-order: stroke fill; line-height: 1; }
+.burst .price small { font-size: 110px; }
+.coin { position: absolute; width: 84px; height: 84px; border-radius: 50%; z-index: 43; opacity: 0;
+  background: radial-gradient(circle at 35% 30%, #fff6b0, #ffd21f 45%, #e09a00 100%); border: 5px solid #b87300; }
+.coin i { position: absolute; inset: 12px; border-radius: 50%; border: 4px solid rgba(184,115,0,.55); }
+
+/* 服务标签 */
+.tag .in { padding: 14px 44px; background: #fff; border-radius: 60px; border: 6px solid var(--teal); font-family: "Num", "Cap", sans-serif; font-weight: 900;
+  font-size: 58px; color: #0c8f81; box-shadow: 0 12px 24px rgba(0,0,0,.3); }
+.tag b { color: var(--hot); }
+
+/* 团购卡 */
+.card .in { border-radius: 34px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.45); border: 6px solid #fff; }
+.card img { display: block; width: 100%; }
+
+/* 每个图层自己的位置和配色 */
+{{CSS}}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="{{TOTAL}}" data-width="{{W}}" data-height="{{H}}">
+{{SHOTS}}
+{{OVERLAYS}}
+<div id="captions" data-track-kind="captions">
+{{CAPTIONS}}
+</div>
+{{AUDIO}}
+</div>
+<script>
+const tl = gsap.timeline({ paused: true });
+{{JS}}
+window.__timelines["main"] = tl;
+tl.seek(0);
+</script>
+</body>
+</html>

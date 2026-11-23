@@ -1,0 +1,16 @@
+{
+  "impact":    {"prompt": "big cinematic boom impact with deep bass hit, short tail, no music", "dur": 1.5, "用在": "首帧大标题砸下、限量数字冲屏"},
+  "text_slam": {"prompt": "punchy comic text slam hit, short thump with crisp snap, for short video title, no music", "dur": 0.7, "用在": "钩子词（注意了）标题再砸一次"},
+  "pin_drop":  {"prompt": "cute cartoon map pin dropping and bouncing, short bright boing, clean, no music", "dur": 0.8, "用在": "定位钉落下"},
+  "whoosh":    {"prompt": "fast clean air whoosh swoosh transition, short, no music", "dur": 0.7, "用在": "速度线、转场、划线前"},
+  "flash":     {"prompt": "camera flash pop with bright shimmer, short transition, no music", "dur": 0.6, "用在": "闪白转场"},
+  "ribbon":    {"prompt": "quick paper banner swish and flap, short, no music", "dur": 0.6, "用在": "新店开业彩带"},
+  "riser":     {"prompt": "short rising whoosh riser build-up ending abruptly, tension, 1.5 seconds, no music", "dur": 1.5, "用在": "低价出现前蓄力"},
+  "kaching":   {"prompt": "cash register ka-ching bell with coins, bright and clean, no music", "dur": 1.2, "用在": "低价爆炸贴"},
+  "coins":     {"prompt": "handful of gold coins scattering and jingling, bright, no music", "dur": 1.5, "用在": "金币飞散"},
+  "sparkle":   {"prompt": "magic sparkle twinkle shimmer, bright and light, no music", "dur": 1.5, "用在": "闪光、收尾"},
+  "pop":       {"prompt": "crisp bubbly UI pop sound, short, no music", "dur": 0.5, "用在": "标签、卖点花字弹出"},
+  "strike":    {"prompt": "quick marker pen strike-through swipe on paper, short, no music", "dur": 0.5, "用在": "原价划掉"},
+  "ding":      {"prompt": "pleasant mobile app notification ding, two-tone chime, no music", "dur": 0.8, "用在": "团购卡弹出"},
+  "tap":       {"prompt": "smartphone screen tap click, double tap, clean, no music", "dur": 0.5, "用在": "箭头指向左下角"}
+}

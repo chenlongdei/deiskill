@@ -116,6 +116,21 @@
       ],
       "first_prompt": "这是我的课程手册和活动海报，按海报的风格给我出一套讲课 PPT：<手册> <海报>",
       "quick_needs": "你的手册；Node.js + Python；Keynote 或 LibreOffice"
+    },
+    {
+      "name": "dei-shop-video",
+      "layer": "output",
+      "summary": "门店引流短视频：门店素材 + 口播文案 → 抖音本地生活 9.9 引流风格竖屏成片（首帧钩子、中文母语配音、花字、逐个动作音效、BGM 卡点、团购卡）",
+      "install": "default",
+      "requires": [
+        "Python 3.9+",
+        "ffmpeg",
+        "Node.js 18+（HyperFrames 渲染）",
+        "Chrome",
+        "ElevenLabs key（配音、语音核对、音效）"
+      ],
+      "first_prompt": "这个文件夹是门店的原始素材，这是口播文案，照着对标视频剪一条 9.9 引流短视频",
+      "quick_needs": "Python 3.9+、ffmpeg、Node.js、Chrome、ElevenLabs key、字体文件（推荐思源宋体 Heavy、抖音美好体）"
     }
   ]
 }
