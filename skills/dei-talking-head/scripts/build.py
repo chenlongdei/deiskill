@@ -60,7 +60,13 @@ def W(text, n=1, off=0.0):
     die(f"W(): 字幕里找不到第 {n} 个「{text}」")
 _W = W
 class _Now(float):
-    """W() 算出的时间已经是当前剪辑的，不再换算"""
+    """W() 算出的时间已经是当前剪辑的，不再换算。加减一个秒数后仍然是 _Now（W("某字") - .15 不能被当成旧剪辑的时间再换算一次）"""
+    def __add__(self, o): return _Now(float(self) + float(o))
+    __radd__ = __add__
+    def __sub__(self, o): return _Now(float(self) - float(o)) if not isinstance(o, _Now) else float(self) - float(o)
+    def __rsub__(self, o): return float(o) - float(self)
+    def __mul__(self, o): return float(self) * float(o)
+    __rmul__ = __mul__
 def W(text, n=1, off=0.0):  # noqa: F811
     return _Now(_W(text, n, off))
 def _t(t):
