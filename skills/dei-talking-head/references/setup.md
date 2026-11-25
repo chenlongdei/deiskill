@@ -11,7 +11,7 @@
 | Node.js 18+ | 运行 HyperFrames（`npx --yes hyperframes@0.9.85`，第一次自动下载） | macOS `brew install node`；Windows `winget install OpenJS.NodeJS.LTS` |
 | Chrome 或 Chromium | HyperFrames 渲染、截帧 | 一般已装 |
 | 字体（推荐） | 字幕、标题、数字 | 阿里巴巴普惠体 3.0 Bold / Black（免费商用）、抖音美好体（免费商用）。文件路径写进 config.json 的 `font_bold` / `font_black` / `font_number` |
-| ElevenLabs key（可选） | 生成音效 | elevenlabs.io → API Keys，勾 Sound Effects |
+| ElevenLabs key（可选） | 按提示词生成音效；不配就自动用 Mixkit 免费音效 | elevenlabs.io → API Keys，勾 Sound Effects |
 | Antigravity CLI `agy`（可选） | Gemini 听审 | 按 Google Antigravity 官方说明安装并登录 Google 账号 |
 | pyJianYingDraft（可选） | 生成剪映多轨草稿（Apache-2.0） | `python3 -m pip install pyJianYingDraft`；没有它也能出字幕.srt 和透明图层.mov，在剪映里手动拼 |
 
@@ -36,4 +36,4 @@
 
 ## 费用
 
-全部本地运行时不花钱。可选：ElevenLabs 音效（一条视频 10 个左右，用很少的额度）；Gemini 听审走用户自己的 Google 账号额度。
+全部本地运行时不花钱。音效默认 Mixkit 免费；可选：ElevenLabs 音效（一条视频 10 个左右，用很少的额度）；Gemini 听审走用户自己的 Google 账号额度。

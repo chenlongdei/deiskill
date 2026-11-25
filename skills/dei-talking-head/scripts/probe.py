@@ -21,7 +21,7 @@ src = next((d / "source").glob("原片.*"))
 tmp = d / "work/probe.wav"
 
 if a.near is not None:
-    for s, e in silences(src, -38, 0.06, ss=max(0, a.near - 1.5), to=a.near + 1.5):
+    for s, e in silences(src, None, 0.06, ss=max(0, a.near - 1.5), to=a.near + 1.5):
         print(f"静音 {s:.2f}–{e:.2f}（{e - s:.2f} 秒）")
 elif a.say:
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(a.say[0]), "-to", str(a.say[1]), "-i", str(src), "-ar", "16000", "-ac", "1", str(tmp)], check=True)

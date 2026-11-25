@@ -53,7 +53,7 @@ $env:DEISKILL_ONLY="dei-talking-head"; irm https://raw.githubusercontent.com/che
 ## 准备什么、花多少钱
 
 - Python 3.9+（jieba、numpy、soundfile）、ffmpeg、whisper.cpp 和模型、Node.js 18+、Chrome（见 [references/setup.md](references/setup.md)）
-- 全部本地运行不花钱；可选 ElevenLabs key（生成音效）、Antigravity CLI（Gemini 听审，用你自己的 Google 账号）
+- 全部本地运行不花钱；音效默认用 Mixkit 免费可商用音效（不要账号）；可选 ElevenLabs key（按提示词生成更贴合的音效）、Antigravity CLI（Gemini 听审，用你自己的 Google 账号）
 - 推荐免费商用字体：阿里巴巴普惠体、抖音美好体
 
 ## 结果存在哪里

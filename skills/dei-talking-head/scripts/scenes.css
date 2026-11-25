@@ -5,8 +5,8 @@
 .scene{position:absolute;inset:0;background:{INK};z-index:2;overflow:hidden}
 .glow{position:absolute;left:-200px;top:200px;width:1480px;height:1100px;background:radial-gradient(closest-side,rgba(200,255,46,.10),rgba(200,255,46,0));}
 .scene::after{content:"";position:absolute;inset:0;background-image:linear-gradient({LINE}55 1px,transparent 1px),linear-gradient(90deg,{LINE}55 1px,transparent 1px);background-size:60px 60px;opacity:.5;z-index:0}
-.chap{position:absolute;left:90px;top:430px;font-size:30px;color:{NEON};letter-spacing:.12em;z-index:3}
-.stitle{position:absolute;left:90px;top:470px;font-size:70px;font-weight:900;z-index:3}
+.chap{position:absolute;left:90px;top:318px;font-size:30px;color:{NEON};letter-spacing:.12em;z-index:3}
+.stitle{position:absolute;left:90px;top:360px;font-size:70px;font-weight:900;z-index:3}
 .stk{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(11,12,10,.82);border:3px solid {NEON};border-radius:28px;padding:18px 22px}
 .stk.vs{flex-direction:row;flex-wrap:wrap;justify-content:center;width:250px} .stk.vs .sm{width:100%;text-align:center}
 .stk .big{font-family:"DY";font-size:110px;line-height:1;color:{NEON}} .stk .sm{font-size:32px;font-weight:700}
@@ -59,3 +59,42 @@
 #ttl b{font-family:"DY";color:{NEON};font-size:76px;font-weight:400}
 #prog{position:absolute;left:150px;right:150px;top:400px;height:8px;border-radius:4px;background:rgba(255,255,255,.25);z-index:8;overflow:hidden}
 #pbar{position:absolute;inset:0;background:{NEON};transform-origin:0 50%}
+
+/* 人像 + 下方横条（band）*/
+.band{display:flex;align-items:center;justify-content:center;gap:26px;min-width:760px;max-width:960px;min-height:180px;padding:22px 34px;
+  background:rgba(11,12,10,.86);border:3px solid {LINE};border-radius:30px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+/* 大字砸屏（punch）*/
+.punch{position:absolute;inset:0;background:{INK};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:40}
+.punch .pw{font-family:"DY","PH",sans-serif;font-size:220px;line-height:1;font-weight:900;text-align:center;max-width:860px}
+.punch .ps{font-size:48px;font-weight:700;color:{WHITE}}
+
+/* ---- 常驻标题的 5 种样式（plan.json 的 title_style；不写就按工程随机，和同文件夹最近两条错开） */
+#ttl.t-tape span{background:{NEON};color:{INK};box-shadow:0 10px 30px rgba(0,0,0,.35);transform:rotate(-2deg);border-radius:6px}
+#ttl.t-tape b{color:{INK}}
+#ttl.t-marker span{background:linear-gradient(transparent 55%,rgba(200,255,46,.85) 55%,rgba(200,255,46,.85) 90%,transparent 90%);box-shadow:none;color:#fff;
+ -webkit-text-stroke:8px {INK};paint-order:stroke fill;border-radius:0;padding:0 10px}
+#ttl.t-marker b{color:#fff}
+#ttl.t-kicker span{background:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:74px;
+ text-shadow:0 4px 18px rgba(0,0,0,.6),0 0 2px rgba(0,0,0,.8)}
+#ttl.t-kicker small{font-size:32px;color:{NEON};letter-spacing:.2em;margin-bottom:6px;font-weight:700}
+#ttl.t-bar{justify-content:flex-start;padding-left:110px}
+#ttl.t-bar span{background:rgba(11,12,10,.72);box-shadow:none;border-left:12px solid {NEON};border-radius:4px 16px 16px 4px}
+#ttl.t-kicker+#prog,#ttl.t-marker+#prog{top:420px}
+
+/* ---- 整屏图解的章节 + 大标题：left（左上）/ center（居中）/ bignum（大号章节数字垫底） */
+.h-center .chap,.h-center .stitle{left:0;right:0;text-align:center}
+.h-bignum .chap{top:250px;left:80px}
+.h-bignum .chap .bn{display:block;font-family:"DY";font-size:190px;line-height:1;color:{WHITE};opacity:.13;letter-spacing:0}
+.h-bignum .chap .cr{position:absolute;left:150px;top:78px;white-space:nowrap}
+.h-bignum .stitle{top:372px;left:130px}
+
+/* ---- 人像贴纸的 5 种外观 */
+.lk-tilt{transform:rotate(-5deg)}
+.lk-note{transform:rotate(3deg)}
+.lk-note .stk,.lk-note .pill{background:#F7F5EE!important;color:{INK}!important;border:none;box-shadow:0 14px 34px rgba(0,0,0,.4)}
+.lk-note .stk .sm,.lk-note .stk .big{color:{INK}} .lk-note .ic{color:{INK}!important}
+.lk-outline .stk,.lk-outline .pill{background:rgba(11,12,10,.55)!important;color:{NEON}!important;border:3px solid {NEON};box-shadow:none}
+.lk-outline .ic{color:{NEON}!important}
+.lk-bubble .stk,.lk-bubble .pill{position:relative;background:#fff!important;color:{INK}!important;border:none;border-radius:28px}
+.lk-bubble .stk .sm,.lk-bubble .stk .big{color:{INK}} .lk-bubble .ic{color:{INK}!important}
+.lk-bubble .stk::after,.lk-bubble .pill::after{content:"";position:absolute;left:50%;bottom:-20px;margin-left:-16px;border:16px solid transparent;border-top-color:#fff;border-bottom:0}

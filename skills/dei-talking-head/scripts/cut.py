@@ -7,7 +7,7 @@
 第一次剪的 edl 另存为 work/edl_base.json：scenes.py 里写死的时间都按它算，以后改剪辑，build.py 会自动把动画挪到新位置。
 """
 import argparse, json, re, shutil, subprocess
-from common import project, run, ffdur, silences, to16k, transcribe, fmt, die
+from common import project, venc, run, ffdur, silences, to16k, transcribe, fmt, die
 
 VOICE_CHAIN = ("highpass=f=75,afftdn=nr=10:nf=-50:tn=1,volume=12dB,equalizer=f=280:t=q:w=1.2:g=-2.5,"
                "equalizer=f=3800:t=q:w=0.9:g=4,highshelf=f=9000:g=2.5,deesser=i=0.35,"
@@ -22,14 +22,16 @@ src = next((d / "source").glob("原片.*"))
 W = d / "work"
 speech = json.loads((W / "speech.json").read_text(encoding="utf-8"))
 PAD, SPEED, GAP = plan.get("pad", .07), plan.get("speed", 1.1), plan.get("split_gap", .45)
+# 句尾多留一点：中文句尾常是降调轻声，能量低、拖得长，只留 0.07 秒容易把最后一个字削掉
+PAD_TAIL = plan.get("pad_tail", .15)
 NO_SPLIT = plan.get("no_split", [])
 keep = sorted(plan["keep"], key=lambda k: k[0])
 
-# 1. 每个保留段内，只留说话段（前后各留 PAD 的气口）
+# 1. 每个保留段内，只留说话段（前面留 PAD、后面留 PAD_TAIL 的气口）
 segs = []
 for ki, (k0, k1, *_) in enumerate(keep):
     for s, e in speech:
-        s2, e2 = max(k0, s - PAD), min(k1, e + PAD)
+        s2, e2 = max(k0, s - PAD), min(k1, e + PAD_TAIL)
         if e2 - s2 > .12:
             segs.append([round(s2, 3), round(e2, 3), ki])
 # 保留段两头：plan 里写到哪就剪到哪（差 0.15 秒以内时）——用来给尾字留余量、把入点放进静音
@@ -56,14 +58,13 @@ fc.append("".join(f"[v{i}][a{i}]" for i in range(len(segs))) + f"concat=n={len(s
 fp = W / "cut.filter"
 fp.write_text("".join(fc), encoding="utf-8")
 base = ["ffmpeg", "-v", "error", "-y", "-i", src]
-tail = ["-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-crf", "16", "-preset", "fast", "-g", "30", "-c:a", "aac", "-b:a", "256k", W / "cut.mp4"]
+tail = ["-map", "[v]", "-map", "[a]"] + venc(16) + ["-g", "30", "-c:a", "aac", "-b:a", "256k", W / "cut.mp4"]
 r = subprocess.run([str(x) for x in base + ["-/filter_complex", fp] + tail], capture_output=True, text=True)
 if r.returncode:  # ffmpeg 8 及以前没有 -/filter_complex
     run(base + ["-filter_complex_script", fp] + tail)
 
 # 4. 提速 + 人声处理
-run(["ffmpeg", "-v", "error", "-y", "-i", W / "cut.mp4", "-an", "-vf", f"setpts=PTS/{SPEED}", "-r", "30", "-c:v", "libx264", "-crf", "15",
-     "-preset", "fast", "-g", "30", d / "hf/assets/aroll.mp4"])
+run(["ffmpeg", "-v", "error", "-y", "-i", W / "cut.mp4", "-an", "-vf", f"setpts=PTS/{SPEED}", "-r", "30"] + venc(15) + ["-g", "30", d / "hf/assets/aroll.mp4"])
 run(["ffmpeg", "-v", "error", "-y", "-i", W / "cut.mp4", "-vn", "-ac", "1", "-ar", "48000", "-af", f"atempo={SPEED}," + plan.get("voice_chain", VOICE_CHAIN),
      "-c:a", "pcm_s16le", d / "hf/assets/voice.wav"])
 to16k(d / "hf/assets/voice.wav", W / "v16k.wav")
@@ -91,7 +92,7 @@ L += ["", f"另外：每个保留段内去掉了 {GAP} 秒以上的停顿，每�
 # 6. 重新转写剪后的人声 → 字幕分组
 names = plan.get("names", [])
 tr = transcribe(W / "v16k.wav", W / "tr", "、".join(names) + "。" if names else "")
-sil = silences(W / "v16k.wav", -35, .12)
+sil = silences(W / "v16k.wav", None, .12)
 import jieba  # noqa: E402  只有这一步要 jieba
 jieba.setLogLevel(60)
 MAXW = plan.get("caption_max", 11)

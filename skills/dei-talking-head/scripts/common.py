@@ -1,5 +1,5 @@
 """dei-talking-head 各脚本共用：配置、工程读写、ffmpeg / whisper / HyperFrames 调用、UTF-8 输出。"""
-import json, os, pathlib, re, shutil, subprocess, sys
+import array, json, math, os, pathlib, re, shutil, subprocess, sys
 
 SKILL = pathlib.Path(__file__).resolve().parent.parent
 HF_VERSION_DEFAULT = "0.9.85"
@@ -66,8 +66,34 @@ def ffdur(p):
     return float(out.strip())
 
 
-def silences(wav, db=-35, dur=0.12, ss=None, to=None):
-    """ffmpeg silencedetect → [(start, end)]，秒"""
+def loudness(wav):
+    """整段的综合响度（LUFS，ffmpeg ebur128）；量不出来时返回 None。"""
+    err = subprocess.run(["ffmpeg", "-nostats", "-i", str(wav), "-vn", "-af", "ebur128", "-f", "null", "-"],
+                         capture_output=True, text=True, encoding="utf-8", errors="replace").stderr
+    m = re.findall(r"I:\s+(-?[\d.]+) LUFS", err)
+    return float(m[-1]) if m else None
+
+
+def silence_db(wav, ratio=.45, lo=-58, hi=-30):
+    """静音门限跟着这条录音走：底噪（50 ms 窗 RMS 的第 10 百分位）往上，
+    到说话声（第 90 百分位）的 45% 处，夹在 [lo, hi]。
+    写死 -35 dB 时，录得小声的原片（实测一条底噪 -61、说话 -34 dB，句尾轻声 -42~-47 dB）
+    句尾会被当成静音，剪出来「话还没说完就切了」；按这个算法那条是 -48.8 dB。"""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(wav), "-vn", "-f", "s16le", "-ac", "1", "-ar", "8000", "-"],
+                         capture_output=True).stdout
+    a = array.array("h"); a.frombytes(raw[:len(raw) // 2 * 2])
+    n = 400   # 50 ms @ 8 kHz
+    dbs = sorted(10 * math.log10(sum(x * x for x in a[i:i + n]) / n / 32768 ** 2 + 1e-12) for i in range(0, len(a) - n, n))
+    if len(dbs) < 20:
+        return -35.0
+    p10, p90 = dbs[len(dbs) // 10], dbs[len(dbs) * 9 // 10]
+    return round(max(lo, min(hi, p10 + ratio * (p90 - p10))), 1)
+
+
+def silences(wav, db=None, dur=0.12, ss=None, to=None):
+    """ffmpeg silencedetect → [(start, end)]，秒；db 不给就按这条录音的响度自适应（silence_db）"""
+    if db is None:
+        db = silence_db(wav)
     cmd = ["ffmpeg", "-v", "info"]
     if ss is not None:
         cmd += ["-ss", str(ss)]
@@ -110,6 +136,22 @@ def to16k(src, dst, ss=None, to=None):
     if to is not None:
         cmd += ["-to", str(to)]
     run(cmd + ["-i", src, "-vn", "-ar", "16000", "-ac", "1", dst])
+
+
+_VENC = []
+def venc(crf=16):
+    """中间视频的编码参数。macOS 有 VideoToolbox 硬件编码就用它（实测 45 秒竖屏 28 秒 → 6 秒），
+    否则 libx264 veryfast。config.json 的 video_encoder 可指定 "x264" / "videotoolbox"。"""
+    if not _VENC:
+        want = (config().get("video_encoder") or "auto").lower()
+        hw = False
+        if want in ("auto", "videotoolbox") and sys.platform == "darwin":
+            r = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True, text=True, encoding="utf-8", errors="replace")
+            hw = "h264_videotoolbox" in r.stdout
+        _VENC.append(hw)
+    if _VENC[0]:
+        return ["-c:v", "h264_videotoolbox", "-b:v", "24M", "-maxrate", "30M", "-pix_fmt", "yuv420p"]
+    return ["-c:v", "libx264", "-crf", str(crf), "-preset", "veryfast", "-pix_fmt", "yuv420p"]
 
 
 def transcribe(wav16k, out_prefix, prompt="", segments=True):

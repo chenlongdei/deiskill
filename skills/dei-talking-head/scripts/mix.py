@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """音频床：音效 + 配乐 → hf/assets/sfx.wav（人声单独一条 voice.wav，不进这里）。
 配乐：先把曲子自身的响度起伏拉平；人声在说话时压到 bgm_talk，停顿时 bgm_gap（两者只差约 2 dB，停顿时音乐不「涌」上来），
-口播结束后抬到 bgm_end；约 1 秒平滑。音效按「相对人声 RMS」定音量，宁轻勿冲。
+口播结束后抬到 bgm_end；约 1 秒平滑。最后按真实响度（LUFS）校准：口播段里配乐整体比人声低 bgm_lu（默认 14 LU）。
+音效按「相对人声 RMS」定音量，宁轻勿冲。
+（旧版只按 RMS 压 -25 dB，实测配乐比人声低了 23.7 LU，手机外放几乎听不见——「有，但又像没有」。）
 
 用法：python3 scripts/mix.py <工程>
-可调（plan.json）：bgm（配乐文件路径）、bgm_talk / bgm_gap / bgm_end（相对人声 dB，默认 -25 / -23 / -16）、sfx_levels（如 {"pop": -20}）
+可调（plan.json）：bgm（配乐文件路径）、bgm_lu（口播段配乐比人声低多少 LU，默认 14；嫌吵改 16，嫌小改 12）、
+bgm_talk / bgm_gap / bgm_end（三段之间的相对高低，默认 -25 / -23 / -16，只决定形状，整体音量由 bgm_lu 定）、sfx_levels（如 {"pop": -20}）
 """
 import json, subprocess, sys
-from common import project, die
+from common import project, die, loudness
 
 try:
     import numpy as np, soundfile as sf
@@ -75,6 +78,17 @@ if bgm:
     g = np.interp(np.arange(N) / SR, tc, v_rms * 10 ** (db / 20) / m_rms, right=v_rms * 10 ** (db[-1] / 20) / m_rms).astype(np.float32)
     fade = np.clip(np.arange(N) / (SR * 1.5), 0, 1) * np.clip((DUR - np.arange(N) / SR) / 1.2, 0, 1)
     track = m * (g * fade)[:, None]
+    # 按 LUFS 校准：口播段里配乐比人声低 bgm_lu
+    tmp_v, tmp_m = d / "work/_lu_voice.wav", d / "work/_lu_bgm.wav"
+    n_a = min(int(AROLL * SR), len(track))
+    sf.write(str(tmp_v), voice[:int(AROLL * vsr)], vsr, subtype="PCM_16")
+    sf.write(str(tmp_m), track[:n_a], SR, subtype="FLOAT")
+    lv, lm = loudness(tmp_v), loudness(tmp_m)
+    tmp_v.unlink(missing_ok=True); tmp_m.unlink(missing_ok=True)
+    if lv is not None and lm is not None and lm > -70:
+        want = lv - plan.get("bgm_lu", 14)
+        track *= 10 ** ((want - lm) / 20)
+        print(f"配乐：人声 {lv:.1f} LUFS，配乐 {lm:.1f} → {want:.1f} LUFS（低 {plan.get('bgm_lu', 14)} LU）")
     sf.write(str(d / "work/bgm_track.wav"), track, SR, subtype="PCM_16")   # 已闪避的配乐，单独一条给剪映草稿
     out += track
 else:

@@ -33,6 +33,6 @@ if npx:
 for k in ("font_bold", "font_black", "font_number"):
     p = expand(c.get(k) or "")
     line(f"字体 {k}", bool(c.get(k)) and p.is_file(), "config.json 填字体文件路径（推荐阿里巴巴普惠体 Bold / Black、抖音美好体）", need=False)
-line("ElevenLabs key（生成音效）", bool(eleven_key(required=False)), "没有也能剪：音效改用你自己的可商用音效库（放进工程 work/sfx/）", need=False)
+line("ElevenLabs key（生成音效）", bool(eleven_key(required=False)), "没有也能剪：sfx.py 自动用 Mixkit 免费可商用音效，或放你自己的音效进工程 work/sfx/", need=False)
 line("审片工具 agy（Gemini 听审）", bool(c.get("reviewer_cli") or shutil.which("agy")), "装 Antigravity CLI 并登录 Google；没有就跳过听审，由你自己逐刀听", need=False)
 print("\n" + ("全部就绪" if ok else "有必需项没装好，按上面的提示补齐（安装前先问用户）"))

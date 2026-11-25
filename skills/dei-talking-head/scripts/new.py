@@ -6,7 +6,7 @@
   --link   原片太大时不复制，建符号链接（外接盘要一直插着）
 """
 import argparse, json, pathlib, shutil
-from common import SKILL, die, run, ffdur, silences, to16k, transcribe, save_plan, fmt, config
+from common import SKILL, die, run, ffdur, silences, to16k, transcribe, save_plan, fmt, config, silence_db
 
 ap = argparse.ArgumentParser()
 ap.add_argument("project")
@@ -37,9 +37,11 @@ names = [n.strip() for n in a.names.replace("，", ",").split(",") if n.strip()]
 prompt = "、".join(names) + "。" if names else ""
 to16k(dst, d / "work/src16k.wav")
 segs = transcribe(d / "work/src16k.wav", d / "work/src_tr", prompt)
-# 说话段 = 去掉 ≥0.3 秒的静音（-35 dB）
+# 说话段 = 去掉 ≥0.3 秒的静音（门限按这条录音的响度自适应，见 common.silence_db）
 dur = ffdur(dst)
-sil = silences(d / "work/src16k.wav", -35, 0.3)
+SIL_DB = silence_db(d / "work/src16k.wav")
+sil = silences(d / "work/src16k.wav", SIL_DB, 0.3)
+print(f"静音门限 {SIL_DB} dB（按原片响度定）")
 speech, t = [], 0.0
 for s, e in sil:
     if s - t > 0.05:
