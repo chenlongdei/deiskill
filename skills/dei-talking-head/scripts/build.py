@@ -195,27 +195,33 @@ def end_scene():
 # 不放下巴下方：脸在画面里偏低的原片会压住嘴（2026-11-24 实测）
 SLOTS = {"左中": (175, 650), "左下": (210, 1000), "顶中": (540, 505), "右上": (765, 505)}
 SLOT_KIND = {"左中": "left", "左下": "left", "顶中": "drop", "右上": "drop"}
-_last = {"slot": None, "look": None}
-USED = []   # (槽位, 外观)，写进 layout.json 给 variety.py
+_last = {"slot": None, "look": None, "xy": None}
+USED = []   # (位置, 外观)，写进 layout.json 给 variety.py 参考
 def sticker(t_in, t_out, inner, y=None, x=None, kind=None, sfx='pop', look=None, slot=None):
-    """人像上的贴纸。不写 x 时自动轮换位置（左中 / 左下 / 顶中 / 右上 / 下巴，不连续两次同位置），外观也轮换
-    （card 深底描边 / tilt 歪一点 / note 白纸 / outline 透明描边 / bubble 对话框），入场动作跟着位置变。
-    要固定时写 slot="右上" 或 x、y；look="note"；kind="pop"。"""
+    """人像上的贴纸。位置怎么放由内容决定，这里只给默认值：
+    - 写 x、y：放在你要的地方（任意坐标都行，只要在安全区、不压脸和字幕）
+    - slot="右上" 等：用预设位置；slot="同上"：和上一个贴纸同一处（接力、替换、一组连续出现时用）
+    - 都不写：从预设位置里随机挑一个（避开 face_box），只是「没特别想法时别全挤一处」的默认
+    外观 look 同理：写了就用，不写随机（card / tilt / note / outline / bubble）；look="同上" 沿用上一个。"""
     AUTO_SNAP.append(_t(t_in + .5 * (t_out - t_in))); SEQ.append((_t(t_in), 'sticker'))
-    if x is None:
+    if slot == "同上" and _last["xy"]:
+        x, y = _last["xy"]
+        slot = _last["slot"]
+    elif x is None:
         fb = PLAN.get("face_box")   # [x0, y0, x1, y1]：眼睛到下巴那一块，近景时脸大，落在里面的位置不用
         ok = [k for k in SLOTS if not (fb and fb[0] <= SLOTS[k][0] <= fb[2] and fb[1] <= SLOTS[k][1] <= fb[3])] or list(SLOTS)
-        slot = slot or RNG.choice([k for k in ok if k != _last["slot"]] or ok)
+        slot = slot or RNG.choice(ok)
         x, y = SLOTS[slot]
-        kind = kind or SLOT_KIND[slot]
-    look = look or RNG.choice([k for k in STICKER_LOOKS if k != _last["look"]])
-    _last.update(slot=slot, look=look); USED.append((slot or f"{x},{y}", look))
+        kind = kind or SLOT_KIND.get(slot)
+    if look == "同上":
+        look = _last["look"]
+    look = look or RNG.choice(STICKER_LOOKS)
+    _last.update(slot=slot, look=look, xy=(x, y)); USED.append((slot or f"{x},{y}", look))
     i = put(t_in, f'<div class="lk lk-{look}">{inner}</div>', x, y, kind or 'pop', sfx)
-    # 至少停 1.2 秒，淡出不能早于入场结束；否则入场动画最后执行，贴纸会一直挂到片尾（WorkBuddy 版的「读 TA 的传记」）
+    # 唯一写死的：淡出不能早于入场动画结束，否则入场最后执行，贴纸会一直挂到片尾（WorkBuddy 版「读 TA 的传记」）
     a0, b0 = _t(t_in), _t(t_out)
-    if b0 - a0 < 1.2:
-        print(f"⚠ 贴纸只停 {b0 - a0:.2f} 秒（{a0:.1f} 秒处），已延长到 1.2 秒；检查 W() 是不是找到了更早的同一个词")
-        b0 = a0 + 1.2
+    if b0 - a0 < 1.0:
+        print(f"提示：{a0:.1f} 秒的贴纸只停 {b0 - a0:.2f} 秒，可能看不清；如果不是有意的，检查 W() 是不是找到了更早的同一个词")
     T(_Now(max(b0 - .2, a0 + .55)), f'#{i} > .in', {'opacity': 0, 'scale': .8}, .2, 'power2.in')
     return i
 def band(t_in, t_out, inner, y=575, kind='drop', sfx='whoosh'):
@@ -429,8 +435,8 @@ for t, y, i in _bad:
 def _zone(u):
     x, y = SLOTS[u] if u in SLOTS else map(float, u.split(","))
     return (round(x / 300), round(y / 250))
-if len(USED) >= 4 and len({_zone(u[0]) for u in USED}) < 3:
-    print("⚠ 贴纸位置太集中（少于 3 个位置）：去掉 sticker() 里写死的 x、y，让它自动轮换")
+if len(USED) >= 5 and len({_zone(u[0]) for u in USED}) < 2:
+    print("提示：贴纸全在同一块区域。是有意的（比如一组接力）就不用管；不是的话看看能不能换个位置")
 
 r = hf(["check", "--json"], HF, capture=True)
 try:

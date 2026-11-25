@@ -71,9 +71,9 @@ if mine:
     t, h, slots = mine
     print(f"样式：常驻标题 {t}，图解标题 {h}，贴纸位置 {dict((k, slots.count(k)) for k in dict.fromkeys(slots))}")
     if slots and max(slots.count(k) for k in set(slots)) / len(slots) > .6:
-        print("⚠ 贴纸一大半挤在同一个位置：去掉写死的 x、y"); bad += 1
+        print("提示：贴纸一大半在同一个位置。有意的接力就不用管，不是的话看看要不要分开")
     for p in others:
         o = styles(p)
         if o and o[0] == t and o[1] == h:
-            print(f"⚠ 和 {p.parent.name} 的常驻标题、图解标题样式完全一样：plan.json 换 title_style / scene_head"); bad += 1
+            print(f"提示：和 {p.parent.name} 的常驻标题、图解标题样式一样；不是有意统一的话，plan.json 换 title_style / scene_head")
 print("结论：" + ("太像了，回 画面方案.md 换版式、换顺序、换钩子" if bad else "够不一样"))
